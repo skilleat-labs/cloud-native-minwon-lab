@@ -18,7 +18,12 @@ DB_CONFIG = {
 }
 
 # ── Object Storage 설정 (Day-1 5차시 실습용) ────────────────────────────────
-OBJECT_STORAGE_ENABLED = os.environ.get("OBJECT_STORAGE_URL", "") != ""
+OBJECT_STORAGE_URL       = os.environ.get("OBJECT_STORAGE_URL", "")
+OBJECT_STORAGE_CONTAINER = os.environ.get("OBJECT_STORAGE_CONTAINER", "minwon-attachments")
+OS_USERNAME              = os.environ.get("OS_USERNAME", "")
+OS_PASSWORD              = os.environ.get("OS_PASSWORD", "")
+OBJECT_STORAGE_ENABLED   = bool(OBJECT_STORAGE_URL and OS_USERNAME and OS_PASSWORD)
+
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "pdf"}
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -83,6 +88,51 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def get_os_token():
+    """NHN Cloud Object Storage 인증 토큰 발급"""
+    import urllib.request, json
+    auth_url = "https://api-identity.infrastructure.cloud.toast.com/v2.0/tokens"
+    # Tenant ID는 OBJECT_STORAGE_URL에서 추출 (AUTH_{TenantID})
+    try:
+        tenant_id = OBJECT_STORAGE_URL.split("AUTH_")[1].rstrip("/")
+    except IndexError:
+        return None
+    payload = json.dumps({
+        "auth": {
+            "tenantId": tenant_id,
+            "passwordCredentials": {
+                "username": OS_USERNAME,
+                "password": OS_PASSWORD,
+            }
+        }
+    }).encode("utf-8")
+    req = urllib.request.Request(auth_url, data=payload,
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read())
+            return data["access"]["token"]["id"]
+    except Exception:
+        return None
+
+
+def upload_to_object_storage(file_obj, filename):
+    """Object Storage에 파일 업로드 후 URL 반환. 실패 시 None 반환."""
+    import urllib.request
+    token = get_os_token()
+    if not token:
+        return None
+    url = f"{OBJECT_STORAGE_URL.rstrip('/')}/{OBJECT_STORAGE_CONTAINER}/{filename}"
+    data = file_obj.read()
+    req = urllib.request.Request(url, data=data, method="PUT",
+                                 headers={"X-Auth-Token": token})
+    try:
+        with urllib.request.urlopen(req, timeout=10):
+            return url
+    except Exception:
+        return None
+
+
 # ── 라우트 ─────────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
@@ -118,10 +168,21 @@ def submit():
         f = request.files.get("attachment")
         if f and f.filename and allowed_file(f.filename):
             filename = secure_filename(f.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-            f.save(save_path)
-            file_path = filename
+            if OBJECT_STORAGE_ENABLED:
+                # Object Storage에 업로드 (5차시)
+                file_path = upload_to_object_storage(f.stream, filename)
+                if not file_path:
+                    flash("Object Storage 업로드 실패 — 로컬에 저장합니다.", "warning")
+                    save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+                    f.save(save_path)
+                    file_path = filename
+            else:
+                # Object Storage 미설정 시 로컬 저장
+                save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+                f.save(save_path)
+                file_path = filename
 
         if status["connected"]:
             init_db()
