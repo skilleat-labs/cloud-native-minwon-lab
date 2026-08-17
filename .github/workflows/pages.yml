@@ -25,20 +25,14 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1'
+          ruby-version: '3.3'
           bundler-cache: true
 
-      - name: Setup Bundler
-        run: |
-          cat > Gemfile <<'EOF'
-          source "https://rubygems.org"
-          gem "github-pages", group: :jekyll_plugins
-          gem "jekyll-remote-theme"
-          EOF
-          bundle install
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
       - name: Build Jekyll site
-        run: bundle exec jekyll build
+        run: bundle exec jekyll build --baseurl "/cloud-native-minwon-lab"
         env:
           JEKYLL_ENV: production
 
