@@ -176,14 +176,42 @@ Storage > Block Storage > [minwon-db-disk] > 연결 추가
 → 인스턴스: minwon-db-01 선택 → 확인
 ```
 
-### 3-2. DB VM에 SSH 접속
+### 3-2. DB VM에 플로팅 IP 연결
+
+Block Storage 마운트를 위해 DB VM에 SSH로 접속해야 합니다.
+DB VM에는 플로팅 IP가 없으므로 임시로 연결합니다.
+
+```
+Network > Floating IP > 플로팅 IP 연결
+→ 인스턴스: minwon-db-01 선택 → 연결
+```
+
+### 3-3. SSH 접속
 
 ```bash
-# DB VM에 임시 플로팅 IP를 붙이거나 강사 안내에 따라 접속합니다
+# 키페어 파일 권한 설정 (최초 1회)
+chmod 400 MyKey.pem
+
+# SSH 접속
 ssh -i MyKey.pem ubuntu@<DB-VM-플로팅-IP>
 ```
 
-### 3-3. 디스크 인식 확인
+접속 후 관리자(root) 권한으로 전환합니다.
+
+```bash
+# 방법 1: sudo su (이후 명령에 sudo 불필요)
+sudo su -
+
+# 방법 2: 명령마다 sudo 붙이기 (권장 — 어떤 명령이 root 권한인지 명확)
+sudo <명령어>
+```
+
+!!! tip "이 실습에서는 방법 2(sudo)를 사용합니다"
+    `sudo su -` 로 root로 전환하면 편하지만,
+    실수로 시스템 파일을 삭제하는 사고가 생길 수 있습니다.
+    명령마다 `sudo`를 붙이는 습관이 안전합니다.
+
+### 3-4. 디스크 인식 확인
 
 ```bash
 lsblk
@@ -192,14 +220,14 @@ lsblk
 # vdb    20G   ← 방금 연결한 Block Storage
 ```
 
-### 3-4. 파티션 및 파일시스템 생성
+### 3-5. 파티션 및 파일시스템 생성
 
 ```bash
 echo -e "n\np\n1\n\n\nw" | sudo fdisk /dev/vdb
 sudo mkfs -t xfs /dev/vdb1
 ```
 
-### 3-5. 마운트 및 자동 마운트 등록
+### 3-6. 마운트 및 자동 마운트 등록
 
 ```bash
 sudo mkdir -p /mnt/data
