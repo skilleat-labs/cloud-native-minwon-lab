@@ -1,0 +1,108 @@
+/* ── 정부 스타일 테마 ─────────────────────────────────────────────────── */
+:root {
+  --gov-blue:   #003087;
+  --gov-navy:   #00205b;
+  --gov-light:  #e8f0fe;
+  --gov-border: #d0d7e2;
+}
+
+html, body { height: 100%; }
+body { background: #f5f7fa; font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+
+/* 헤더 */
+.gov-header       { background: var(--gov-navy); color: #fff; }
+.gov-logo         { font-size: 2rem; }
+.gov-title        { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+.gov-subtitle     { font-size: 0.72rem; opacity: 0.65; }
+
+/* 네비게이션 */
+.gov-nav          { background: var(--gov-blue); }
+.gov-nav .nav-link { color: rgba(255,255,255,0.8); font-size: 0.9rem; padding: 0.6rem 0; text-decoration: none; }
+.gov-nav .nav-link:hover,
+.gov-nav .nav-link.active { color: #fff; border-bottom: 2px solid #fff; }
+
+/* DB 상태 배지 */
+.db-badge-ok   { background: #1a7f4b; font-size: 0.78rem; padding: 0.35em 0.8em; }
+.db-badge-fail { background: #c0392b; font-size: 0.78rem; padding: 0.35em 0.8em; }
+
+/* LB 상태 배지 */
+.lb-badge-ok   { background: #6f42c1; font-size: 0.78rem; padding: 0.35em 0.8em; }
+.lb-badge-fail { background: #555e6e; font-size: 0.78rem; padding: 0.35em 0.8em; }
+
+/* 서버 색상 배지 — 서버마다 다른 색으로 LB 분산 시각화 */
+.sv-badge  { font-size: 0.82rem; padding: 0.4em 0.9em; font-weight: 600; }
+.sv-blue   { background: #1565c0; }
+.sv-green  { background: #2e7d32; }
+.sv-orange { background: #e65100; }
+.sv-purple { background: #6a1b9a; }
+.sv-red    { background: #b71c1c; }
+.sv-teal   { background: #00695c; }
+
+/* LB 분산 확인 배너 */
+.lb-server-banner {
+  color: #fff;
+  text-align: center;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+  transition: background 0.3s;
+}
+.lb-server-banner.sv-blue   { background: #1565c0; }
+.lb-server-banner.sv-green  { background: #2e7d32; }
+.lb-server-banner.sv-orange { background: #e65100; }
+.lb-server-banner.sv-purple { background: #6a1b9a; }
+.lb-server-banner.sv-red    { background: #b71c1c; }
+.lb-server-banner.sv-teal   { background: #00695c; }
+
+/* 페이지 제목 */
+.page-title { font-size: 1.4rem; font-weight: 700; color: var(--gov-navy); }
+
+/* 테이블 */
+.table-gov th { background: var(--gov-blue); color: #fff; font-weight: 500; }
+.complaint-link { color: var(--gov-navy); text-decoration: none; font-weight: 500; }
+.complaint-link:hover { text-decoration: underline; }
+
+/* 상태 배지 */
+.status-badge   { font-size: 0.78rem; }
+.status-접수    { background: #2471a3; }
+.status-처리중  { background: #d68910; }
+.status-완료    { background: #1a7f4b; }
+.status-반려    { background: #922b21; }
+
+/* DB 미연결 안내 카드 */
+.db-disconnected-card {
+  background: #fff;
+  border: 1px solid var(--gov-border);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.db-icon   { font-size: 3rem; margin-bottom: 1rem; }
+.env-box   { background: #1e1e1e; color: #d4d4d4; border-radius: 8px; padding: 1rem 1.5rem; text-align: left; font-size: 0.85rem; }
+.env-val   { color: #ce9178; }
+
+/* 단계 카드 */
+.step-card {
+  border: 1px solid var(--gov-border);
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fff;
+  text-align: center;
+}
+.step-num  { width: 32px; height: 32px; border-radius: 50%; background: var(--gov-border); color: #555;
+             display: flex; align-items: center; justify-content: center; font-weight: 700;
+             margin: 0 auto 0.5rem; }
+.step-num.active { background: var(--gov-blue); color: #fff; }
+.step-text { font-size: 0.82rem; }
+
+/* 빈 상태 */
+.empty-state { text-align: center; padding: 4rem 1rem; }
+.empty-icon  { font-size: 3rem; margin-bottom: 1rem; }
+.empty-msg   { color: #888; font-size: 1rem; }
+
+/* 민원 내용 */
+.complaint-content { white-space: pre-wrap; line-height: 1.8; }
+
+/* 푸터 */
+.gov-footer { background: var(--gov-navy); color: rgba(255,255,255,0.5); font-size: 0.78rem; }

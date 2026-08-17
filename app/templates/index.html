@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="page-title">민원 목록</h2>
+  <a href="{{ url_for('submit') }}" class="btn btn-primary">+ 민원 신청</a>
+</div>
+
+{% if status.connected %}
+  {% if complaints %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-gov">
+        <tr>
+          <th style="width:70px">번호</th>
+          <th>제목</th>
+          <th style="width:100px" class="text-center">상태</th>
+          <th style="width:160px" class="text-center">접수 일시</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in complaints %}
+        <tr>
+          <td class="text-center text-muted">{{ c[0] }}</td>
+          <td>
+            <a href="{{ url_for('detail', cid=c[0]) }}" class="complaint-link">{{ c[1] }}</a>
+          </td>
+          <td class="text-center">
+            <span class="badge status-badge status-{{ c[2] }}">{{ c[2] }}</span>
+          </td>
+          <td class="text-center text-muted small">{{ c[3] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <p class="empty-msg">등록된 민원이 없습니다.</p>
+    <a href="{{ url_for('submit') }}" class="btn btn-primary mt-2">첫 민원 신청하기</a>
+  </div>
+  {% endif %}
+
+{% else %}
+<!-- DB 미연결 상태 안내 -->
+<div class="db-disconnected-card">
+  <div class="db-icon">🔌</div>
+  <h4>데이터베이스에 연결되지 않았습니다</h4>
+  <p class="text-muted">아래 환경변수를 설정하고 애플리케이션을 재시작하면<br>민원 데이터를 저장하고 조회할 수 있습니다.</p>
+
+  <div class="env-box mt-3">
+    <pre>export DB_HOST=<span class="env-val">&lt;DB VM 사설 IP&gt;</span>
+export DB_PORT=<span class="env-val">3306</span>
+export DB_USER=<span class="env-val">민원계정</span>
+export DB_PASSWORD=<span class="env-val">비밀번호</span>
+export DB_NAME=<span class="env-val">complaints_db</span>
+
+python app.py</pre>
+  </div>
+
+  <div class="mt-4 row g-3 justify-content-center">
+    <div class="col-md-3">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-text">DB VM 생성<br><small>3차시</small></div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-text">MySQL 설치<br><small>init_db.sh 실행</small></div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-text">DB_HOST 설정<br><small>환경변수 주입</small></div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="step-card">
+        <div class="step-num active">4</div>
+        <div class="step-text">앱 재시작<br><small>목록 확인 ✓</small></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
