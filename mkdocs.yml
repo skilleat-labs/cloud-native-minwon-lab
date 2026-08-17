@@ -25,6 +25,13 @@ nav:
     - 3차시 — VM 생성 & Block Storage 연결: day1/session3.md
     - 4차시 — 서비스 자동 배포 & LB 등록: day1/session4.md
     - 5차시 — Object Storage & 저장소 분리: day1/session5.md
+  - Day 2 — 멈추지 않게 운영하라:
+    - 개요: day2/index.md
+    - 1차시 — 컨테이너와 이미지, 레지스트리: day2/session1.md
+    - 2차시 — 컨테이너 실행 & 동작 확인: day2/session2.md
+    - 3차시 — Kubernetes & NKS 클러스터 생성: day2/session3.md
+    - 4차시 — 기존 DB 유지한 채 Pod 배포: day2/session4.md
+    - 5차시 — 자동 복구 & 수평 확장: day2/session5.md
 
 plugins:
   - search:
