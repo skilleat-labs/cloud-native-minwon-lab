@@ -1,9 +1,3 @@
----
-title: Day 1 — 민원 서비스를 오픈하라
-nav_order: 2
-has_children: true
----
-
 # Day 1 — 민원 서비스를 오픈하라
 
 VM 기반으로 웹·애플리케이션 계층과 DB 계층을 분리한 2-Tier 구조를 만들고, 외부 사용자가 실제로 민원을 접수할 수 있는 서비스를 구축합니다.
@@ -40,4 +34,5 @@ VM 기반으로 웹·애플리케이션 계층과 DB 계층을 분리한 2-Tier 
 VPC: 192.168.0.0/16
 ```
 
-> **주의**: 1일차에 만든 DB VM, Block Storage, Object Storage는 2일차에도 사용합니다. 임의로 삭제하지 마세요.
+!!! warning "주의"
+    1일차에 만든 DB VM, Block Storage, Object Storage는 2일차에도 사용합니다. 임의로 삭제하지 마세요.

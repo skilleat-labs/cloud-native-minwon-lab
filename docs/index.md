@@ -1,8 +1,3 @@
----
-title: 홈
-nav_order: 1
----
-
 # 온라인 민원 서비스로 배우는 클라우드 & 클라우드 네이티브
 
 NHN Cloud를 활용해 온라인 민원 서비스를 직접 구축하며, 클라우드 인프라의 핵심 개념을 익히는 실습 과정입니다.
@@ -20,7 +15,7 @@ NHN Cloud를 활용해 온라인 민원 서비스를 직접 구축하며, 클라
 
 | 일차 | 차시 | 주제 |
 |------|------|------|
-| Day 1 | 1차시 | [콘솔 로그인 & 환경 확인](./day1/session1.md) |
+| Day 1 | 1차시 | [콘솔 로그인 & 환경 확인](day1/session1.md) |
 | Day 1 | 2차시 | 네트워크 & 보안 그룹 구성 (준비 중) |
 | Day 1 | 3차시 | VM 생성 & Block Storage 연결 (준비 중) |
 | Day 1 | 4차시 | 서비스 배포 & Load Balancer 등록 (준비 중) |
@@ -53,4 +48,5 @@ VPC: 192.168.0.0/16
 - **직접 하는 것**: VPC·서브넷·보안 그룹·LB·VM·Block Storage·Object Storage 생성
 - **제공되는 것**: 민원 서비스 앱, DB 설치 스크립트, 배포 자동화 스크립트
 
-> **주의**: 1일차에 만든 DB VM, Block Storage, Object Storage는 2일차에도 사용합니다. 임의로 삭제하지 마세요.
+!!! warning "주의"
+    1일차에 만든 DB VM, Block Storage, Object Storage는 2일차에도 사용합니다. 임의로 삭제하지 마세요.

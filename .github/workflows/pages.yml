@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages
+name: Deploy MkDocs to GitHub Pages
 
 on:
   push:
@@ -22,24 +22,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          ruby-version: '3.3'
-          bundler-cache: true
+          python-version: '3.x'
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: Install MkDocs Material
+        run: pip install mkdocs-material
 
-      - name: Build Jekyll site
-        run: bundle exec jekyll build --baseurl "/cloud-native-minwon-lab"
-        env:
-          JEKYLL_ENV: production
+      - name: Build MkDocs site
+        run: mkdocs build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: ./site
 
   deploy:
     environment:

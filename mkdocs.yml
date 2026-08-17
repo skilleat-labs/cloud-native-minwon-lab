@@ -1,0 +1,35 @@
+site_name: 온라인 민원 서비스로 배우는 클라우드 & 클라우드 네이티브
+site_url: https://skilleat-labs.github.io/cloud-native-minwon-lab/
+site_description: NHN Cloud 실습 가이드 — 공공기관 클라우드 운영자 과정
+
+theme:
+  name: material
+  language: ko
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - 홈: index.md
+  - Day 1 — 민원 서비스를 오픈하라:
+    - 개요: day1/index.md
+    - 1차시 — 콘솔 로그인 & 환경 확인: day1/session1.md
+
+plugins:
+  - search:
+      lang: ko
+
+markdown_extensions:
+  - admonition
+  - tables
+  - attr_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
