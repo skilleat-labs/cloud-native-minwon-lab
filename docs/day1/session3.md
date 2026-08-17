@@ -246,6 +246,13 @@ echo "/dev/vdb1 /mnt/data xfs defaults 0 0" | sudo tee -a /etc/fstab
 df -h | grep mnt
 ```
 
+아래와 같이 출력되면 성공입니다.
+
+```
+Filesystem       Size  Used Avail Use% Mounted on
+/dev/vdb1         10G  104M  9.9G   2% /mnt/data
+```
+
 ---
 
 ## STEP 04 — DB VM 사설 IP 확인
