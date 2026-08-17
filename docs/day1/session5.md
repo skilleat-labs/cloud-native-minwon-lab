@@ -83,11 +83,21 @@ DB VM          ← 파일 경로(URL)만 기록
 
 ## STEP 01 — Object Storage 서비스 활성화
 
+### 콘솔 경로
+
 ```
-서비스 선택 → Storage → Object Storage → 서비스 활성화
+상단 메뉴 > 서비스 선택 > Storage > Object Storage > 서비스 활성화
 ```
 
-프로젝트당 한 번만 활성화하면 됩니다.
+### 활성화 방법
+
+1. 콘솔 상단 **서비스 선택** 클릭
+2. 왼쪽 분류에서 **Storage** 선택
+3. **Object Storage** 항목에서 **서비스 활성화** 클릭
+4. 왼쪽 메뉴에 **Storage > Object Storage** 가 나타나면 완료
+
+!!! info "프로젝트당 한 번만 활성화하면 됩니다"
+    이미 활성화된 경우 왼쪽 메뉴에서 바로 Object Storage가 보입니다.
 
 ---
 
