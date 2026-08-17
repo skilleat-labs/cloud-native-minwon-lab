@@ -1,11 +1,8 @@
----
-title: 홈
-nav_order: 1
----
-
 # 온라인 민원 서비스로 배우는 클라우드 & 클라우드 네이티브
 
 NHN Cloud를 활용해 온라인 민원 서비스를 직접 구축하며, 클라우드 인프라의 핵심 개념을 익히는 실습 과정입니다.
+
+**실습 가이드 사이트**: https://skilleat-labs.github.io/cloud-native-minwon-lab/
 
 ## 과정 정보
 
@@ -16,41 +13,12 @@ NHN Cloud를 활용해 온라인 민원 서비스를 직접 구축하며, 클라
 | 방식 | 이론 + 콘솔 실습 + 시나리오 미션 |
 | 실습 환경 | NHN Cloud 콘솔 (개인 실습 계정) |
 
-## 실습 가이드 목차
+## 목차
 
 | 일차 | 차시 | 주제 |
 |------|------|------|
-| Day 1 | 1차시 | [콘솔 로그인 & 환경 확인](./day1/session1.md) |
-| Day 1 | 2차시 | 네트워크 & 보안 그룹 구성 (준비 중) |
-| Day 1 | 3차시 | VM 생성 & Block Storage 연결 (준비 중) |
-| Day 1 | 4차시 | 서비스 배포 & Load Balancer 등록 (준비 중) |
-| Day 1 | 5차시 | Object Storage & 저장소 분리 (준비 중) |
-
-## 1일차 최종 아키텍처
-
-```
-민원 신청자 (인터넷)
-        │
-        ▼
-  플로팅 IP (공인 IP)
-        │
-        ▼
-   Load Balancer          ← 단일 진입점, 헬스체크
-        │
-        ▼
-     App VM               → Object Storage (첨부파일)
-  192.168.10.x
-        │
-        ▼
-     DB VM                ← Block Storage (DB 데이터)
-  192.168.20.x
-
-VPC: 192.168.0.0/16
-```
-
-## 실습 원칙
-
-- **직접 하는 것**: VPC·서브넷·보안 그룹·LB·VM·Block Storage·Object Storage 생성
-- **제공되는 것**: 민원 서비스 앱, DB 설치 스크립트, 배포 자동화 스크립트
-
-> **주의**: 1일차에 만든 DB VM, Block Storage, Object Storage는 2일차에도 사용합니다. 임의로 삭제하지 마세요.
+| Day 1 | 1차시 | 콘솔 로그인 & 환경 확인 |
+| Day 1 | 2차시 | 네트워크 & 보안 그룹 구성 |
+| Day 1 | 3차시 | VM 생성 & Block Storage 연결 |
+| Day 1 | 4차시 | 서비스 배포 & Load Balancer 등록 |
+| Day 1 | 5차시 | Object Storage & 저장소 분리 |
