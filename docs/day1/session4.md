@@ -1,7 +1,7 @@
-# Day 1 · 4차시 — 준비된 민원 서비스를 자동으로 배포하라
+# Day 1 · 4차시 — LB에 앱 서버를 연결하고 서비스를 오픈하라
 
 **소요 시간**: 50분 (14:00~14:50)
-**목표**: 사용자 스크립트로 DB를 초기화하고 앱을 자동 배포한 뒤, Load Balancer에 등록해 외부 접속을 확인한다
+**목표**: 3차시에서 자동 배포된 App VM을 Load Balancer에 등록하고, 외부에서 민원 서비스에 접속한다
 
 ---
 
@@ -9,204 +9,53 @@
 
 | STEP | 작업 |
 |------|------|
-| 01 | DB VM에서 DB 초기화 스크립트 실행 |
-| 02 | App VM에 앱 배포 (사용자 스크립트 방식) |
-| 03 | Load Balancer 멤버로 App VM 등록 |
-| 04 | 헬스체크 통과 확인 |
-| 05 | 브라우저에서 민원 서비스 접속 확인 |
+| 01 | DB / 앱 서비스 정상 동작 확인 |
+| 02 | App VM을 Load Balancer 멤버로 등록 |
+| 03 | 헬스체크 통과 확인 |
+| 04 | 브라우저에서 민원 서비스 접속 확인 |
+
+!!! info "3차시에서 이미 완료된 것"
+    - DB VM 생성 → MySQL 자동 설치·DB 초기화 (사용자 스크립트)
+    - App VM 생성 → 소스 clone·앱 배포 (사용자 스크립트)
+
+    이번 차시는 **LB 연결 및 외부 접속 확인**에 집중합니다.
 
 ---
 
-## 개념 — 사용자 스크립트란
+## STEP 01 — DB / 앱 서비스 정상 동작 확인
 
-NHN Cloud 인스턴스는 생성 시 **사용자 스크립트(User Data)** 를 등록할 수 있습니다.
-인스턴스가 처음 부팅될 때 **cloud-init**이 이 스크립트를 자동으로 실행합니다.
+LB에 등록하기 전에 각 VM에서 서비스가 정상 실행 중인지 확인합니다.
 
-```
-인스턴스 생성 클릭
-      ↓
-부팅 완료 (약 1~2분)
-      ↓
-cloud-init 실행 → 사용자 스크립트 자동 실행
-      ↓
-패키지 설치 → 소스 clone → 서비스 등록 → 시작
-      ↓
-서비스 자동 기동 완료
-```
-
-### 수동 설치 vs 사용자 스크립트 비교
-
-| 구분 | 수동 설치 | 사용자 스크립트 |
-|------|---------|--------------|
-| 방법 | SSH 접속 → 명령 하나씩 실행 | 생성 시 스크립트 등록 |
-| 서버 3대 | 같은 작업 3번 반복 | 스크립트 하나로 3대 동시 |
-| 재현성 | 사람마다 결과가 다를 수 있음 | 항상 동일한 결과 |
-
-!!! warning "사용자 스크립트는 최초 부팅 때 한 번만 실행"
-    내용을 수정하려면 인스턴스를 다시 만들거나 서버에 SSH로 직접 접속해 실행해야 합니다.
-
----
-
-## 이 과정의 앱 소스 위치
-
-이 실습에서 사용하는 민원 서비스 소스코드는 GitHub 레포지토리에 있습니다.
-
-```
-https://github.com/skilleat-labs/cloud-native-minwon-lab
-└── app/
-    ├── app.py               # Flask 웹 앱
-    ├── requirements.txt     # Python 의존성
-    ├── templates/           # HTML 템플릿
-    ├── static/              # CSS, JS
-    └── scripts/
-        ├── 01_init_db.sh    # DB 초기화 스크립트
-        ├── 02_install_app.sh# 앱 수동 배포 스크립트
-        └── 03_userdata_app.sh  # ← 사용자 스크립트 (인스턴스 생성 시 사용)
-```
-
----
-
-## STEP 01 — DB 초기화 스크립트 실행
-
-DB VM에 SSH로 접속한 뒤 스크립트를 실행합니다.
+### DB VM 확인
 
 ```bash
-# GitHub에서 스크립트 다운로드
-curl -o /tmp/01_init_db.sh \
-  https://raw.githubusercontent.com/skilleat-labs/cloud-native-minwon-lab/main/app/scripts/01_init_db.sh
-
-# 실행 권한 부여 및 실행
-chmod +x /tmp/01_init_db.sh
-sudo bash /tmp/01_init_db.sh
+# DB VM에 SSH 접속 후
+sudo systemctl status mysql
+# Active: active (running) ← 정상
 ```
 
-스크립트가 자동으로 수행하는 작업:
-
-| 단계 | 내용 |
-|------|------|
-| [1/4] | MySQL 8.0 설치 |
-| [2/4] | MySQL 시작 및 자동 실행 설정 |
-| [3/4] | DB · 계정 · 테이블 생성, 샘플 데이터 입력 |
-| [4/4] | 외부 접속용 바인딩 설정 (0.0.0.0) |
-
-완료 메시지 예시:
-```
-✅ 완료! App VM에서 아래 환경변수를 설정하세요:
-  export DB_HOST=192.168.1.10
-  export DB_USER=complaint_user
-  export DB_PASSWORD=Minjeon2024!
-  export DB_NAME=complaints_db
-```
-
-**DB VM의 사설 IP를 복사해 두세요.** STEP 02에서 사용합니다.
-
-```bash
-# DB VM 사설 IP 확인
-hostname -I | awk '{print $1}'
-```
-
----
-
-## STEP 02 — 앱 배포 (두 가지 방법)
-
-### 방법 A: 사용자 스크립트로 자동 배포 (권장) ⭐
-
-App VM을 **새로 생성**할 때 사용자 스크립트 란에 아래 내용을 붙여넣습니다.
-
-```
-Compute > Instance > 인스턴스 생성
-→ [추가 설정] > 사용자 스크립트
-```
-
-```bash
-#!/bin/bash
-set -e
-
-# ── ① 이 값을 반드시 수정하세요 ────────────────────────────
-DB_HOST="192.168.1.10"        # ← DB VM 사설 IP
-DB_PORT="3306"
-DB_USER="complaint_user"
-DB_PASSWORD="Minjeon2024!"
-DB_NAME="complaints_db"
-APP_PORT="8080"
-# ──────────────────────────────────────────────────────────
-
-GITHUB_REPO="https://github.com/skilleat-labs/cloud-native-minwon-lab.git"
-APP_DIR="/opt/complaint-app"
-
-apt-get update -y
-apt-get install -y python3 python3-pip git
-
-git clone "$GITHUB_REPO" /tmp/minwon-repo
-mkdir -p "$APP_DIR"
-cp -r /tmp/minwon-repo/app/. "$APP_DIR/"
-
-pip3 install -r "$APP_DIR/requirements.txt" --break-system-packages 2>/dev/null || \
-  pip3 install -r "$APP_DIR/requirements.txt"
-
-cat > "$APP_DIR/.env" <<EOF
-DB_HOST=${DB_HOST}
-DB_PORT=${DB_PORT}
-DB_USER=${DB_USER}
-DB_PASSWORD=${DB_PASSWORD}
-DB_NAME=${DB_NAME}
-PORT=${APP_PORT}
-EOF
-
-cat > /etc/systemd/system/complaint-app.service <<EOF
-[Unit]
-Description=온라인 민원 서비스
-After=network.target
-
-[Service]
-WorkingDirectory=${APP_DIR}
-EnvironmentFile=${APP_DIR}/.env
-ExecStart=/usr/bin/python3 ${APP_DIR}/app.py
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl enable complaint-app
-systemctl start complaint-app
-```
-
-!!! info "사용자 스크립트 동작 확인"
-    부팅 후 약 2~3분 뒤 아래 명령으로 확인하세요.
-    ```bash
-    sudo systemctl status complaint-app
-    sudo journalctl -u complaint-app -f   # 실시간 로그
-    ```
-
----
-
-### 방법 B: SSH 직접 접속 후 수동 배포
-
-이미 생성된 App VM이 있거나 사용자 스크립트 없이 배포할 때 사용합니다.
+### App VM 확인
 
 ```bash
 # App VM에 SSH 접속 후
+sudo systemctl status complaint-app
+# Active: active (running) ← 정상
 
-# 스크립트 다운로드
-curl -o /tmp/02_install_app.sh \
-  https://raw.githubusercontent.com/skilleat-labs/cloud-native-minwon-lab/main/app/scripts/02_install_app.sh
-
-# 환경변수 설정 후 실행
-export DB_HOST=192.168.1.10   # ← DB VM 사설 IP
-export DB_USER=complaint_user
-export DB_PASSWORD=Minjeon2024!
-export DB_NAME=complaints_db
-
-chmod +x /tmp/02_install_app.sh
-sudo -E bash /tmp/02_install_app.sh
+# 앱이 응답하는지 직접 확인
+curl http://localhost:8080/health
+# {"status": "ok"} ← 정상
 ```
+
+!!! warning "아직 실행 중이 아니라면"
+    사용자 스크립트는 부팅 후 약 2~3분 소요됩니다. 로그를 확인하세요.
+    ```bash
+    sudo tail -50 /var/log/cloud-init-output.log
+    ```
+    `✅ 앱 배포 완료` 메시지가 있으면 정상 완료입니다.
 
 ---
 
-## STEP 03 — App VM을 Load Balancer 멤버로 등록
+## STEP 02 — App VM을 Load Balancer 멤버로 등록
 
 ### 콘솔 경로
 
@@ -225,7 +74,7 @@ Network > Load Balancer > [minwon-lb]
 
 ---
 
-## STEP 04 — 헬스체크 통과 확인
+## STEP 03 — 헬스체크 통과 확인
 
 멤버를 등록하면 LB가 `/health` 엔드포인트로 상태 확인을 시작합니다.
 
@@ -246,7 +95,7 @@ Network > Load Balancer > [minwon-lb] > 멤버 상태
 
 ---
 
-## STEP 05 — 브라우저에서 민원 서비스 접속
+## STEP 04 — 브라우저에서 민원 서비스 접속
 
 LB 플로팅 IP로 접속합니다.
 
