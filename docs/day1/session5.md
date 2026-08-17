@@ -131,18 +131,26 @@ Storage > Object Storage > 컨테이너 생성
 
 ## STEP 03 — Object Storage 접근 정보 확인
 
-앱에서 Object Storage에 연결하려면 아래 정보가 필요합니다.
+앱에서 Object Storage에 연결하려면 아래 4가지 정보가 필요합니다.
 
 ```
-Storage > Object Storage > API 엔드포인트 확인
+Storage > Object Storage > API 엔드포인트 설정 버튼 클릭
 ```
 
-| 항목 | 위치 |
-|------|------|
-| Object Storage URL | API 엔드포인트 탭 |
-| Tenant ID | API 엔드포인트 탭 |
-| API User ID | 계정 설정 > API 보안 설정 |
-| API Password | API 보안 설정에서 발급 |
+| 항목 | 값 | 확인 위치 |
+|------|---|---------|
+| Object Storage URL | `https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_{TenantID}` | API 엔드포인트 설정 |
+| Tenant ID | `AUTH_` 뒤의 문자열 | API 엔드포인트 설정 |
+| username | **NHN Cloud 로그인 이메일** | 내 계정 정보 |
+| API 비밀번호 | Object Storage 전용 비밀번호 | API 엔드포인트 설정에서 직접 설정 |
+
+!!! warning "API 비밀번호 ≠ NHN Cloud 로그인 비밀번호"
+    API 비밀번호는 Object Storage 전용으로 별도 설정하는 값입니다.
+    **API 엔드포인트 설정** 창에서 직접 입력하고 저장해야 합니다.
+
+!!! warning "Tenant ID는 Object Storage 전용"
+    Object Storage의 Tenant ID는 일반 인프라 서비스의 Tenant ID와 다릅니다.
+    반드시 Object Storage > API 엔드포인트 설정에서 확인하세요.
 
 ---
 
@@ -160,9 +168,26 @@ sudo nano /opt/complaint-app/.env
 # Object Storage 설정 (5차시)
 OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_{TenantID}
 OBJECT_STORAGE_CONTAINER=minwon-attachments
-OS_USERNAME={API User ID}
-OS_PASSWORD={API Password}
+OS_USERNAME={NHN Cloud 로그인 이메일}
+OS_PASSWORD={API 엔드포인트 설정에서 설정한 API 비밀번호}
 ```
+
+저장 후 앱을 재시작합니다:
+
+```bash
+sudo systemctl restart complaint-app
+sudo systemctl status complaint-app
+```
+
+### 토큰 발급 테스트 (선택)
+
+설정이 올바른지 먼저 확인하고 싶다면 아래 명령으로 토큰 발급을 테스트합니다.
+
+```bash
+curl -s -X POST https://api-identity.infrastructure.cloud.toast.com/v2.0/tokens -H "Content-Type: application/json" -d '{"auth":{"tenantId":"{TenantID}","passwordCredentials":{"username":"{이메일}","password":"{API비밀번호}"}}}' | python3 -m json.tool | grep '"id"' | head -1
+```
+
+토큰 문자열이 출력되면 인증 성공입니다.
 
 앱 재시작:
 
