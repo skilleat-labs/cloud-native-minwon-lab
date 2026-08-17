@@ -172,8 +172,8 @@ Storage > Block Storage > 블록 스토리지 생성
 ### 3-1. 콘솔에서 연결
 
 ```
-Storage > Block Storage > [minwon-db-disk] > 연결 관리
-→ 인스턴스: minwon-db-01 선택 → 연결
+Storage > Block Storage > [minwon-db-disk] > 연결 추가
+→ 인스턴스: minwon-db-01 선택 → 확인
 ```
 
 ### 3-2. DB VM에 SSH 접속
