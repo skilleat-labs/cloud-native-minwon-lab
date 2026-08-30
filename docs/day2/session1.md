@@ -142,9 +142,16 @@ flowchart TB
 
 ## STEP 01 — NCR 서비스 활성화
 
-```
-상단 메뉴 > 서비스 선택 > Containers > NHN Container Registry(NCR) > 서비스 활성화
-```
+1. 콘솔 상단 **서비스 선택** 클릭
+2. **Container** 분류에서 **NHN Container Registry(NCR)** 클릭
+
+![서비스 선택 — NHN Container Registry(NCR) 선택](./images/d2-1-ncr-service-select.png)
+
+3. 활성화 확인 팝업에서 **확인** 클릭
+
+![NCR 서비스 활성화 확인](./images/d2-1-ncr-activate-confirm.png)
+
+4. 왼쪽 메뉴에 **Container > NHN Container Registry(NCR)** 가 나타나면 완료
 
 ---
 
