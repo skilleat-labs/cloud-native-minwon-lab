@@ -332,15 +332,20 @@ sudo mkfs -t xfs /dev/vdb1
 ### 3-6. 마운트 및 자동 마운트 등록
 
 ```bash
+# 마운트 포인트 생성
 sudo mkdir -p /mnt/data
+
+# 마운트
 sudo mount /dev/vdb1 /mnt/data
 
-# 재부팅 후 자동 마운트
+# 재부팅 후 자동 마운트 등록
 echo "/dev/vdb1 /mnt/data xfs defaults 0 0" | sudo tee -a /etc/fstab
 
-# 확인
+# 마운트 확인
 df -h | grep mnt
 ```
+
+![mkfs 포맷 → 마운트 → fstab 등록 → df 확인 화면](./images/3-13-mount-fstab.png)
 
 아래와 같이 출력되면 성공입니다.
 
