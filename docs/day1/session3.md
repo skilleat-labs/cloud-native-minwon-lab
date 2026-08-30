@@ -275,6 +275,19 @@ ssh -i MyKey.pem ubuntu@<DB-VM-플로팅-IP>
 !!! warning "처음 접속 시 경고 메시지가 뜨면?"
     `Are you sure you want to continue connecting (yes/no)?` 메시지가 나오면 **yes** 를 입력하고 Enter를 누르세요.
 
+접속에 성공하면 아래와 같은 화면이 나타납니다.
+
+![SSH 접속 성공 화면](./images/3-11-ssh-login-success.png)
+
+!!! info "프롬프트 기호로 현재 권한을 확인하세요"
+    | 프롬프트 | 의미 |
+    |---------|------|
+    | `ubuntu@minwon-db-01:~$` | 일반 사용자 권한 — **sudo 필요** |
+    | `root@minwon-db-01:~#` | root(관리자) 권한 |
+
+    접속 직후에는 `$` 표시가 나타납니다. **관리자 권한이 아닌 상태**입니다.
+    이 실습에서는 이 상태에서 명령마다 `sudo` 를 붙여 실행합니다.
+
 **④ 접속 후 권한 설정**
 
 이 실습에서는 명령마다 `sudo` 를 붙여 실행합니다.
