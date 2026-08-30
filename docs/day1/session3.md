@@ -497,35 +497,85 @@ echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT
 
 ## STEP 06 — 배포 확인
 
-App VM의 사용자 스크립트는 부팅 후 백그라운드에서 실행됩니다.
-**약 2~3분 후** SSH로 접속해서 확인합니다.
+App VM의 사용자 스크립트는 부팅 후 백그라운드에서 자동 실행됩니다.
+**인스턴스 생성 후 약 2~3분 기다렸다가** SSH로 접속해 확인합니다.
+
+### 6-1. App VM 플로팅 IP 확인
+
+!!! info "배포 확인을 위해 App VM에 SSH로 접속해야 합니다"
+    STEP 05에서 App VM 생성 시 플로팅 IP를 **사용**으로 설정했습니다.
+    콘솔에서 할당된 공인 IP를 확인하세요.
+
+    ```
+    Compute > Instance → minwon-app-01 클릭 → IP 주소 확인
+    ```
+
+    | 항목 | 확인 위치 |
+    |------|---------|
+    | 공인 IP (플로팅 IP) | 인스턴스 상세 > IP 주소 항목 |
+
+### 6-2. PowerShell로 App VM에 SSH 접속
+
+**① PowerShell 열기**
+
+`시작 메뉴` → **PowerShell** 검색 → 실행
+
+**② 키페어 파일이 있는 폴더로 이동**
+
+```powershell
+cd C:\Users\사용자이름\Downloads
+```
+
+**③ App VM에 SSH 접속**
+
+```powershell
+ssh -i MyKey.pem ubuntu@<App-VM-플로팅-IP>
+```
+
+> `<App-VM-플로팅-IP>` 자리에 6-1에서 확인한 공인 IP를 입력합니다.
+
+접속 성공 시 `ubuntu@minwon-app-01:~$` 프롬프트가 나타납니다.
+
+### 6-3. 배포 상태 확인
+
+접속 후 아래 명령어를 순서대로 실행합니다.
+
+**① 서비스 실행 상태 확인**
 
 ```bash
-# 서비스 상태 확인
 sudo systemctl status complaint-app
-
-# 로그 확인 (스크립트 실행 내역)
-sudo tail -50 /var/log/cloud-init-output.log
-
-# 앱이 정상 응답하는지 확인
-curl http://localhost:8080
 ```
 
 `Active: active (running)` 이 보이면 배포 성공입니다.
 
-### App VM → DB VM 통신 확인
+**② 설치 로그 확인** (서비스가 아직 시작 안 됐을 때)
 
 ```bash
-# DB VM 사설 IP로 포트 연결 테스트
-nc -zv <DB-VM-사설-IP> 3306
-# Connection to ... 3306 port succeeded! ← 성공
+sudo tail -50 /var/log/cloud-init-output.log
 ```
 
-통신이 안 되면 확인 순서:
+> 스크립트가 아직 실행 중이면 1~2분 더 기다린 뒤 다시 확인하세요.
 
-1. DB VM이 실행 중인가?
-2. `minwon-sg-db`의 인바운드 규칙 — 원격이 `minwon-sg-app`으로 지정되어 있는가?
-3. 두 VM이 같은 VPC 안에 있는가?
+**③ 앱 응답 확인**
+
+```bash
+curl http://localhost:8080
+```
+
+HTML 코드가 출력되면 앱이 정상 동작 중입니다.
+
+### 6-4. App VM → DB VM 통신 확인
+
+```bash
+nc -zv <DB-VM-사설-IP> 3306
+```
+
+`Connection to ... 3306 port [tcp/mysql] succeeded!` 가 나오면 성공입니다.
+
+!!! warning "통신이 안 되면 이 순서로 확인하세요"
+    1. `Compute > Instance` 에서 DB VM이 **실행 중** 상태인가?
+    2. `minwon-sg-db` 인바운드 규칙 — 원격이 `minwon-sg-app` **보안 그룹**으로 지정되어 있는가?
+    3. 두 VM이 모두 `minwon-vpc` 안에 있는가?
 
 ---
 
