@@ -371,6 +371,12 @@ Network > Floating IP > 플로팅 IP 생성
 → 생성 후 [연결 관리] → Load Balancer 선택
 ```
 
+![플로팅 IP 생성 화면](./images/2-7-floating-ip-create.png)
+
+!!! warning "플로팅 IP는 생성 즉시 과금됩니다"
+    인스턴스에 연결하지 않아도 생성만 해도 요금이 발생합니다.
+    실습이 끝난 후 사용하지 않는 플로팅 IP는 반드시 삭제하세요.
+
 ### IP 할당 원칙
 
 | 자원 | 사설 IP | 플로팅 IP | 이유 |
