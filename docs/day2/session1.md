@@ -46,24 +46,50 @@
 
 ### VM vs 컨테이너
 
-```
-가상 머신 (VM)                       컨테이너
-┌────────┬────────┐           ┌────────┬────────┬────────┐
-│ 앱 A   │ 앱 B   │           │ 앱 A   │ 앱 B   │ 앱 C   │
-├────────┼────────┤           ├────────────────────────────┤
-│게스트OS│게스트OS│           │      컨테이너 런타임       │
-├────────────────┤           ├────────────────────────────┤
-│   하이퍼바이저  │           │    호스트 OS 커널 (공유)    │
-├────────────────┤           ├────────────────────────────┤
-│    호스트 OS    │           │          하드웨어           │
-└────────────────┘           └────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph VM["🖥️ 가상 머신 (VM)"]
+        direction TB
+        subgraph VM1["VM 1"]
+            VA["앱 A"]
+            VOS1["게스트 OS"]
+        end
+        subgraph VM2["VM 2"]
+            VB["앱 B"]
+            VOS2["게스트 OS"]
+        end
+        HV["하이퍼바이저"]
+        HOS["호스트 OS"]
+        HW1["하드웨어"]
+        VM1 & VM2 --- HV --- HOS --- HW1
+    end
+
+    subgraph CT["📦 컨테이너"]
+        direction TB
+        CA["앱 A"]
+        CB["앱 B"]
+        CC["앱 C"]
+        CR["컨테이너 런타임 (Docker)"]
+        KERNEL["호스트 OS 커널 (공유)"]
+        HW2["하드웨어"]
+        CA & CB & CC --- CR --- KERNEL --- HW2
+    end
+
+    style VM fill:#fff3cd,stroke:#f0ad4e
+    style CT fill:#e8f4fd,stroke:#2196F3
+    style VOS1 fill:#ffeeba,stroke:#f0ad4e
+    style VOS2 fill:#ffeeba,stroke:#f0ad4e
+    style HV fill:#ffd699,stroke:#e0a000
+    style CR fill:#b3d9ff,stroke:#2196F3
+    style KERNEL fill:#cce5ff,stroke:#2196F3
 ```
 
 | 비교 항목 | 가상 머신 | 컨테이너 |
-|---------|---------|---------|
-| 포함하는 것 | 게스트 OS 전체 + 앱 | 앱 + 필요한 라이브러리 |
-| 시작 속도 | 운영체제 부팅 시간 필요 | 프로세스 실행 수준으로 빠름 |
+|---------|:-------:|:-------:|
+| 포함하는 것 | 게스트 OS 전체 + 앱 | 앱 + 필요한 라이브러리만 |
+| 시작 속도 | 수 분 (OS 부팅) | 수 초 (프로세스 실행) |
 | 크기 | 수 GB | 수십~수백 MB |
+| OS 공유 | ❌ 각자 OS 보유 | ✅ 호스트 커널 공유 |
 
 ---
 
