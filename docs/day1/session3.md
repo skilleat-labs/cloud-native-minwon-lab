@@ -98,6 +98,16 @@ Compute > Instance > 인스턴스 생성
 
 ![DB 서브넷 선택 화면](./images/3-3-instance-db-subnet-select.png)
 
+### ④ 플로팅 IP 설정
+
+플로팅 IP는 **기본값(사용 안 함)** 그대로 두세요. DB VM은 외부에서 직접 접근하지 않습니다.
+
+![플로팅 IP 사용 안 함 화면](./images/3-4-instance-floating-ip-off.png)
+
+!!! info "DB VM에 플로팅 IP가 없는 이유"
+    DB VM은 App VM에서만 접근하면 됩니다.
+    외부 인터넷에 노출시킬 필요가 없으므로 플로팅 IP를 연결하지 않습니다.
+
 ### 사용자 스크립트 입력
 
 **추가 설정 > 사용자 스크립트** 란에 아래 내용을 **그대로** 붙여넣습니다.
