@@ -85,20 +85,42 @@ curl http://localhost:8080/health
 3차시에서 직접 접속 테스트를 위해 App VM에 연결했던 플로팅 IP를 **LB로 이동**합니다.
 이후부터는 LB를 통해서만 민원 서비스에 접속할 수 있습니다.
 
-```
-사용자 → LB (플로팅 IP, 포트 80) → App VM (사설 IP, 포트 8080)
-```
+### 이전 (3차시) — 플로팅 IP가 App VM에 직접 연결
 
 ```mermaid
 flowchart LR
     U["👤 사용자\n브라우저"]
-    LB["⚖️ minwon-lb\n플로팅 IP : 80"]
+    FIP["🌐 플로팅 IP\n133.186.240.131 : 8080"]
+    APP["🖥️ minwon-app-01\n192.168.0.x : 8080"]
+    DB["🗄️ minwon-db-01\n192.168.1.x : 3306"]
+    LB["⚖️ minwon-lb\n(플로팅 IP 없음)"]
+
+    U -->|"HTTP :8080"| FIP
+    FIP -->|직접 연결| APP
+    APP -->|"MySQL :3306"| DB
+    LB -.미사용.-o APP
+
+    style LB fill:#e0e0e0,stroke:#aaa,color:#888
+    style FIP fill:#fff3cd,stroke:#f0ad4e
+```
+
+### 이후 (4차시) — 플로팅 IP를 LB로 이동, LB를 통해 접속
+
+```mermaid
+flowchart LR
+    U["👤 사용자\n브라우저"]
+    FIP["🌐 플로팅 IP\n133.186.240.131 : 80"]
+    LB["⚖️ minwon-lb"]
     APP["🖥️ minwon-app-01\n192.168.0.x : 8080"]
     DB["🗄️ minwon-db-01\n192.168.1.x : 3306"]
 
-    U -->|"HTTP :80"| LB
+    U -->|"HTTP :80"| FIP
+    FIP --> LB
     LB -->|"HTTP :8080"| APP
     APP -->|"MySQL :3306"| DB
+
+    style FIP fill:#fff3cd,stroke:#f0ad4e
+    style LB fill:#d4edda,stroke:#28a745
 ```
 
 ### 3-1. App VM에서 플로팅 IP 해제
