@@ -6,6 +6,20 @@
 
 ## 바뀌는 것 vs 바뀌지 않는 것
 
+```mermaid
+flowchart LR
+    subgraph CHANGE["🔄 바뀌는 것"]
+        APP["🖥️ App VM\n↓\n📦 Pod × 3\n(Kubernetes)"]
+    end
+    subgraph KEEP["✅ 그대로 유지"]
+        DB["🗄️ DB VM\n+ Block Storage"]
+        OS["📦 Object Storage\n(첨부파일)"]
+    end
+
+    style CHANGE fill:#fff3cd,stroke:#f0ad4e
+    style KEEP fill:#e8f5e9,stroke:#4caf50
+```
+
 | 구분 | 오늘 어떻게 되는가 |
 |------|-----------------|
 | App Tier | 컨테이너 이미지로 만들어 Kubernetes에서 Pod로 실행 — **완전히 바뀜** |
@@ -14,14 +28,33 @@
 
 ## 2일차 최종 아키텍처
 
-```
-민원 신청자 (웹 브라우저)
-        ↓
-Kubernetes Service (단일 진입점, 정상 Pod에만 분산)
-        ↓
-[Pod 민원서비스] [Pod 민원서비스] [Pod 민원서비스]
-        ↓                         ↓
-기존 DB VM (그대로 유지)   기존 Object Storage (그대로 유지)
+```mermaid
+flowchart TB
+    USER["👤 민원 신청자\n(웹 브라우저)"]
+
+    subgraph K8S["☸️ NKS Kubernetes 클러스터"]
+        SVC["🔀 Kubernetes Service\n단일 진입점 · 정상 Pod에만 분산"]
+        subgraph PODS["Pod (자동 복구 · 수평 확장)"]
+            P1["📦 Pod\n민원서비스"]
+            P2["📦 Pod\n민원서비스"]
+            P3["📦 Pod\n민원서비스"]
+        end
+        SVC --> P1 & P2 & P3
+    end
+
+    subgraph DAY1["📦 1일차 자원 — 그대로 유지"]
+        DB["🗄️ DB VM\nMySQL + Block Storage"]
+        OS["📂 Object Storage\n첨부파일 버킷"]
+    end
+
+    USER --> SVC
+    P1 & P2 & P3 -->|"MySQL :3306"| DB
+    P1 & P2 & P3 -->|"REST API"| OS
+
+    style K8S fill:#e8f4fd,stroke:#2196F3
+    style PODS fill:#f0f7ff,stroke:#90caf9
+    style DAY1 fill:#e8f5e9,stroke:#4caf50
+    style SVC fill:#d4edda,stroke:#28a745
 ```
 
 ## 1일차 vs 2일차 비교
