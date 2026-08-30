@@ -334,6 +334,8 @@ Network > Load Balancer > 로드 밸런서 생성
 | 프로토콜 | `HTTP` |
 | 로드 밸런서 포트 | `80` |
 
+![리스너 설정 화면](./images/2-6-lb-listener.png)
+
 ### ④ 멤버 그룹 설정
 
 | 항목 | 값 |
