@@ -179,14 +179,17 @@ Containers > NHN Container Registry(NCR) > 레지스트리 생성
 
 레지스트리를 생성하면 **이미지를 Push/Pull할 주소**가 생깁니다.
 
-```
-Containers > NCR > [minwon-registry] > 기본 정보
-→ 레지스트리 주소 확인 (예: {리전}.registry.container.nhncloud.com/{레지스트리명})
-```
+`minwon-registry` 클릭 → **기본 정보** 탭에서 아래 정보를 확인합니다.
 
-| 항목 | 내가 확인한 값 |
-|------|-------------|
-| 레지스트리 주소 | |
+![레지스트리 기본 정보 — Public URI · Docker 접근 명령어](./images/d2-1-ncr-registry-info.png)
+
+| 항목 | 설명 | 내가 확인한 값 |
+|------|------|-------------|
+| Public URI | 외부에서 이미지 Push/Pull할 주소 | |
+| Docker 접근 명령어 | `docker login` 시 사용할 주소 | |
+
+!!! tip "복사 버튼을 활용하세요"
+    Public URI와 Docker 접근 명령어 옆의 **복사** 버튼을 클릭하면 클립보드에 바로 복사됩니다.
 
 ---
 
