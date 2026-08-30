@@ -247,30 +247,46 @@ DB VM에는 플로팅 IP가 없으므로 임시로 연결합니다.
 
 3. 사용 가능한 플로팅 IP를 선택해 **연결** 클릭합니다
 
-### 3-3. SSH 접속
+### 3-3. SSH 접속 (Windows PowerShell)
 
-```bash
-# 키페어 파일 권한 설정 (최초 1회)
-chmod 400 MyKey.pem
+!!! info "Windows 사용자는 PowerShell로 접속합니다"
+    Windows 10/11에는 SSH가 기본 내장되어 있습니다. 별도 프로그램 설치 없이 PowerShell에서 바로 접속할 수 있습니다.
 
-# SSH 접속
+**① PowerShell 열기**
+
+`시작 메뉴` → **PowerShell** 검색 → 실행
+
+**② 키페어 파일이 있는 폴더로 이동**
+
+```powershell
+cd C:\Users\사용자이름\Downloads
+```
+
+> 키페어 `.pem` 파일을 다운로드한 폴더로 이동합니다. 대부분 `Downloads` 폴더에 있습니다.
+
+**③ SSH 접속**
+
+```powershell
 ssh -i MyKey.pem ubuntu@<DB-VM-플로팅-IP>
 ```
 
-접속 후 관리자(root) 권한으로 전환합니다.
+> `<DB-VM-플로팅-IP>` 자리에 앞서 연결한 플로팅 IP를 입력합니다. (예: `133.186.xxx.xxx`)
+
+!!! warning "처음 접속 시 경고 메시지가 뜨면?"
+    `Are you sure you want to continue connecting (yes/no)?` 메시지가 나오면 **yes** 를 입력하고 Enter를 누르세요.
+
+**④ 접속 후 권한 설정**
+
+이 실습에서는 명령마다 `sudo` 를 붙여 실행합니다.
 
 ```bash
-# 방법 1: sudo su (이후 명령에 sudo 불필요)
-sudo su -
-
-# 방법 2: 명령마다 sudo 붙이기 (권장 — 어떤 명령이 root 권한인지 명확)
-sudo <명령어>
+# 예시: 파일 목록 확인
+sudo ls /var/lib/mysql
 ```
 
-!!! tip "이 실습에서는 방법 2(sudo)를 사용합니다"
-    `sudo su -` 로 root로 전환하면 편하지만,
-    실수로 시스템 파일을 삭제하는 사고가 생길 수 있습니다.
-    명령마다 `sudo`를 붙이는 습관이 안전합니다.
+!!! tip "sudo su - 는 사용하지 않습니다"
+    `sudo su -` 로 root 전환하면 편하지만, 실수로 시스템 파일을 삭제하는 사고가 생길 수 있습니다.
+    명령마다 `sudo` 를 붙이는 습관이 안전합니다.
 
 ### 3-4. 디스크 인식 확인
 
