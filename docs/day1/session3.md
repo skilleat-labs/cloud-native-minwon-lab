@@ -613,6 +613,8 @@ sudo systemctl status mysql
 
 `Active: active (running)` 이 보이면 MySQL 정상 실행 중입니다.
 
+![MySQL 서비스 정상 실행 화면](./images/3-18-mysql-status.png)
+
 ### 6-5. App VM에서 DB VM 통신 확인
 
 App VM 터미널(기존 창)로 돌아와서 실행합니다.
