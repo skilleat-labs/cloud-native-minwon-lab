@@ -240,10 +240,12 @@ Storage > Block Storage > 블록 스토리지 생성
 Block Storage 마운트를 위해 DB VM에 SSH로 접속해야 합니다.
 DB VM에는 플로팅 IP가 없으므로 임시로 연결합니다.
 
-```
-Network > Floating IP > 플로팅 IP 연결
-→ 인스턴스: minwon-db-01 선택 → 연결
-```
+1. `Compute > Instance` 에서 `minwon-db-01` 을 체크합니다
+2. 상단 **플로팅 IP 관리** 버튼을 클릭합니다
+
+![인스턴스 상단 플로팅 IP 관리 버튼](./images/3-10-floating-ip-manage-btn.png)
+
+3. 사용 가능한 플로팅 IP를 선택해 **연결** 클릭합니다
 
 ### 3-3. SSH 접속
 
