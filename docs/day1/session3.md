@@ -182,6 +182,22 @@ echo "✅ DB 초기화 완료"
 
 ## STEP 02 — Block Storage 생성
 
+!!! warning "생성 전 — DB VM의 가용성 영역을 먼저 확인하세요"
+    Block Storage는 **인스턴스와 같은 가용성 영역(AZ)** 에 있어야 연결할 수 있습니다.
+    아래 경로에서 `minwon-db-01` 의 가용성 영역을 확인한 뒤 Block Storage를 생성하세요.
+
+    ```
+    Compute > Instance → 목록에서 minwon-db-01 의 가용성 영역 확인
+    ```
+
+    ![DB VM 가용성 영역 확인](./images/3-7-instance-az-check.png)
+
+    캡처 예시에서는 가용성 영역이 **`kr-pub-b`** 입니다. 본인 화면의 값을 아래에 기록해두세요.
+
+    | 항목 | 내가 확인한 값 |
+    |------|-------------|
+    | DB VM 가용성 영역 | |
+
 ### 콘솔 경로
 
 ```
