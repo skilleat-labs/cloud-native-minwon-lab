@@ -426,6 +426,11 @@ Compute > Instance > 인스턴스 생성
 
     ⚠️ `DB_PORT`, `DB_USER`, `DB_PASSWORD` 등 **나머지 줄은 절대 수정하지 마세요.**
 
+    아래 캡처는 예시입니다. **반드시 본인의 DB VM IP를 직접 확인해서 입력하세요.**
+    옆 사람 IP를 그대로 따라 쓰면 내 서비스가 동작하지 않습니다.
+
+    ![DB_HOST 수정 예시](./images/3-14-userscript-db-host.png)
+
 ```bash
 #!/bin/bash
 set -e
