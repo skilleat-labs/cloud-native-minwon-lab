@@ -201,11 +201,15 @@ Containers > NHN Container Registry(NCR) > 레지스트리 생성
     컨테이너 이미지 빌드(Dockerfile 작성, docker build)는 이번 과정의 범위 밖입니다.
     빌드가 완료된 민원 서비스 이미지가 강사 레지스트리에 준비되어 있습니다.
 
-강사에게 아래 정보를 받아 기록합니다.
+아래 주소로 바로 Pull할 수 있습니다. (`docker login` 불필요)
 
 | 항목 | 값 |
 |------|---|
-| 이미지 주소 | `{레지스트리 주소}/complaint-app:latest` |
+| 이미지 주소 | `43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest` |
+
+```bash
+docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
+```
 
 ---
 
