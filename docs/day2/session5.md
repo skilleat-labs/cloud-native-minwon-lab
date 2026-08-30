@@ -16,31 +16,50 @@
 
 ---
 
-## 개념 — 어제였다면
+## 개념 — 어제였다면 (VM 방식)
 
 App VM에서 서비스가 죽으면:
 
-1. Load Balancer 헬스체크 실패
-2. 해당 서버 트래픽 제외
-3. 남은 서버가 없으면 서비스 중단
-4. **누군가 알아채고 서버에 접속해 다시 실행해야 함**
-5. 복구 시간 = "사람이 얼마나 빨리 알아채는가"
+```mermaid
+flowchart LR
+    A["💀 서비스 죽음"] --> B["❌ 모니터링 알림\n(연락에 걸리는 시간)"]
+    B --> C["😰 담당자\nSSH 접속"]
+    C --> D["원인 파악"]
+    D --> E["수동 재시작"]
+    E --> F["✅ 복구 완료"]
+
+    style A fill:#ffcccc,stroke:#dc3545
+    style B fill:#fff3cd,stroke:#f0ad4e
+    style C fill:#fff3cd,stroke:#f0ad4e
+    style D fill:#fff3cd,stroke:#f0ad4e
+    style E fill:#fff3cd,stroke:#f0ad4e
+```
+
+복구 시간 = **사람이 얼마나 빨리 알아채고 대응하는가**
 
 ---
 
-## 개념 — 오늘은 (Pod 자동 복구)
+## 개념 — 오늘은 (Kubernetes 방식)
 
-Pod가 죽으면 Kubernetes의 조정 루프가 작동합니다.
+```mermaid
+flowchart TB
+    subgraph LOOP["♻️ Kubernetes 조정 루프 (끊임없이 반복)"]
+        direction LR
+        WANT["📋 원하는 상태\nreplicas: 3"]
+        CHECK["👁️ 현재 상태 확인\n실제 2개만 실행 중"]
+        DIFF["⚡ 차이 감지\n1개 부족!"]
+        FIX["🔧 자동 수정\n새 Pod 생성"]
 
-```
-① 원하는 상태 (replicas: 3)
-        ↓
-② 현재 상태 관찰 (실제 2개만 실행 중)
-        ↓
-③ 차이 감지 → 새 Pod 자동 생성
-        ↓
-④ 준비 완료 → Service 대상에 자동 포함
-↑_________________________________↑ (끊임없이 반복)
+        WANT --> CHECK --> DIFF --> FIX --> CHECK
+    end
+
+    SVC["🔀 Service\n새 Pod 자동 포함"]
+    FIX --> SVC
+
+    style LOOP fill:#e8f4fd,stroke:#2196F3
+    style WANT fill:#d4edda,stroke:#28a745
+    style DIFF fill:#fff3cd,stroke:#f0ad4e
+    style FIX fill:#e8f5e9,stroke:#4caf50
 ```
 
 | 단계 | 1일차 (사람이 한다) | 2일차 (시스템이 한다) |
@@ -53,22 +72,27 @@ Pod가 죽으면 Kubernetes의 조정 루프가 작동합니다.
 
 ## STEP 01 — 현재 상태 확인
 
+App VM 터미널에서 실행합니다.
+
 ```bash
-# Pod 목록 확인
 kubectl get pods
-# NAME                             READY   STATUS    RESTARTS
-# complaint-app-7d4b9c8f6-xxxxx   1/1     Running   0
-
-# 현재 복제본 수 확인
-kubectl get deployments
-# NAME            READY   UP-TO-DATE   AVAILABLE
-# complaint-app   1/1     1            1
-
-# Service 상태 확인
-kubectl get services
 ```
 
-브라우저에서 서비스가 정상 동작하는지 확인합니다.
+```
+NAME                             READY   STATUS    RESTARTS
+complaint-app-7d4b9c8f6-xxxxx   1/1     Running   0
+```
+
+```bash
+kubectl get deployments
+```
+
+```
+NAME            READY   UP-TO-DATE   AVAILABLE
+complaint-app   1/1     1            1
+```
+
+브라우저에서도 서비스가 동작하는지 확인합니다.
 
 ```
 http://<EXTERNAL-IP>
@@ -81,77 +105,127 @@ http://<EXTERNAL-IP>
 ### Pod 이름 확인 후 삭제
 
 ```bash
-# Pod 이름 확인
+# Pod 이름 확인 (xxxxx 부분이 랜덤 문자열)
 kubectl get pods
 
 # Pod 삭제 (장애 상황 재현)
-kubectl delete pod <Pod-이름>
-# pod "complaint-app-7d4b9c8f6-xxxxx" deleted
+kubectl delete pod <위에서-확인한-Pod-이름>
 ```
+
+```
+pod "complaint-app-7d4b9c8f6-xxxxx" deleted
+```
+
+---
 
 ### 자동 복구 관찰
 
-```bash
-# 즉시 확인 — 새 Pod가 생성되는 과정 관찰
-kubectl get pods
-# NAME                             READY   STATUS              RESTARTS
-# complaint-app-7d4b9c8f6-yyyyy   0/1     ContainerCreating   0   ← 새로 만들어지는 중
+삭제 직후 바로 확인합니다.
 
-# 잠시 후 다시 확인
+```bash
 kubectl get pods
-# NAME                             READY   STATUS    RESTARTS
-# complaint-app-7d4b9c8f6-yyyyy   1/1     Running   0          ← 복구 완료
 ```
+
+```
+NAME                             READY   STATUS              RESTARTS
+complaint-app-7d4b9c8f6-yyyyy   0/1     ContainerCreating   0
+```
+
+← 이름이 다른 새 Pod가 만들어지고 있습니다!
+
+잠시 후 다시 확인합니다.
+
+```bash
+kubectl get pods
+```
+
+```
+NAME                             READY   STATUS    RESTARTS
+complaint-app-7d4b9c8f6-yyyyy   1/1     Running   0
+```
+
+← 자동으로 복구되었습니다.
 
 !!! tip "관찰 포인트"
     - 삭제한 Pod와 새로 생긴 Pod의 **이름이 다릅니다** — "고쳐 쓴 것"이 아니라 "새로 만든 것"
-    - 복구되는 동안에도 서비스가 끊기지 않습니다 (Pod가 1개라 잠깐 끊길 수 있음 — 다음 STEP에서 해결)
+    - 사람이 아무것도 하지 않았는데 자동으로 복구되었습니다
+    - Pod가 1개라 잠깐 끊길 수 있습니다 — 다음 STEP에서 이 문제를 해결합니다
 
 ---
 
 ## STEP 03 — 복제본 3개로 수평 확장
 
-### 방법 1: 명령어로 즉시 변경
+Pod를 3개로 늘리면, 하나가 죽어도 나머지 2개가 계속 서비스합니다.
+
+### 방법 1: 명령어로 즉시 변경 (간단)
 
 ```bash
 kubectl scale deployment complaint-app --replicas=3
 ```
 
+---
+
 ### 방법 2: YAML 수정 후 적용
 
 ```bash
-# deployment.yaml에서 replicas 값 변경
-# replicas: 1 → replicas: 3
+# deployment.yaml 에서 replicas: 1 → replicas: 3 으로 수정
+sed -i 's/replicas: 1/replicas: 3/' app/deployment.yaml
+
+# 수정된 내용 적용
 kubectl apply -f app/deployment.yaml
 ```
+
+---
 
 ### 확장 결과 확인
 
 ```bash
 kubectl get pods
-# NAME                             READY   STATUS    RESTARTS
-# complaint-app-7d4b9c8f6-aaaa   1/1     Running   0
-# complaint-app-7d4b9c8f6-bbbb   1/1     Running   0
-# complaint-app-7d4b9c8f6-cccc   1/1     Running   0
-
-kubectl get deployments
-# NAME            READY   UP-TO-DATE   AVAILABLE
-# complaint-app   3/3     3            3
 ```
+
+```
+NAME                             READY   STATUS    RESTARTS
+complaint-app-7d4b9c8f6-aaaa   1/1     Running   0
+complaint-app-7d4b9c8f6-bbbb   1/1     Running   0
+complaint-app-7d4b9c8f6-cccc   1/1     Running   0
+```
+
+```bash
+kubectl get deployments
+```
+
+```
+NAME            READY   UP-TO-DATE   AVAILABLE
+complaint-app   3/3     3            3
+```
+
+---
 
 ### 확장 후 다시 Pod 삭제해보기
 
+Pod가 3개일 때 1개를 삭제하면 어떻게 될까요?
+
 ```bash
 kubectl delete pod <Pod-이름-하나>
-
-# 즉시 확인
-kubectl get pods
-# 3개 중 하나가 Terminating이고, 새 Pod가 생성 중
-# 나머지 2개는 계속 서비스 처리 중 → 서비스 끊기지 않음
 ```
+
+```bash
+kubectl get pods
+```
+
+```
+NAME                             READY   STATUS        RESTARTS
+complaint-app-7d4b9c8f6-aaaa   1/1     Terminating   0   ← 삭제 중
+complaint-app-7d4b9c8f6-bbbb   1/1     Running       0   ← 계속 서비스
+complaint-app-7d4b9c8f6-cccc   1/1     Running       0   ← 계속 서비스
+complaint-app-7d4b9c8f6-dddd   0/1     Creating      0   ← 새로 생성 중
+```
+
+나머지 2개가 계속 서비스하는 동안 새 Pod가 만들어집니다. **서비스가 끊기지 않습니다.**
 
 !!! tip "1일차와의 결정적 차이"
     1일차: App VM을 늘리면 Load Balancer에 **멤버를 수동 등록**해야 했습니다.
+
     오늘: replicas를 늘리면 새 Pod가 **라벨만 맞으면 자동으로** Service 대상에 포함됩니다.
 
 ---
@@ -217,3 +291,4 @@ http://<EXTERNAL-IP>
     | App VM | 콘솔 > Compute > Instance > 삭제 |
     | DB VM | 강사 안내에 따라 (데이터 보존 여부 확인) |
     | NCR 레지스트리 | 콘솔 > NCR > 레지스트리 삭제 |
+    | 플로팅 IP | 콘솔 > Network > Floating IP > 삭제 |

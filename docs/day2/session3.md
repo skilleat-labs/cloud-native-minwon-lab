@@ -9,109 +9,141 @@
 
 | STEP | 내용 |
 |------|------|
-| 01 | NKS 클러스터 생성 |
-| 02 | kubectl 설치 |
+| 01 | NKS 서비스 활성화 & 클러스터 생성 |
+| 02 | App VM에 kubectl 설치 |
 | 03 | kubeconfig 적용 |
-| 04 | 클러스터 구성 요소 확인 |
+| 04 | 클러스터 연결 확인 |
+
+!!! info "kubectl은 App VM에서 실행합니다"
+    2차시에서 접속했던 App VM(Ubuntu)에 kubectl을 설치합니다.
+    내 PC에 별도 프로그램을 설치할 필요가 없습니다.
 
 ---
 
 ## 개념 — 왜 Kubernetes가 필요한가
 
-컨테이너가 여러 개가 되면 사람이 직접 관리해야 할 일이 폭발적으로 늘어납니다.
+컨테이너가 여러 개가 되면 사람이 해야 할 일이 폭발적으로 늘어납니다.
 
-| 상황 | 사람이 해야 하는 일 |
-|------|-----------------|
-| 컨테이너가 죽었다 | 누군가 알아채고, 접속해서, 다시 실행해야 한다 |
-| 접속자가 늘었다 | 노드에 여유가 있는지 확인하고 컨테이너를 더 띄워야 한다 |
-| 노드가 죽었다 | 그 노드에 있던 컨테이너를 다른 노드에 다시 띄워야 한다 |
-| 새 버전을 배포한다 | 하나씩 교체하면서 서비스가 끊기지 않게 조절해야 한다 |
-| 트래픽을 나눠야 한다 | 새로 뜬 컨테이너 주소를 로드 밸런서에 등록해야 한다 |
+```mermaid
+flowchart LR
+    subgraph PROB["❌ 컨테이너가 5개라면?"]
+        direction TB
+        P1["컨테이너가 죽었다\n→ 누군가 알아채서 다시 실행"]
+        P2["접속자가 늘었다\n→ 컨테이너를 몇 개 더 띄워야?"]
+        P3["새 버전을 배포한다\n→ 하나씩 교체하면서 끊기지 않게"]
+        P4["서버가 죽었다\n→ 다른 서버로 이동시켜야"]
+    end
 
-!!! tip "Kubernetes는 이 모든 것을 자동으로 합니다"
+    subgraph K8S["✅ Kubernetes가 있다면"]
+        direction TB
+        K1["죽으면 → 자동으로 새로 생성"]
+        K2["늘려야 하면 → 숫자 하나 바꾸면 끝"]
+        K3["새 버전 → 순차적으로 자동 교체"]
+        K4["서버 죽으면 → 다른 서버로 자동 이동"]
+    end
+
+    style PROB fill:#fff3cd,stroke:#f0ad4e
+    style K8S fill:#e8f5e9,stroke:#4caf50
+```
 
 ---
 
 ## 개념 — 클러스터 구조
 
-```
-컨트롤 플레인 (Control Plane)
-클러스터 관리 — 스케줄링, 스케일링, 배포 등 모든 활동 관리
-        ↓
-[노드 1] [노드 2] [노드 3]
-실제 애플리케이션이 실행되는 서버 (= 어제의 App VM)
+```mermaid
+flowchart TB
+    subgraph CLUSTER["☸️ Kubernetes 클러스터 (NKS)"]
+        direction TB
+        CP["🧠 컨트롤 플레인\n무엇을 어디에 띄울지 결정\n(NHN Cloud가 관리)"]
+
+        subgraph NODES["워커 노드들 (= 실제 서버)"]
+            N1["🖥️ 노드 1\n📦 Pod A\n📦 Pod B"]
+            N2["🖥️ 노드 2\n📦 Pod C\n📦 Pod D"]
+        end
+
+        CP -->|"배치 지시"| N1
+        CP -->|"배치 지시"| N2
+    end
+
+    USER["👤 사용자\n(kubectl 명령)"]
+    USER -->|"원하는 상태 전달"| CP
+
+    style CLUSTER fill:#e8f4fd,stroke:#2196F3
+    style NODES fill:#f0f7ff,stroke:#90caf9
+    style CP fill:#b3d9ff,stroke:#2196F3
 ```
 
 | 구성 요소 | 역할 | 1일차 대응 개념 |
 |---------|------|--------------|
-| 컨트롤 플레인 | 전체를 관리 — 무엇을 어디에 띄울지 결정 | 운영자의 판단 |
+| 컨트롤 플레인 | 전체 관리 — 무엇을 어디에 띄울지 결정 | 운영자의 판단 |
 | 노드 | 컨테이너가 실제로 실행되는 서버 | App VM |
-| Pod | 노드 위에서 실행되는 최소 배포 단위 | App VM 위의 프로세스 |
+| Pod | 컨테이너를 담는 최소 단위 | App VM 위의 프로세스 |
 
 ---
 
 ## 개념 — Pod / Deployment / Service
 
-### Pod
+```mermaid
+flowchart TB
+    DEP["📋 Deployment\n'민원 서비스 Pod를 3개 유지하라'"]
+    RS["ReplicaSet\n부족하면 만들고, 넘치면 지운다"]
+    P1["📦 Pod 1"]
+    P2["📦 Pod 2"]
+    P3["📦 Pod 3"]
 
-- 컨테이너를 담는 **가장 작은 배포 단위**
-- 언제든 사라질 수 있는 존재로 취급 — 고쳐 쓰지 않고 새로 만듦
-- Pod마다 IP가 있지만, 재생성되면 주소가 바뀜
+    SVC["🔀 Service\n고정된 접근 지점\nPod가 바뀌어도 주소는 그대로"]
 
-### Deployment
+    USER["👤 민원 신청자"]
 
-```
-Deployment: "민원 서비스 이미지를 3개 유지하라"
-        ↓
-ReplicaSet: 부족하면 만들고, 넘치면 지운다
-        ↓        ↓        ↓
-      Pod 1    Pod 2    Pod 3
-```
+    DEP --> RS --> P1 & P2 & P3
+    USER -->|"http 접속"| SVC
+    SVC --> P1 & P2 & P3
 
-"몇 개가 있어야 한다"만 적으면 Kubernetes가 실제로 세고 맞춥니다.
-
-### Service
-
-```
-민원 신청자
-        ↓
-Service (고정된 접근 지점 — Pod 주소가 바뀌어도 항상 같은 주소)
-        ↓        ↓        ↓
-      Pod 1    Pod 2    Pod 3
+    style DEP fill:#fff3cd,stroke:#f0ad4e
+    style SVC fill:#d4edda,stroke:#28a745
+    style P1 fill:#e8f4fd,stroke:#2196F3
+    style P2 fill:#e8f4fd,stroke:#2196F3
+    style P3 fill:#e8f4fd,stroke:#2196F3
 ```
 
-| 역할 | 1일차에서는 | 2일차에서는 |
-|------|-----------|-----------|
-| 단일 진입점 | Load Balancer | Kubernetes Service |
-| 트래픽 분산 | LB 로드 밸런싱 | Service가 정상 Pod로 분배 |
-| 대상 목록 갱신 | 멤버 수동 등록 | 라벨이 맞는 Pod를 자동 포함 |
+| 개념 | 설명 | 비유 |
+|------|------|------|
+| **Pod** | 컨테이너를 담는 가장 작은 배포 단위 | 붕어빵 한 개 |
+| **Deployment** | 몇 개를 어떤 이미지로 유지할지 선언 | "붕어빵 항상 3개 있어야 해" |
+| **Service** | 변하지 않는 접근 지점, 정상 Pod로 분산 | 가게 입구 (안에 직원이 바뀌어도 입구는 같음) |
 
 ---
 
-## 개념 — NKS (관리형 Kubernetes)
+## 개념 — NKS란?
+
+NKS(NHN Kubernetes Service)는 NHN Cloud가 제공하는 **관리형 Kubernetes**입니다.
 
 | 관리 주체 | 담당 영역 |
 |---------|---------|
-| NHN Cloud | 컨트롤 플레인 (고가용성 보장, 설치·구성·운영) |
-| 사용자 | 노드 (사양, 수), 서비스 (외부 노출), Pod (앱, 복제본 수) |
+| **NHN Cloud** | 컨트롤 플레인 (설치·구성·운영·고가용성 보장) |
+| **내가 할 일** | 노드 사양/수, 앱 배포, 복제본 수 |
+
+복잡한 Kubernetes 설치 없이, 콘솔에서 몇 가지 선택만 하면 클러스터가 생깁니다.
 
 ---
 
 ## STEP 01 — NKS 서비스 활성화 & 클러스터 생성
 
-### 서비스 활성화
+### 1-1. 서비스 활성화
 
 ```
-상단 메뉴 > 서비스 선택 > Containers > NKS > 서비스 활성화
+상단 메뉴 > 서비스 선택 > Containers > NHN Kubernetes Service(NKS) > 서비스 활성화
 ```
 
-### 클러스터 생성
+활성화 확인 팝업에서 **확인** 클릭
+
+---
+
+### 1-2. 클러스터 생성
 
 ```
-Containers > NKS > 클러스터 생성
+Containers > NHN Kubernetes Service(NKS) > + 클러스터 생성
 ```
-
-### 설정값
 
 **클러스터 기본 설정**
 
@@ -134,83 +166,147 @@ Containers > NKS > 클러스터 생성
 | 키페어 | 1일차와 동일한 키페어 |
 | 블록 스토리지 | HDD 20GB |
 
+**생성** 버튼 클릭
+
 !!! info "클러스터 생성에는 약 10분이 소요됩니다"
-    생성 버튼을 누른 뒤 상태가 `CREATE_COMPLETE`가 될 때까지 기다립니다.
+    상태가 `CREATE_COMPLETE`가 될 때까지 기다립니다.
+    기다리는 동안 STEP 02를 먼저 진행할 수 있습니다.
 
 !!! tip "노드는 결국 인스턴스"
-    노드 그룹 설정은 1일차에서 배운 이미지, 인스턴스 타입, 키페어, 블록 스토리지 개념 그대로입니다.
+    노드 그룹 설정은 1일차에서 만든 App VM과 똑같은 개념입니다.
+    이미지, 인스턴스 타입, 키페어, 블록 스토리지 — 모두 익숙한 설정입니다.
 
 ---
 
-## STEP 02 — kubectl 설치
+## STEP 02 — App VM에 kubectl 설치
 
-클러스터를 조작하려면 `kubectl` 명령어 도구가 필요합니다.
+2차시에서 사용했던 App VM에 SSH로 접속해서 kubectl을 설치합니다.
 
-**로컬 PC(Mac)**에서 설치합니다.
+### 2-1. App VM SSH 접속
+
+PowerShell을 열고 아래 명령을 입력합니다.
+
+```powershell
+ssh -i C:\Users\사용자이름\Downloads\nhn-temp-key.pem ubuntu@<App-VM-플로팅-IP>
+```
+
+!!! tip "2차시에서 컨테이너가 실행 중이라면"
+    App VM에 이미 접속한 상태라면 바로 다음 단계로 넘어갑니다.
+    새 PowerShell 창이면 위 명령으로 다시 접속하세요.
+
+---
+
+### 2-2. kubectl 설치
+
+App VM 터미널에서 아래 명령을 순서대로 실행합니다.
+
+**① kubectl 바이너리 다운로드**
 
 ```bash
-# Homebrew로 설치
-brew install kubectl
+curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+```
 
-# 설치 확인
+**② 실행 권한 부여 및 시스템 경로 이동**
+
+```bash
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+```
+
+**③ 설치 확인**
+
+```bash
 kubectl version --client
 ```
 
-**Windows**라면 공식 문서 참고: https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/
+```
+Client Version: v1.x.x  ← 이렇게 나오면 정상
+```
 
 ---
 
 ## STEP 03 — kubeconfig 적용
 
-kubeconfig는 클러스터에 접근하기 위한 인증 정보가 담긴 파일입니다.
+kubeconfig는 **클러스터에 접근하기 위한 인증 정보**가 담긴 파일입니다.
 
-### 콘솔에서 다운로드
+### 3-1. 콘솔에서 kubeconfig 내용 확인
 
 ```
-Containers > NKS > [minwon-cluster]
+Containers > NHN Kubernetes Service(NKS) > [minwon-cluster]
 → 기본 정보 탭 > 설정 파일 다운로드 버튼 클릭
 ```
 
-### 로컬에 적용
+다운로드된 파일을 **메모장(Notepad)**으로 엽니다.
+`Ctrl+A` → `Ctrl+C` 로 전체 내용을 복사합니다.
+
+---
+
+### 3-2. App VM에 kubeconfig 파일 생성
+
+App VM 터미널에서 아래 명령을 입력합니다.
 
 ```bash
-# 다운로드한 파일을 ~/.kube 디렉토리에 복사
 mkdir -p ~/.kube
-cp ~/Downloads/minwon-cluster-kubeconfig.yaml ~/.kube/config
-
-# 또는 환경변수로 지정
-export KUBECONFIG=~/Downloads/minwon-cluster-kubeconfig.yaml
+cat > ~/.kube/config << 'KUBECONFIG_EOF'
 ```
 
-### 연결 확인
+엔터를 누른 뒤, **복사해 둔 kubeconfig 내용을 붙여넣기** 합니다.
 
-```bash
-kubectl cluster-info
-# Kubernetes control plane is running at https://...
+마지막 줄에 아래를 입력하고 엔터:
+
+```
+KUBECONFIG_EOF
 ```
 
 ---
 
-## STEP 04 — 클러스터 구성 요소 확인
+### 3-3. 파일 권한 설정
 
 ```bash
-# 노드 목록
-kubectl get nodes
-# NAME         STATUS   ROLES    AGE
-# node-xxxxx   Ready    <none>   5m
-# node-yyyyy   Ready    <none>   5m
-
-# 기본 Pod 목록 (시스템 Pod)
-kubectl get pods -A
-
-# Deployment 목록
-kubectl get deployments
-
-# Service 목록
-kubectl get services
+chmod 600 ~/.kube/config
 ```
 
-`kubectl get nodes` 에서 모든 노드가 `Ready` 상태이면 준비 완료입니다.
+---
+
+## STEP 04 — 클러스터 연결 확인
+
+NKS 클러스터 상태가 `CREATE_COMPLETE`인지 먼저 확인하세요.
+
+**① 클러스터 기본 정보 확인**
+
+```bash
+kubectl cluster-info
+```
+
+```
+Kubernetes control plane is running at https://...  ← 이렇게 나오면 성공
+```
+
+---
+
+**② 노드 목록 확인**
+
+```bash
+kubectl get nodes
+```
+
+```
+NAME           STATUS   ROLES    AGE
+node-xxxxx     Ready    <none>   5m
+node-yyyyy     Ready    <none>   5m
+```
+
+모든 노드가 `Ready` 상태이면 준비 완료입니다.
+
+---
+
+**③ 시스템 Pod 확인**
+
+```bash
+kubectl get pods -A
+```
+
+kube-system 네임스페이스의 Pod들이 `Running` 상태이면 정상입니다.
 
 ---
 
@@ -219,7 +315,7 @@ kubectl get services
 | # | 확인 항목 | 확인 방법 |
 |---|---------|---------|
 | ① | NKS 클러스터가 `CREATE_COMPLETE` 상태다 | 콘솔 > NKS 목록 |
-| ② | kubectl이 설치되었다 | `kubectl version --client` |
+| ② | App VM에 kubectl이 설치되었다 | `kubectl version --client` |
 | ③ | kubeconfig가 적용되었다 | `kubectl cluster-info` |
 | ④ | 노드가 `Ready` 상태다 | `kubectl get nodes` |
 

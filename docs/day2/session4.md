@@ -1,7 +1,7 @@
 # Day 2 · 4차시 — 기존 DB를 유지한 채 서비스를 배포하라
 
 **소요 시간**: 50분 (14:00~14:50)
-**목표**: Secret으로 연결 정보를 주입하고, YAML을 적용해 Pod에서 1일차 DB와 Object Storage에 연결한다
+**목표**: NCR 인증 Secret을 만들고, DB 연결 정보를 주입해 Pod에서 1일차 DB와 연결한다
 
 ---
 
@@ -9,11 +9,14 @@
 
 | STEP | 내용 |
 |------|------|
-| 01 | deployment.yaml 내용 파악 |
-| 02 | Secret 값 수정 (DB IP, Object Storage 정보) |
+| 01 | NCR 이미지 Pull Secret 생성 |
+| 02 | deployment.yaml 값 수정 |
 | 03 | 배포 적용 (`kubectl apply`) |
 | 04 | Pod 정상 실행 확인 |
 | 05 | 브라우저에서 기존 데이터 연결 확인 |
+
+!!! info "모든 명령은 App VM 터미널에서 실행합니다"
+    3차시에서 접속해 둔 App VM SSH 터미널을 그대로 사용합니다.
 
 ---
 
@@ -21,129 +24,179 @@
 
 | 방식 | 문제 |
 |------|------|
-| YAML에 직접 작성 | YAML 파일을 보는 모든 사람이 비밀번호를 알게 됨 |
+| YAML에 직접 작성 | 파일을 보는 모든 사람이 비밀번호를 알게 됨 |
 | 이미지 안에 포함 | 이미지를 Pull하면 비밀번호가 노출됨 |
-| **Secret으로 분리** | 배포 정의(Deployment)와 비밀 값을 따로 관리 가능 |
+| **Secret으로 분리** | 배포 정의와 비밀 값을 따로 관리 가능 |
 
 DB 비밀번호가 바뀌어도 이미지를 다시 만들 필요 없이 **Secret 값만 교체**하면 됩니다.
 
 ---
 
-## 개념 — YAML 읽는 법
+## 개념 — kubectl apply 흐름
 
-### Deployment YAML 구조
+```mermaid
+flowchart LR
+    YAML["📄 deployment.yaml\n(원하는 상태 선언)"]
+    CMD["kubectl apply -f"]
+    CP["🧠 컨트롤 플레인"]
+    NODE["🖥️ 노드"]
+    NCR["🏭 NCR\n이미지 창고"]
+    POD["📦 Pod\n실행 중"]
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment          # 어떤 종류의 오브젝트인지
-metadata:
-  name: complaint-app     # 이 배포의 이름
-spec:
-  replicas: 1             # 유지할 Pod 개수
-  selector:
-    matchLabels:
-      app: complaint-app  # 어떤 Pod를 관리할지 (라벨로 선택)
-  template:
-    metadata:
-      labels:
-        app: complaint-app # Pod에 붙이는 이름표
-    spec:
-      containers:
-      - name: complaint-app
-        image: {레지스트리}/complaint-app:latest  # 실행할 이미지
-        ports:
-        - containerPort: 8080
-        envFrom:
-        - secretRef:
-            name: complaint-db-secret  # Secret에서 환경 변수 주입
-```
+    YAML --> CMD --> CP
+    CP -->|"이미지 Pull 지시"| NODE
+    NODE -->|"docker pull"| NCR
+    NCR -->|"이미지 전달"| NODE
+    NODE --> POD
 
-### Service YAML 구조
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: complaint-service
-spec:
-  type: LoadBalancer       # 외부 노출 방식 (NHN Cloud LB 자동 생성)
-  selector:
-    app: complaint-app     # 이 라벨을 가진 Pod로 트래픽 전달
-  ports:
-  - port: 80               # 외부에서 접속할 포트
-    targetPort: 8080       # Pod 안 컨테이너 포트
-```
-
-```
-외부 → port: 80 → Service → targetPort: 8080 → Pod
+    style YAML fill:#fff3cd,stroke:#f0ad4e
+    style POD fill:#e8f4fd,stroke:#2196F3
+    style NCR fill:#e8f5e9,stroke:#4caf50
 ```
 
 ---
 
-## STEP 01 — deployment.yaml 확인
+## STEP 01 — NCR 이미지 Pull Secret 생성
 
-레포지토리에 준비된 YAML 파일을 확인합니다.
+Kubernetes 노드가 NCR에서 이미지를 받아오려면 **로그인 정보**가 필요합니다.
+이 정보를 Secret으로 저장해 둡니다.
+
+App VM 터미널에서 아래 명령을 실행합니다.
+`(강사 제공)` 부분을 강사에게 받은 아이디/비밀번호로 교체하세요.
 
 ```bash
-# 로컬 PC에서 레포지토리 clone (처음인 경우)
+kubectl create secret docker-registry ncr-secret \
+  --docker-server=43c329ba-kr1-registry.container.nhncloud.com \
+  --docker-username=(강사 제공 아이디) \
+  --docker-password=(강사 제공 비밀번호)
+```
+
+!!! tip "한 줄로 입력해도 됩니다"
+    줄바꿈(\)이 불편하다면 아래처럼 한 줄로 입력하세요.
+    ```bash
+    kubectl create secret docker-registry ncr-secret --docker-server=43c329ba-kr1-registry.container.nhncloud.com --docker-username=(강사 제공 아이디) --docker-password=(강사 제공 비밀번호)
+    ```
+
+생성 확인:
+
+```bash
+kubectl get secrets
+```
+
+```
+NAME           TYPE                             DATA   AGE
+ncr-secret     kubernetes.io/dockerconfigjson   1      10s
+```
+
+`ncr-secret` 이 보이면 성공입니다.
+
+---
+
+## STEP 02 — deployment.yaml 값 수정
+
+레포지토리에 준비된 YAML 파일을 받아서 값을 수정합니다.
+
+### 2-1. 레포지토리 clone
+
+```bash
 git clone https://github.com/skilleat-labs/cloud-native-minwon-lab.git
 cd cloud-native-minwon-lab
+```
 
-# YAML 파일 위치 확인
-ls app/
-# Dockerfile  app.py  deployment.yaml  requirements.txt  ...
+이미 clone이 되어 있다면:
+
+```bash
+cd cloud-native-minwon-lab
+git pull
 ```
 
 ---
 
-## STEP 02 — deployment.yaml 수정
+### 2-2. DB VM 사설 IP 확인
 
-`app/deployment.yaml` 파일에서 아래 항목을 실제 값으로 수정합니다.
+1일차 DB VM(`minwon-db-01`)의 **사설 IP**가 필요합니다.
+
+```
+콘솔 > Compute > Instance > minwon-db-01 클릭 > 기본 정보 탭 > IP 주소
+```
+
+예: `192.168.0.20` (본인 값으로 확인)
+
+---
+
+### 2-3. deployment.yaml 수정
+
+아래 명령에서 `여기에DB사설IP입력` 을 **본인 DB VM의 사설 IP로 바꾼 뒤** 실행합니다.
 
 ```bash
-# 편집기로 열기
-nano app/deployment.yaml
+sed -i 's|192.168.0.20|여기에DB사설IP입력|g' app/deployment.yaml
 ```
 
-### 수정해야 하는 값
+예시 (DB IP가 192.168.0.15인 경우):
 
-**① Secret의 DB_HOST**
-
-```yaml
-stringData:
-  DB_HOST: "192.168.0.20"    # ← DB VM 사설 IP로 변경
-  DB_USER: "complaint_user"
-  DB_PASSWORD: "Minjeon2024!"
-  DB_NAME: "complaints_db"
+```bash
+sed -i 's|192.168.0.20|192.168.0.15|g' app/deployment.yaml
 ```
 
-**② Deployment의 이미지 주소**
+---
 
-```yaml
-containers:
-  - name: complaint-app
-    image: <레지스트리 주소>/complaint-app:latest   # ← 실제 레지스트리 주소로 변경
+### 2-4. 이미지 주소 수정
+
+```bash
+sed -i 's|<레지스트리 주소>/complaint-app:latest|43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest|g' app/deployment.yaml
 ```
 
-!!! danger "두 곳을 반드시 수정하세요"
-    - `DB_HOST`: 1일차 DB VM의 사설 IP
-    - `image`: 1차시에서 확인한 NCR 레지스트리 주소
+---
 
-### Object Storage 설정 추가 (선택)
+### 2-5. imagePullSecrets 추가
 
-1일차에서 설정한 Object Storage도 연결하려면 Secret에 추가합니다.
+Kubernetes가 NCR에서 이미지를 받을 때 아까 만든 Secret을 사용하도록 설정합니다.
 
-```yaml
-stringData:
-  DB_HOST: "192.168.x.x"
-  DB_USER: "complaint_user"
-  DB_PASSWORD: "Minjeon2024!"
-  DB_NAME: "complaints_db"
-  OBJECT_STORAGE_URL: "https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_{TenantID}"
-  OBJECT_STORAGE_CONTAINER: "minwon-attachments"
-  OS_USERNAME: "{NHN Cloud 이메일}"
-  OS_PASSWORD: "{API 비밀번호}"
+아래 명령을 **그대로** 실행합니다.
+
+```bash
+sed -i '/      containers:/i\      imagePullSecrets:\n      - name: ncr-secret' app/deployment.yaml
 ```
+
+---
+
+### 2-6. Object Storage 설정 추가 (선택)
+
+1일차에서 설정한 Object Storage를 연결하려면 Secret에 추가합니다.
+
+아래 명령에서 `여기에...` 부분을 본인 값으로 바꾼 뒤 실행합니다.
+
+```bash
+kubectl patch secret complaint-db-secret --type=merge -p '{
+  "stringData": {
+    "OBJECT_STORAGE_URL": "https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_여기에TenantID입력",
+    "OBJECT_STORAGE_CONTAINER": "minwon-attachments",
+    "OS_USERNAME": "여기에로그인이메일입력",
+    "OS_PASSWORD": "여기에API비밀번호입력"
+  }
+}'
+```
+
+!!! info "Object Storage 정보 확인 위치"
+    - TenantID: `Storage > Object Storage > API 엔드포인트 설정`
+    - OS_USERNAME: NHN Cloud 로그인 이메일
+    - OS_PASSWORD: API 엔드포인트 설정에서 직접 설정한 API 전용 비밀번호
+
+---
+
+### 2-7. 수정 결과 확인
+
+```bash
+cat app/deployment.yaml
+```
+
+아래 세 곳이 올바르게 바뀌어 있는지 확인합니다.
+
+| 확인 항목 | 올바른 값 |
+|---------|---------|
+| `DB_HOST` | 본인 DB VM 사설 IP |
+| `image:` | `43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest` |
+| `imagePullSecrets:` | `- name: ncr-secret` 포함 |
 
 ---
 
@@ -161,37 +214,77 @@ deployment.apps/complaint-app created
 service/complaint-service created
 ```
 
-### 배포가 실제로 일어나는 순서
+### 배포 순서
 
-1. `kubectl apply` → 컨트롤 플레인이 원하는 상태로 기록
-2. 스케줄러가 배치할 노드 결정
-3. 노드에서 NCR로부터 이미지 Pull
-4. 컨테이너 실행 → Pod 준비 완료
-5. Service가 해당 Pod를 대상에 포함
+```mermaid
+flowchart LR
+    A["kubectl apply"] --> B["컨트롤 플레인\n원하는 상태 기록"]
+    B --> C["스케줄러\n배치할 노드 결정"]
+    C --> D["노드에서\nNCR 이미지 Pull"]
+    D --> E["컨테이너 실행\nPod 준비"]
+    E --> F["Service가\nPod를 대상에 포함"]
+
+    style A fill:#fff3cd,stroke:#f0ad4e
+    style F fill:#e8f5e9,stroke:#4caf50
+```
 
 ---
 
 ## STEP 04 — Pod 정상 실행 확인
 
+**① Pod 상태 확인**
+
 ```bash
-# Pod 상태 확인 (Running이 될 때까지 반복)
 kubectl get pods
-# NAME                             READY   STATUS    RESTARTS   AGE
-# complaint-app-7d4b9c8f6-xxxxx   1/1     Running   0          1m
-
-# Deployment 확인
-kubectl get deployments
-# NAME            READY   UP-TO-DATE   AVAILABLE
-# complaint-app   1/1     1            1
-
-# Service 확인 (EXTERNAL-IP가 생길 때까지 1~2분 대기)
-kubectl get services
-# NAME                TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)
-# complaint-service   LoadBalancer   10.x.x.x     {공인IP}         80:xxxxx/TCP
 ```
 
-!!! info "EXTERNAL-IP가 <pending>인 경우"
-    NHN Cloud Load Balancer가 생성 중입니다. 1~2분 후 다시 확인하세요.
+```
+NAME                             READY   STATUS    RESTARTS   AGE
+complaint-app-7d4b9c8f6-xxxxx   1/1     Running   0          1m
+```
+
+`Running` 이 보이면 성공입니다. 처음엔 `ContainerCreating` 상태로 보일 수 있습니다.
+
+---
+
+**② Deployment 확인**
+
+```bash
+kubectl get deployments
+```
+
+```
+NAME            READY   UP-TO-DATE   AVAILABLE
+complaint-app   1/1     1            1
+```
+
+---
+
+**③ Service 확인 (EXTERNAL-IP 대기)**
+
+```bash
+kubectl get services
+```
+
+```
+NAME                TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)
+complaint-service   LoadBalancer   10.x.x.x     <pending>        80:xxxxx/TCP
+```
+
+`EXTERNAL-IP` 가 `<pending>` 이면 아직 생성 중입니다. 1~2분 후 다시 확인합니다.
+
+```bash
+kubectl get services
+```
+
+```
+NAME                TYPE           CLUSTER-IP    EXTERNAL-IP      PORT(S)
+complaint-service   LoadBalancer   10.x.x.x     203.x.x.x       80:xxxxx/TCP
+```
+
+공인 IP 주소가 나오면 완료입니다.
+
+---
 
 ### Pod가 뜨지 않을 때 확인 순서
 
@@ -203,11 +296,11 @@ kubectl describe pod <Pod-이름>
 kubectl logs <Pod-이름>
 ```
 
-| 증상 | 원인 |
-|------|------|
-| `ImagePullBackOff` | 이미지 주소 오타 또는 NCR 인증 실패 |
-| `CrashLoopBackOff` | 앱 실행 오류 — `kubectl logs`로 원인 확인 |
-| `Pending` | 노드에 자원 여유 없음 |
+| 증상 | 원인 | 해결 |
+|------|------|------|
+| `ImagePullBackOff` | NCR 인증 실패 또는 이미지 주소 오류 | STEP 01 Secret 재확인, 이미지 주소 재확인 |
+| `CrashLoopBackOff` | 앱 실행 오류 | `kubectl logs <Pod명>`으로 원인 확인 |
+| `Pending` | 노드에 자원 여유 없음 | 노드 상태 확인 |
 
 ---
 
@@ -236,8 +329,8 @@ http://<EXTERNAL-IP>
 
 | # | 확인 항목 | 확인 방법 |
 |---|---------|---------|
-| ① | Secret이 생성되었다 | `kubectl get secrets` |
-| ② | Deployment가 생성되었다 | `kubectl get deployments` |
+| ① | `ncr-secret` 이 생성되었다 | `kubectl get secrets` |
+| ② | `complaint-db-secret` 이 생성되었다 | `kubectl get secrets` |
 | ③ | Pod가 `Running` 상태다 | `kubectl get pods` |
 | ④ | Service의 EXTERNAL-IP가 생겼다 | `kubectl get services` |
 | ⑤ | 브라우저에서 민원 서비스가 접속된다 | 브라우저 확인 |
