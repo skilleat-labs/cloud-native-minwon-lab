@@ -59,18 +59,21 @@ curl http://localhost:8080/health
 
 ### 콘솔 경로
 
-```
-Network > Load Balancer > [minwon-lb]
-> 멤버 그룹 탭 > 멤버 추가
-```
+1. `Network > Load Balancer` 에서 `minwon-lb` 의 **상세 보기** 클릭
+
+![LB 목록에서 상세 보기 클릭](./images/4-1-lb-detail-view.png)
+
+2. **멤버 그룹** 탭 → `memberGroup-1` 선택 → **멤버** 탭 → **멤버 추가** 클릭
+3. 아래 설정값으로 입력 후 **확인**
 
 ### 설정값
 
 | 항목 | 값 |
 |------|---|
 | 인스턴스 | `minwon-app-01` |
-| 목적지 포트 | `8080` |
-| 가중치 | 1 |
+| 포트 | `8080` |
+
+![멤버 추가 화면 — minwon-app-01 선택](./images/4-2-lb-member-add.png)
 
 ---
 
