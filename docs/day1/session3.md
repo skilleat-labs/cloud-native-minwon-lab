@@ -209,9 +209,11 @@ Storage > Block Storage > 블록 스토리지 생성
 | 항목 | 값 |
 |------|---|
 | 이름 | `minwon-db-disk` |
-| 가용성 영역 | DB VM과 **동일한 AZ** |
+| 가용성 영역 | DB VM과 **동일한 AZ** (앞서 확인한 값 입력) |
 | 타입 | HDD |
-| 크기 | 20GB |
+| 크기 | 10GB |
+
+![블록 스토리지 생성 화면](./images/3-8-block-storage-create.png)
 
 ### 왜 DB 데이터를 별도 Block Storage에 두는가
 
