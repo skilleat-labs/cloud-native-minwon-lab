@@ -34,6 +34,9 @@ nav:
     - 4차시 — 기존 DB 유지한 채 Pod 배포: day2/session4.md
     - 5차시 — 자동 복구 & 수평 확장: day2/session5.md
 
+extra_css:
+  - stylesheets/extra.css
+
 plugins:
   - search:
       lang: ko

@@ -1,0 +1,7 @@
+/* 이미지 전체 너비로 표시 */
+.md-content img {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
