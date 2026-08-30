@@ -74,6 +74,10 @@ Compute > Instance > 인스턴스 생성
 | 키페어 | 새로 생성 또는 기존 키페어 선택 |
 | 플로팅 IP | 연결 안 함 |
 
+이미지는 **OS > Ubuntu** 를 선택한 뒤 목록에서 **Ubuntu Server 22.04 LTS** 를 선택합니다.
+
+![인스턴스 이미지 선택 화면](./images/3-1-instance-image-select.png)
+
 !!! warning "키페어 주의"
     개인 키(.pem) 파일은 생성 시점에 **딱 한 번만** 다운로드됩니다.
     잃어버리면 SSH 접속이 불가능합니다. 반드시 보관하세요.
