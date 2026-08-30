@@ -168,8 +168,10 @@ Containers > NHN Container Registry(NCR) > 레지스트리 생성
 | 항목 | 값 |
 |------|---|
 | 이름 | `minwon-registry` |
-| 접근 정책 | Private |
-| 이미지 정리 정책 | 사용 안 함 |
+| Public URI | 사용 |
+| 용도 | 일반 |
+
+![레지스트리 생성 — minwon-registry 입력](./images/d2-1-ncr-registry-create.png)
 
 ---
 
