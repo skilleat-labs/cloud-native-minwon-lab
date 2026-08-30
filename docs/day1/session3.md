@@ -59,7 +59,7 @@ VM을 생성할 때 **추가 설정 > 사용자 스크립트** 란에 셸 스크
 Compute > Instance > 인스턴스 생성
 ```
 
-### 설정값
+### ① 기본 정보 & 이미지 설정
 
 | 항목 | 값 |
 |------|---|
@@ -68,15 +68,16 @@ Compute > Instance > 인스턴스 생성
 | 인스턴스 타입 | `t2.c1m1` (1 vCPU, 1GB RAM) |
 | 가용성 영역 | 한국(판교) — **Block Storage와 같은 AZ** |
 | 루트 디스크 | HDD 20GB |
-| VPC | `minwon-vpc` |
-| 서브넷 | `minwon-subnet-db` |
-| 보안 그룹 | `minwon-sg-db` |
-| 키페어 | 새로 생성 또는 기존 키페어 선택 |
-| 플로팅 IP | 연결 안 함 |
 
 이미지는 **OS > Ubuntu** 를 선택한 뒤 목록에서 **Ubuntu Server 22.04 LTS** 를 선택합니다.
 
 ![인스턴스 이미지 선택 화면](./images/3-1-instance-image-select.png)
+
+### ② 키페어 설정
+
+| 항목 | 값 |
+|------|---|
+| 키페어 | 새로 생성 또는 기존 키페어 선택 |
 
 ![인스턴스 기본 정보 설정 및 키페어 다운로드](./images/3-2-instance-keypair-download.png)
 
@@ -85,6 +86,17 @@ Compute > Instance > 인스턴스 생성
     `.pem` 파일은 **생성 시점에 단 한 번만** 다운로드할 수 있습니다.
     이 파일을 잃어버리면 해당 인스턴스에 SSH로 접속할 방법이 없습니다.
     다운로드 후 안전한 위치(USB 또는 로컬 폴더)에 즉시 보관하세요.
+
+### ③ 네트워크 설정
+
+| 항목 | 값 |
+|------|---|
+| VPC | `minwon-vpc` |
+| 서브넷 | `minwon-subnet-db` |
+
+오른쪽 **사용 가능한 서브넷** 목록에서 `minwon-subnet-db`를 클릭하면 왼쪽 **선택된 서브넷**으로 이동합니다.
+
+![DB 서브넷 선택 화면](./images/3-3-instance-db-subnet-select.png)
 
 ### 사용자 스크립트 입력
 
