@@ -256,7 +256,8 @@ Network > Security Group > 보안 그룹 생성
 | 수신 | TCP | 3306 | **minwon-sg-app** (보안 그룹 지정) | App → DB 트래픽 |
 | 수신 | TCP | 22 | 내 IP (`현재 IP 확인 → https://ifconfig.me`) | SSH 접속용 |
 
-위 이미지와 동일한 방법으로 DB 보안 그룹도 생성합니다.
+![DB 보안 그룹 생성 화면](./images/2-5-sg-db-create.png)
+
 원격(소스) 항목에 CIDR 대신 **`minwon-sg-app` 보안 그룹**을 지정하는 것이 핵심입니다.
 
 !!! warning "핵심 — CIDR이 아닌 보안 그룹으로 지정"
@@ -265,9 +266,36 @@ Network > Security Group > 보안 그룹 생성
 
 ### 보안 그룹 동작 원리
 
-- **허용 목록(Whitelist) 방식**: 규칙에 없는 트래픽은 모두 차단
-- **Stateful**: 허용된 요청의 응답은 반대 방향 규칙 없이 자동 통과
-- **자주 하는 실수**: DB 그룹에 `0.0.0.0/0` 허용 → 인터넷 전체에 DB 포트 노출
+**① Whitelist 방식 — 허용하지 않은 트래픽은 전부 차단**
+
+```mermaid
+flowchart LR
+    A[🌐 인터넷] -->|포트 8080 요청| B{보안 그룹}
+    A -->|포트 3306 요청| B
+    B -->|규칙 있음 ✅| C[✅ 통과 → App VM]
+    B -->|규칙 없음 ❌| D[❌ 차단]
+```
+
+**② Stateful — 요청이 허용되면 응답은 자동 통과**
+
+```mermaid
+flowchart LR
+    A[🌐 클라이언트] -->|"① 요청 (허용 규칙 있음)"| B[App VM]
+    B -->|"② 응답 (규칙 없어도 자동 통과)"| A
+```
+
+**③ 자주 하는 실수 — DB에 0.0.0.0/0 허용**
+
+```mermaid
+flowchart LR
+    A[🌐 인터넷 전체] -->|"0.0.0.0/0 → 3306"| B["💀 DB VM\n(누구나 접근 가능)"]
+    style A fill:#ff4444,color:#fff
+    style B fill:#ff4444,color:#fff
+```
+
+!!! danger "절대 하면 안 되는 설정"
+    DB 보안 그룹의 원격을 `0.0.0.0/0`으로 설정하면 전 세계 누구나 DB에 접근을 시도할 수 있습니다.
+    원격은 반드시 **`minwon-sg-app` 보안 그룹**으로 지정하세요.
 
 ---
 
