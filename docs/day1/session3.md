@@ -488,6 +488,11 @@ EOF
 
 systemctl daemon-reload
 systemctl enable complaint-app
+
+# hostname이 127.0.1.1로 매핑되는 Ubuntu 기본값을 실제 사설 IP로 교체
+PRIVATE_IP=$(hostname -I | awk '{print $1}')
+sed -i "s/127.0.1.1/$PRIVATE_IP/" /etc/hosts
+
 systemctl start complaint-app
 
 echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT}"
