@@ -10,8 +10,9 @@
 | STEP | 작업 |
 |------|------|
 | 01 | 컨테이너(버킷) 생성 |
-| 02 | 앱에 Object Storage 연결 설정 |
-| 03 | 첨부파일 업로드 후 저장 결과 확인 |
+| 02 | Object Storage 접근 정보 확인 |
+| 03 | 앱에 Object Storage 연결 (임시 플로팅 IP 생성 → SSH → 해제) |
+| 04 | 첨부파일 업로드 후 저장 결과 확인 |
 
 !!! info "Object Storage 서비스 활성화는 1차시에서 이미 완료했습니다"
     왼쪽 메뉴에 **Storage > Object Storage** 가 보이면 바로 시작하세요.
@@ -146,6 +147,19 @@ Storage > Object Storage > API 엔드포인트 설정 버튼 클릭
 
 ## STEP 03 — 앱에 Object Storage 연결
 
+!!! info "SSH 접속을 위해 플로팅 IP를 임시로 생성합니다"
+    4차시에서 App VM의 플로팅 IP를 LB로 옮겼기 때문에, 지금 App VM에는 공인 IP가 없습니다.
+    .env 파일 수정을 위해 **새 플로팅 IP를 생성 → App VM에 임시 연결 → 수정 완료 후 해제·삭제** 합니다.
+
+### 3-0. App VM에 플로팅 IP 임시 연결
+
+1. `Network > Floating IP` → **플로팅 IP 생성** 클릭 → **확인**
+2. 생성된 IP 선택 → **연결** 클릭
+   - 네트워크 인터페이스: `minwon-app-01`
+3. App VM에 연결된 공인 IP 주소를 메모해 두세요
+
+### 3-1. App VM SSH 접속 후 .env 수정
+
 App VM에 SSH로 접속한 뒤 환경변수 파일을 수정합니다.
 
 ```bash
@@ -185,6 +199,16 @@ curl -s -X POST https://api-identity.infrastructure.cloud.toast.com/v2.0/tokens 
 sudo systemctl restart complaint-app
 sudo systemctl status complaint-app
 ```
+
+### 3-2. 임시 플로팅 IP 해제 및 삭제
+
+SSH 작업이 끝났으면 임시로 만든 플로팅 IP를 정리합니다.
+
+1. `Network > Floating IP` 에서 임시 생성한 IP 체크
+2. **연결 해제** 후 **플로팅 IP 삭제**
+
+!!! warning "플로팅 IP는 연결하지 않아도 과금됩니다"
+    사용이 끝난 즉시 삭제하세요.
 
 ---
 
