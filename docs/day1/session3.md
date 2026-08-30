@@ -229,10 +229,11 @@ Storage > Block Storage > 블록 스토리지 생성
 
 ### 3-1. 콘솔에서 연결
 
-```
-Storage > Block Storage > [minwon-db-disk] > 연결 추가
-→ 인스턴스: minwon-db-01 선택 → 확인
-```
+1. `minwon-db-disk` 를 체크한 뒤 **연결 추가** 버튼 클릭
+2. **찾아보기** 를 눌러 `minwon-db-01` 인스턴스 선택
+3. 삭제 정책은 **인스턴스 삭제 시 유지** 로 두고 **연결** 클릭
+
+![블록 스토리지 연결 추가 화면](./images/3-9-block-storage-attach.png)
 
 ### 3-2. DB VM에 플로팅 IP 연결
 
