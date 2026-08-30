@@ -157,34 +157,23 @@ docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complai
 
 ### 3-2. 컨테이너 실행
 
-아래 명령에서 **반드시 바꿔야 할 것**:
-
-- `여기에DB사설IP입력` → DB VM의 사설 IP (예: `192.168.1.15`)
-- `여기에TenantID입력` → Object Storage Tenant ID
-- `여기에이메일입력` → NHN Cloud 로그인 이메일
-- `여기에API비밀번호입력` → Object Storage API 비밀번호
-
-값을 바꾼 뒤 **전체 복사해서 붙여넣기** 하세요:
+1일차에서 이미 `.env` 파일을 만들어뒀습니다. 그 파일을 그대로 사용하면 됩니다.
 
 ```bash
 docker run -d \
   --name complaint-app \
   -p 8080:8080 \
-  -e DB_HOST=여기에DB사설IP입력 \
-  -e DB_PORT=3306 \
-  -e DB_USER=complaint_user \
-  -e DB_PASSWORD=Minjeon2024! \
-  -e DB_NAME=complaints_db \
-  -e OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_여기에TenantID입력 \
-  -e OBJECT_STORAGE_CONTAINER=minwon-attachments \
-  -e OS_USERNAME=여기에이메일입력 \
-  -e OS_PASSWORD=여기에API비밀번호입력 \
+  --env-file /opt/complaint-app/.env \
   43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
 ```
 
-!!! danger "DB_HOST는 반드시 사설 IP로!"
-    콘솔에서 DB VM의 **사설 IP**를 확인하세요.
-    공인 IP를 입력하면 연결되지 않습니다.
+`--env-file` 은 `.env` 파일 안의 모든 설정값을 컨테이너에 한 번에 주입합니다.
+DB 주소, Object Storage 정보 등을 따로 입력할 필요가 없어요.
+
+!!! info ".env 파일 내용 확인하고 싶다면"
+    ```bash
+    cat /opt/complaint-app/.env
+    ```
 
 컨테이너 ID(긴 문자열)가 출력되면 정상 실행된 것입니다.
 
@@ -263,7 +252,13 @@ docker rm -f complaint-app
 
 ### 5-3. 같은 명령으로 다시 실행
 
-STEP 03의 `docker run` 명령을 그대로 다시 실행합니다.
+```bash
+docker run -d \
+  --name complaint-app \
+  -p 8080:8080 \
+  --env-file /opt/complaint-app/.env \
+  43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
+```
 
 ### 5-4. 결과 확인
 
