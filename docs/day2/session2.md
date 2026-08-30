@@ -11,9 +11,10 @@
 |------|------|
 | 01 | App VM에 SSH 접속 |
 | 02 | Docker 설치 |
-| 03 | 이미지 Pull & 컨테이너 실행 |
-| 04 | 동작 확인 |
-| 05 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
+| 03 | NCR 로그인 |
+| 04 | 이미지 Pull & 컨테이너 실행 |
+| 05 | 동작 확인 |
+| 06 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
 
 ---
 
@@ -141,11 +142,26 @@ Docker version 24.x.x ← 이렇게 나오면 정상
 
 ---
 
-## STEP 03 — 이미지 Pull & 컨테이너 실행
+## STEP 03 — NCR 로그인
 
-### 3-1. 이미지 받기
+강사에게 받은 아이디와 비밀번호로 로그인합니다.
 
-로그인 없이 바로 Pull 가능합니다.
+```bash
+docker login 43c329ba-kr1-registry.container.nhncloud.com
+```
+
+```
+Username: (강사 제공)
+Password: (강사 제공)
+```
+
+`Login Succeeded` 가 나오면 성공입니다.
+
+---
+
+## STEP 04 — 이미지 Pull & 컨테이너 실행
+
+### 4-1. 이미지 받기
 
 ```bash
 docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
@@ -155,7 +171,7 @@ docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complai
 
 ---
 
-### 3-2. 컨테이너 실행
+### 4-2. 컨테이너 실행
 
 1일차에서 이미 `.env` 파일을 만들어뒀습니다. 그 파일을 그대로 사용하면 됩니다.
 
@@ -179,7 +195,7 @@ DB 주소, Object Storage 정보 등을 따로 입력할 필요가 없어요.
 
 ---
 
-## STEP 04 — 동작 확인
+## STEP 05 — 동작 확인
 
 **① 컨테이너 실행 상태 확인**
 
@@ -232,7 +248,7 @@ http://<App-VM-플로팅-IP>:8080
 
 ---
 
-## STEP 05 — 컨테이너 삭제 후 재실행 관찰
+## STEP 06 — 컨테이너 삭제 후 재실행 관찰
 
 컨테이너를 지우면 **컨테이너 안의 데이터는 사라지지만, DB와 Object Storage는 그대로**임을 확인합니다.
 
