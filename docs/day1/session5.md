@@ -9,10 +9,12 @@
 
 | STEP | 작업 |
 |------|------|
-| 01 | Object Storage 서비스 활성화 |
-| 02 | 컨테이너(버킷) 생성 |
-| 03 | 앱에 Object Storage 연결 설정 |
-| 04 | 첨부파일 업로드 후 저장 결과 확인 |
+| 01 | 컨테이너(버킷) 생성 |
+| 02 | 앱에 Object Storage 연결 설정 |
+| 03 | 첨부파일 업로드 후 저장 결과 확인 |
+
+!!! info "Object Storage 서비스 활성화는 1차시에서 이미 완료했습니다"
+    왼쪽 메뉴에 **Storage > Object Storage** 가 보이면 바로 시작하세요.
 
 ---
 
@@ -81,27 +83,13 @@ DB VM          ← 파일 경로(URL)만 기록
 
 ---
 
-## STEP 01 — Object Storage 서비스 활성화
+## STEP 01 — 컨테이너(버킷) 생성
 
 ### 콘솔 경로
 
 ```
-상단 메뉴 > 서비스 선택 > Storage > Object Storage > 서비스 활성화
+Storage > Object Storage > 컨테이너 생성
 ```
-
-### 활성화 방법
-
-1. 콘솔 상단 **서비스 선택** 클릭
-2. 왼쪽 분류에서 **Storage** 선택
-3. **Object Storage** 항목에서 **서비스 활성화** 클릭
-4. 왼쪽 메뉴에 **Storage > Object Storage** 가 나타나면 완료
-
-!!! info "프로젝트당 한 번만 활성화하면 됩니다"
-    이미 활성화된 경우 왼쪽 메뉴에서 바로 Object Storage가 보입니다.
-
----
-
-## STEP 02 — 컨테이너(버킷) 생성
 
 ### 콘솔 경로
 
@@ -117,6 +105,8 @@ Storage > Object Storage > 컨테이너 생성
 | 접근 정책 | **PRIVATE** |
 | 스토리지 클래스 | Standard |
 
+![컨테이너 생성 — 이름·접근 정책 입력](./images/5-1-container-create.png)
+
 ### 접근 정책 비교
 
 | 정책 | 설명 | 언제 사용 |
@@ -129,7 +119,7 @@ Storage > Object Storage > 컨테이너 생성
 
 ---
 
-## STEP 03 — Object Storage 접근 정보 확인
+## STEP 02 — Object Storage 접근 정보 확인
 
 앱에서 Object Storage에 연결하려면 아래 4가지 정보가 필요합니다.
 
@@ -154,7 +144,7 @@ Storage > Object Storage > API 엔드포인트 설정 버튼 클릭
 
 ---
 
-## STEP 04 — 앱에 Object Storage 연결
+## STEP 03 — 앱에 Object Storage 연결
 
 App VM에 SSH로 접속한 뒤 환경변수 파일을 수정합니다.
 
@@ -198,7 +188,7 @@ sudo systemctl status complaint-app
 
 ---
 
-## STEP 05 — 첨부파일 업로드 및 확인
+## STEP 04 — 첨부파일 업로드 및 확인
 
 ### 5-1. 민원 접수 시 첨부파일 업로드
 
@@ -239,10 +229,9 @@ Storage > Object Storage > [minwon-attachments]
 
 | # | 확인 항목 | 확인 방법 |
 |---|----------|---------|
-| ① | Object Storage 서비스가 활성화되었다 | Storage > Object Storage 메뉴 진입 가능 |
-| ② | `minwon-attachments` 컨테이너가 PRIVATE으로 생성되었다 | 컨테이너 상세 확인 |
-| ③ | 민원 신청 시 첨부파일이 버킷에 저장된다 | Object Storage 오브젝트 목록 |
-| ④ | DB에는 파일 본문이 아닌 경로(URL)가 저장된다 | 민원 상세에서 첨부파일 링크 동작 확인 |
+| ① | `minwon-attachments` 컨테이너가 PRIVATE으로 생성되었다 | 컨테이너 상세 확인 |
+| ② | 민원 신청 시 첨부파일이 버킷에 저장된다 | Object Storage 오브젝트 목록 |
+| ③ | DB에는 파일 본문이 아닌 경로(URL)가 저장된다 | 민원 상세에서 첨부파일 링크 동작 확인 |
 
 ---
 
