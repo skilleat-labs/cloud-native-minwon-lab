@@ -572,6 +572,8 @@ nc -zv <DB-VM-사설-IP> 3306
 
 `Connection to ... 3306 port [tcp/mysql] succeeded!` 가 나오면 성공입니다.
 
+![nc 명령어 DB 통신 성공 화면](./images/3-15-nc-db-connect.png)
+
 !!! warning "통신이 안 되면 이 순서로 확인하세요"
     1. `Compute > Instance` 에서 DB VM이 **실행 중** 상태인가?
     2. `minwon-sg-db` 인바운드 규칙 — 원격이 `minwon-sg-app` **보안 그룹**으로 지정되어 있는가?
