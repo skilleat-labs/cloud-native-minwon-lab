@@ -9,8 +9,8 @@
 
 | STEP | 내용 |
 |------|------|
-| 01 | App VM에 Docker 설치 |
-| 02 | NCR 로그인 |
+| 01 | App VM에 SSH 접속 |
+| 02 | Docker 설치 |
 | 03 | 이미지 Pull & 컨테이너 실행 |
 | 04 | 동작 확인 |
 | 05 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
@@ -29,136 +29,225 @@
 
 ## 개념 — 포트 연결 구조
 
-```
-외부 요청 (브라우저)
-        ↓
-VM(호스트): 80번 포트로 들어온 요청을 컨테이너 8080으로 전달
-        ↓
-컨테이너: 앱이 듣고 있는 8080 포트
+```mermaid
+flowchart LR
+    U["👤 브라우저\n:8080"]
+    VM["🖥️ App VM\n호스트 포트 :8080"]
+    CT["📦 컨테이너\n앱 포트 :8080"]
+
+    U -->|"요청"| VM
+    VM -->|"-p 8080:8080"| CT
+
+    style CT fill:#e8f4fd,stroke:#2196F3
 ```
 
-컨테이너는 자기만의 네트워크 공간을 가집니다. 컨테이너 안의 포트는 밖에서 그대로 보이지 않으므로 `-p 호스트포트:컨테이너포트` 로 연결해줘야 합니다.
+컨테이너는 자기만의 네트워크 공간을 가집니다.
+`-p 호스트포트:컨테이너포트` 로 연결해줘야 외부에서 접속할 수 있습니다.
 
 ---
 
 ## 개념 — 설정을 이미지 밖으로 빼는 이유
 
-### 이미지 안에 설정을 넣으면 (문제)
+```mermaid
+flowchart LR
+    subgraph BAD["❌ 이미지 안에 설정을 넣으면"]
+        I1["이미지 A\nDB=192.168.0.1"]
+        I2["이미지 B\nDB=192.168.0.2"]
+    end
+    subgraph GOOD["✅ 환경 변수로 주입하면"]
+        IMG["이미지 하나"]
+        E1["개발환경\nDB=dev-server"]
+        E2["운영환경\nDB=prod-server"]
+        IMG -->|"-e DB_HOST="| E1 & E2
+    end
 
-- DB 주소가 바뀌면 이미지를 다시 만들어야 함
-- 이미지 안에 비밀번호가 그대로 남음
-- 개발/운영 환경마다 이미지를 따로 관리해야 함
-
-### 환경 변수로 주입하면 (장점)
-
-- 이미지는 하나, 환경마다 다른 값만 주입
-- 민감한 값은 별도로 분리 가능
-- 같은 이미지로 개발·검증·운영을 모두 커버
+    style BAD fill:#fff3cd,stroke:#f0ad4e
+    style GOOD fill:#e8f5e9,stroke:#4caf50
+```
 
 !!! tip "핵심"
     이미지는 어디서나 같고, 설정은 환경마다 다르다.
 
 ---
 
-## STEP 01 — App VM에 Docker 설치
+## STEP 01 — App VM에 SSH 접속
 
-App VM에 SSH로 접속합니다.
+**① Windows PowerShell 열기**
 
-```bash
-ssh -i MyKey.pem ubuntu@<App-VM-플로팅-IP>
+시작 메뉴에서 **PowerShell** 검색 후 실행
+
+---
+
+**② 키파일 위치 확인**
+
+1일차에서 다운로드한 `nhn-temp-key.pem` 파일 위치를 확인합니다.
+보통 `C:\Users\사용자이름\Downloads\` 에 있습니다.
+
+---
+
+**③ SSH 접속**
+
+```powershell
+ssh -i C:\Users\사용자이름\Downloads\nhn-temp-key.pem ubuntu@<App-VM-플로팅-IP>
 ```
 
-Docker를 설치합니다.
+!!! warning "App VM 플로팅 IP 확인"
+    4차시에서 App VM의 플로팅 IP를 LB로 옮겼습니다.
+    접속을 위해 **새 플로팅 IP를 임시로 생성**해서 App VM에 연결하세요.
+
+    `Compute > Instance > minwon-app-01 체크 > 플로팅 IP 관리 > 생성 후 연결`
+
+처음 접속 시 아래 메시지가 나오면 `yes` 입력 후 Enter:
+```
+Are you sure you want to continue connecting? yes
+```
+
+`ubuntu@minwon-app-01:~$` 가 보이면 접속 성공입니다.
+
+---
+
+## STEP 02 — Docker 설치
+
+App VM 터미널에서 아래 명령을 **순서대로** 실행합니다.
+
+**① Docker 설치**
 
 ```bash
 curl -fsSL https://get.docker.com | sudo sh
+```
+
+설치에 1~2분 소요됩니다.
+
+---
+
+**② 현재 사용자에게 Docker 권한 부여**
+
+```bash
 sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-설치 확인:
+---
+
+**③ 설치 확인**
 
 ```bash
 docker --version
-# Docker version 24.x.x ← 정상
 ```
 
----
-
-## STEP 02 — NCR 로그인
-
-NCR에 로그인해야 이미지를 Pull할 수 있습니다.
-
 ```
-Containers > NCR > [minwon-registry] > 기본 정보
-→ 로그인 명령어 확인 및 복사
+Docker version 24.x.x ← 이렇게 나오면 정상
 ```
-
-콘솔에서 복사한 명령어를 실행합니다.
-
-```bash
-docker login {레지스트리 주소}
-# Username: {NHN Cloud 이메일}
-# Password: {API 비밀번호}
-```
-
-`Login Succeeded` 가 나오면 성공입니다.
 
 ---
 
 ## STEP 03 — 이미지 Pull & 컨테이너 실행
 
-### 이미지 받기
+### 3-1. 이미지 받기
+
+로그인 없이 바로 Pull 가능합니다.
 
 ```bash
-docker pull {레지스트리 주소}/complaint-app:latest
+docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
 ```
 
-### 컨테이너 실행
+레이어를 다운로드하는 메시지가 나오고 `Pull complete` 가 보이면 완료입니다.
+
+---
+
+### 3-2. 컨테이너 실행
+
+아래 명령에서 **반드시 바꿔야 할 것**:
+
+- `여기에DB사설IP입력` → DB VM의 사설 IP (예: `192.168.1.15`)
+- `여기에TenantID입력` → Object Storage Tenant ID
+- `여기에이메일입력` → NHN Cloud 로그인 이메일
+- `여기에API비밀번호입력` → Object Storage API 비밀번호
+
+값을 바꾼 뒤 **전체 복사해서 붙여넣기** 하세요:
 
 ```bash
 docker run -d \
   --name complaint-app \
   -p 8080:8080 \
-  -e DB_HOST=<DB-VM-사설-IP> \
+  -e DB_HOST=여기에DB사설IP입력 \
   -e DB_PORT=3306 \
   -e DB_USER=complaint_user \
   -e DB_PASSWORD=Minjeon2024! \
   -e DB_NAME=complaints_db \
-  -e OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_{TenantID} \
+  -e OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_여기에TenantID입력 \
   -e OBJECT_STORAGE_CONTAINER=minwon-attachments \
-  -e OS_USERNAME={NHN Cloud 이메일} \
-  -e OS_PASSWORD={API 비밀번호} \
-  {레지스트리 주소}/complaint-app:latest
+  -e OS_USERNAME=여기에이메일입력 \
+  -e OS_PASSWORD=여기에API비밀번호입력 \
+  43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
 ```
 
-!!! danger "DB_HOST를 반드시 실제 DB VM 사설 IP로 변경하세요"
+!!! danger "DB_HOST는 반드시 사설 IP로!"
+    콘솔에서 DB VM의 **사설 IP**를 확인하세요.
+    공인 IP를 입력하면 연결되지 않습니다.
+
+컨테이너 ID(긴 문자열)가 출력되면 정상 실행된 것입니다.
 
 ---
 
 ## STEP 04 — 동작 확인
 
+**① 컨테이너 실행 상태 확인**
+
 ```bash
-# 컨테이너 실행 상태 확인
 docker ps
-# CONTAINER ID   IMAGE           STATUS          PORTS
-# abc123         complaint-app   Up 30 seconds   0.0.0.0:8080->8080/tcp
+```
 
-# 앱 응답 확인
+```
+CONTAINER ID   IMAGE             STATUS         PORTS
+abc123...      complaint-app     Up 10 seconds  0.0.0.0:8080->8080/tcp
+```
+
+`Up` 상태가 보이면 정상입니다.
+
+---
+
+**② 앱 응답 확인**
+
+```bash
 curl http://localhost:8080/health
-# {"status": "ok"} ← 정상
+```
 
-# 로그 확인
+```json
+{"status": "ok"} ← 정상
+```
+
+---
+
+**③ 로그 확인**
+
+```bash
 docker logs complaint-app
 ```
 
-브라우저에서 `http://<App-VM-플로팅-IP>:8080` 으로 접속해서 1일차 민원 데이터가 보이는지 확인합니다.
+오류 메시지 없이 `Running on ...` 이 보이면 성공입니다.
+
+---
+
+**④ 브라우저에서 접속**
+
+```
+http://<App-VM-플로팅-IP>:8080
+```
+
+1일차 민원 데이터가 그대로 보이면 완벽합니다.
+
+!!! warning "접속이 안 된다면"
+    App 보안 그룹에서 **8080 포트**가 열려 있는지 확인하세요.
+    `Network > Security Groups > minwon-sg-app > 규칙 확인`
 
 ---
 
 ## STEP 05 — 컨테이너 삭제 후 재실행 관찰
 
-### 컨테이너 안에서 파일 만들기
+컨테이너를 지우면 **컨테이너 안의 데이터는 사라지지만, DB와 Object Storage는 그대로**임을 확인합니다.
+
+### 5-1. 컨테이너 안에 파일 만들기
 
 ```bash
 docker exec complaint-app touch /tmp/my-test-file.txt
@@ -166,19 +255,17 @@ docker exec complaint-app ls /tmp/
 # my-test-file.txt ← 존재함
 ```
 
-### 컨테이너 삭제 후 재실행
+### 5-2. 컨테이너 삭제
 
 ```bash
 docker rm -f complaint-app
-
-# 동일한 명령으로 다시 실행 (STEP 03 명령어 그대로)
-docker run -d --name complaint-app -p 8080:8080 \
-  -e DB_HOST=<DB-VM-사설-IP> \
-  ... (동일한 환경 변수)
-  {레지스트리 주소}/complaint-app:latest
 ```
 
-### 관찰
+### 5-3. 같은 명령으로 다시 실행
+
+STEP 03의 `docker run` 명령을 그대로 다시 실행합니다.
+
+### 5-4. 결과 확인
 
 ```bash
 # 아까 만든 파일이 사라졌는가?
@@ -186,15 +273,15 @@ docker exec complaint-app ls /tmp/
 # (파일 없음) ← 컨테이너가 새로 만들어졌기 때문
 
 # DB의 민원 데이터는 남아 있는가?
-curl http://localhost:8080
-# 데이터가 그대로 보임 ← DB는 컨테이너 밖에 있기 때문
+curl http://localhost:8080/health
+# {"status": "ok"} ← 앱은 정상, 데이터도 그대로
 ```
 
 | 관찰 항목 | 결과 | 이유 |
 |---------|------|------|
-| 컨테이너 안 파일 | 사라짐 | 컨테이너는 새로 만들어진 것 |
-| DB의 민원 데이터 | 그대로 | DB는 컨테이너 밖(VM)에 있음 |
-| Object Storage 첨부파일 | 그대로 | Object Storage는 컨테이너 밖 |
+| 컨테이너 안 파일 | **사라짐** | 컨테이너는 새로 만들어진 것 |
+| DB의 민원 데이터 | **그대로** | DB는 컨테이너 밖(VM)에 있음 |
+| Object Storage 첨부파일 | **그대로** | Object Storage는 컨테이너 밖 |
 
 !!! tip "핵심"
     컨테이너는 언제든 사라질 수 있다고 가정하고 설계한다.
@@ -207,7 +294,7 @@ curl http://localhost:8080
 | # | 확인 항목 | 확인 방법 |
 |---|---------|---------|
 | ① | Docker가 설치되었다 | `docker --version` |
-| ② | NCR 로그인이 성공했다 | `Login Succeeded` |
+| ② | 이미지가 Pull 되었다 | `docker images` |
 | ③ | 컨테이너가 실행 중이다 | `docker ps` |
 | ④ | 브라우저에서 민원 서비스가 접속된다 | 브라우저 확인 |
 | ⑤ | 컨테이너를 지워도 DB 데이터는 남는다 | 재실행 후 데이터 확인 |
