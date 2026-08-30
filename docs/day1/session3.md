@@ -98,7 +98,15 @@ Compute > Instance > 인스턴스 생성
 
 ![DB 서브넷 선택 화면](./images/3-3-instance-db-subnet-select.png)
 
-### ④ 플로팅 IP 설정
+### ④ 보안 그룹 설정
+
+!!! danger "반드시 `minwon-sg-db` 를 선택하세요"
+    보안 그룹 선택 목록에서 **`minwon-sg-db`** 에만 체크하세요.
+    `default` 나 `minwon-sg-app` 을 선택하면 잘못된 포트가 열리거나 DB가 외부에 노출될 수 있습니다.
+
+![보안 그룹 선택 화면 — minwon-sg-db 선택](./images/3-5-instance-sg-db-select.png)
+
+### ⑤ 플로팅 IP 설정
 
 플로팅 IP는 **기본값(사용 안 함)** 그대로 두세요. DB VM은 외부에서 직접 접근하지 않습니다.
 
