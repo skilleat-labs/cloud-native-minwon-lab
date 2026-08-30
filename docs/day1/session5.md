@@ -160,65 +160,32 @@ Storage > Object Storage > API 엔드포인트 설정 버튼 클릭
 
 ### 3-1. App VM SSH 접속 후 .env 수정
 
-**① 파일 열기**
+아래 명령에서 `여기에...` 부분만 **본인 값으로 바꾼 뒤 전체를 복사해서 붙여넣기** 하세요.
 
 ```bash
-sudo nano /opt/complaint-app/.env
-```
-
-명령을 입력하면 아래처럼 검은 화면에 텍스트가 보입니다. 이게 **nano 편집기**입니다.
-
-```
-DB_HOST=192.168.x.x
-DB_PORT=3306
-...
-```
-
----
-
-**② 맨 아래로 이동**
-
-키보드 방향키 `↓` 를 계속 눌러서 파일의 **맨 마지막 줄**로 이동합니다.
-
----
-
-**③ 내용 입력**
-
-아래 내용을 **한 줄씩 그대로** 입력합니다.
-`{중괄호}` 부분은 **본인 값으로 교체**하세요.
-
-```bash
-OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_{TenantID}
+sudo tee -a /opt/complaint-app/.env << 'EOF'
+OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_여기에TenantID입력
 OBJECT_STORAGE_CONTAINER=minwon-attachments
-OS_USERNAME={NHN Cloud 로그인 이메일}
-OS_PASSWORD={API 엔드포인트 설정에서 설정한 API 비밀번호}
+OS_USERNAME=여기에로그인이메일입력
+OS_PASSWORD=여기에API비밀번호입력
+EOF
 ```
 
-!!! warning "주의 — 띄어쓰기·오타 금지"
-    `=` 앞뒤에 **공백 없이** 입력해야 합니다.
-    예) `OS_USERNAME=hong@korea.kr` ← 이렇게
+!!! warning "붙여넣기 전에 반드시 값을 먼저 수정하세요"
+    - `여기에TenantID입력` → Object Storage API 엔드포인트 설정에서 복사한 Tenant ID
+    - `여기에로그인이메일입력` → NHN Cloud 로그인 이메일 (예: `hong@korea.kr`)
+    - `여기에API비밀번호입력` → API 엔드포인트 설정에서 설정한 API 전용 비밀번호
 
----
-
-**④ 저장하기**
-
-`Ctrl + O` 를 누릅니다 (알파벳 O, 숫자 0 아님)
+입력이 완료되면 아래처럼 추가된 내용이 그대로 출력됩니다.
 
 ```
-File Name to Write: /opt/complaint-app/.env
+OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_abc123...
+OBJECT_STORAGE_CONTAINER=minwon-attachments
+OS_USERNAME=hong@korea.kr
+OS_PASSWORD=mypassword
 ```
 
-라고 물어보면 그냥 `Enter` 를 누릅니다.
-
----
-
-**⑤ 편집기 닫기**
-
-`Ctrl + X` 를 누르면 편집기가 닫히고 터미널로 돌아옵니다.
-
----
-
-**⑥ 앱 재시작**
+**② 앱 재시작**
 
 ```bash
 sudo systemctl restart complaint-app
