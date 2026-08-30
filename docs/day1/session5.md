@@ -227,22 +227,6 @@ sudo systemctl status complaint-app
 
 `Active: active (running)` 이 보이면 성공입니다.
 
-### 토큰 발급 테스트 (선택)
-
-설정이 올바른지 먼저 확인하고 싶다면 아래 명령으로 토큰 발급을 테스트합니다.
-
-```bash
-curl -s -X POST https://api-identity.infrastructure.cloud.toast.com/v2.0/tokens -H "Content-Type: application/json" -d '{"auth":{"tenantId":"{TenantID}","passwordCredentials":{"username":"{이메일}","password":"{API비밀번호}"}}}' | python3 -m json.tool | grep '"id"' | head -1
-```
-
-토큰 문자열이 출력되면 인증 성공입니다.
-
-앱 재시작:
-
-```bash
-sudo systemctl restart complaint-app
-sudo systemctl status complaint-app
-```
 
 ### 3-2. 임시 플로팅 IP 해제 및 삭제
 
