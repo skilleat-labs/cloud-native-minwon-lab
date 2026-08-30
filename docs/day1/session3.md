@@ -304,11 +304,17 @@ sudo ls /var/lib/mysql
 ### 3-4. 디스크 인식 확인
 
 ```bash
-lsblk
-# NAME   SIZE
-# vda    20G   ← 루트 디스크
-# vdb    20G   ← 방금 연결한 Block Storage
+sudo lsblk
 ```
+
+명령 실행 후 아래처럼 `vdb` 디스크가 보이면 Block Storage가 정상 연결된 것입니다.
+
+![lsblk 및 fdisk 파티션 생성 화면](./images/3-12-lsblk-fdisk.png)
+
+| 디스크 | 크기 | 역할 |
+|--------|------|------|
+| `vda` | 20G | 루트 디스크 (OS) |
+| `vdb` | 10G | 방금 연결한 Block Storage |
 
 ### 3-5. 파티션 및 파일시스템 생성
 
