@@ -495,7 +495,35 @@ echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT
 
 ---
 
-## STEP 06 — 배포 확인
+## STEP 06 — App 보안 그룹 수정 (8080 포트 오픈)
+
+브라우저에서 `공인IP:8080` 으로 직접 접속하려면 보안 그룹에서 8080 포트를 인터넷에 열어야 합니다.
+
+### 콘솔 경로
+
+```
+Network > Security Group > minwon-sg-app 클릭
+→ 보안 규칙 탭 > 수신 TCP 8080 규칙 > 변경
+```
+
+### 변경 내용
+
+| 항목 | 기존 | 변경 후 |
+|------|------|--------|
+| 방향 | 수신 | 수신 |
+| 프로토콜 | TCP | TCP |
+| 포트 | 8080 | 8080 |
+| 원격 | `192.168.0.0/24` (App 서브넷) | `0.0.0.0/0` (인터넷 전체) |
+
+![보안 그룹 8080 포트 0.0.0.0/0 으로 변경](./images/3-16-sg-app-8080-open.png)
+
+!!! warning "실습 전용 설정입니다"
+    `0.0.0.0/0` 은 전 세계 누구나 8080 포트로 접근 가능합니다.
+    실습이 끝나면 다시 제한하거나 인스턴스를 삭제하세요.
+
+---
+
+## STEP 07 — 배포 확인
 
 App VM의 사용자 스크립트는 부팅 후 백그라운드에서 자동 실행됩니다.
 **인스턴스 생성 후 약 2~3분 기다렸다가** SSH로 접속해 확인합니다.
@@ -564,7 +592,30 @@ curl http://localhost:8080
 
 HTML 코드가 출력되면 앱이 정상 동작 중입니다.
 
-### 6-4. App VM → DB VM 통신 확인
+### 6-4. DB VM 서비스 확인 (새 터미널에서)
+
+!!! tip "App VM 터미널은 그대로 두고 PowerShell 창을 새로 여세요"
+    App VM에 접속 중인 터미널을 닫지 말고,
+    **PowerShell 창을 하나 더 열어서** DB VM에 별도로 접속합니다.
+
+**새 PowerShell 창에서 DB VM 접속**
+
+```powershell
+cd C:\Users\사용자이름\Downloads
+ssh -i MyKey.pem ubuntu@<DB-VM-플로팅-IP>
+```
+
+**DB VM에서 MySQL 상태 확인**
+
+```bash
+sudo systemctl status mysql
+```
+
+`Active: active (running)` 이 보이면 MySQL 정상 실행 중입니다.
+
+### 6-5. App VM에서 DB VM 통신 확인
+
+App VM 터미널(기존 창)로 돌아와서 실행합니다.
 
 ```bash
 nc -zv <DB-VM-사설-IP> 3306
@@ -579,9 +630,17 @@ nc -zv <DB-VM-사설-IP> 3306
     2. `minwon-sg-db` 인바운드 규칙 — 원격이 `minwon-sg-app` **보안 그룹**으로 지정되어 있는가?
     3. 두 VM이 모두 `minwon-vpc` 안에 있는가?
 
----
+### 6-6. 브라우저에서 서비스 확인
 
-![민원 서비스 배포 완료](./images/3-6-deploy-complete.png)
+모든 확인이 끝났으면 브라우저 주소창에 아래와 같이 입력합니다.
+
+```
+http://<App-VM-플로팅-IP>:8080
+```
+
+아래와 같이 **온라인 민원 서비스** 화면이 보이면 배포 완료입니다! 🎉
+
+![브라우저에서 민원 서비스 확인](./images/3-17-browser-check.png)
 
 ## 3차시 체크포인트
 
