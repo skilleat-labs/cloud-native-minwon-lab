@@ -99,14 +99,16 @@ flowchart LR
     S3["☸️ 3차시\nKubernetes·NKS\n클러스터 생성"]
     S4["🚀 4차시\n기존 DB 연결한 채\nPod 배포"]
     S5["⚡ 5차시\n자동 복구·확장\n실습"]
+    S6["🏁 6차시\n최종 미션 &\n자원 정리"]
 
-    S1 --> S2 --> S3 --> S4 --> S5
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6
 
     style S1 fill:#e8f4fd,stroke:#2196F3
     style S2 fill:#e8f4fd,stroke:#2196F3
     style S3 fill:#e8f4fd,stroke:#2196F3
     style S4 fill:#e8f4fd,stroke:#2196F3
     style S5 fill:#e8f4fd,stroke:#2196F3
+    style S6 fill:#e8f5e9,stroke:#4caf50
 ```
 
 | 시간 | 차시 | 내용 |
@@ -116,6 +118,7 @@ flowchart LR
 | 13:00~13:50 | [3차시](session3.md) | Kubernetes란? NKS 클러스터 생성 |
 | 14:00~14:50 | [4차시](session4.md) | 기존 DB VM을 연결한 채 Pod 배포 |
 | 15:00~15:50 | [5차시](session5.md) | Pod 자동 복구 & 수평 확장 실습 |
+| 16:00~17:00 | [6차시](session6.md) | 최종 실습 미션 & 자원 정리 |
 
 ---
 
