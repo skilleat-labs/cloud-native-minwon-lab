@@ -21,11 +21,12 @@ nav:
   - 홈: index.md
   - Day 1 — 민원 서비스를 오픈하라:
     - 개요: day1/index.md
-    - 1차시 — 콘솔 로그인 & 환경 확인: day1/session1.md
-    - 2차시 — 네트워크 & 보안 그룹 & LB 구성: day1/session2.md
-    - 3차시 — VM 생성 & Block Storage 연결: day1/session3.md
-    - 4차시 — 서비스 자동 배포 & LB 등록: day1/session4.md
-    - 5차시 — Object Storage & 저장소 분리: day1/session5.md
+    - 1차시 — 콘솔에 로그인하자: day1/session1.md
+    - 2차시 — 어디에 올릴지 그려보자: day1/session2.md
+    - 3차시 — 네트워크 & 보안 그룹 & LB 구성: day1/session3.md
+    - 4차시 — VM 생성 & Block Storage 연결: day1/session4.md
+    - 5차시 — 서비스 자동 배포 & LB 등록: day1/session5.md
+    - 6차시 — Object Storage & 저장소 분리: day1/session6.md
   - Day 2 — 멈추지 않게 운영하라:
     - 개요: day2/index.md
     - 1차시 — 컨테이너와 이미지, 레지스트리: day2/session1.md
