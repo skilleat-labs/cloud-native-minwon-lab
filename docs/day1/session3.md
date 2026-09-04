@@ -32,20 +32,57 @@
 
 ---
 
-## 개념 — 2-Tier 분리 구조
+## 개념 — 왜 2-Tier 구조인가?
 
-```
-인터넷 사용자
-      ↓
-Load Balancer · 플로팅 IP
-      ↓
-App Tier (192.168.0.0/24)  ← 80 포트만 허용
-      ↓
-DB Tier  (192.168.1.0/24)  ← App에서만 3306 허용
+공공 서비스는 **보안**과 **가용성**이 중요합니다.  
+App 계층과 DB 계층을 분리하면 각각 독립적으로 관리할 수 있고, DB에 대한 직접 접근을 네트워크 수준에서 차단할 수 있습니다.
+
+```mermaid
+graph LR
+    subgraph T1["❌ 1-Tier — 단일 서버"]
+        A["App + DB
+한 서버에 모두"]
+    end
+
+    subgraph T2["✅ 2-Tier — 계층 분리"]
+        B["🖥️ App VM"]
+        C["🗄️ DB VM"]
+        B --> C
+    end
+
+    style T1 fill:#ffebee,stroke:#e53935,stroke-width:2px
+    style T2 fill:#e8f5e9,stroke:#43a047,stroke-width:2px
+    style A fill:#ffcdd2,stroke:#e53935
+    style B fill:#c8e6c9,stroke:#43a047
+    style C fill:#c8e6c9,stroke:#43a047
 ```
 
-DB는 인터넷에서 직접 보이지 않습니다.
+| | 1-Tier | 2-Tier |
+|--|--------|--------|
+| 장애 | 앱이 다운되면 DB도 중단 | 계층별 독립 운영·확장 |
+| 보안 | 보안 경계 없음 | DB는 외부 직접 접근 차단 |
+
+## 개념 — 2-Tier 트래픽 흐름
+
+DB는 인터넷에서 직접 보이지 않습니다.  
 각 계층이 "누구에게서 들어오는 요청만 허용할지"를 보안 그룹으로 제어하는 것이 2-Tier 분리의 실체입니다.
+
+```mermaid
+graph TD
+    Internet["🌐 인터넷 사용자"]
+    LB["⚖️ Load Balancer · 플로팅 IP"]
+    App["🖥️ App Tier
+192.168.0.0/24
+80 포트만 허용"]
+    DB["🗄️ DB Tier
+192.168.1.0/24
+App에서만 3306 허용"]
+
+    Internet --> LB --> App --> DB
+
+    style App fill:#fff3e0,stroke:#ff9800
+    style DB fill:#fce4ec,stroke:#e91e63
+```
 
 ---
 
