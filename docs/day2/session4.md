@@ -154,25 +154,26 @@ sed -i '/      containers:/i\      imagePullSecrets:\n      - name: ncr-secret' 
 
 ### 2-5. Object Storage 설정 추가 (선택)
 
-1일차에서 설정한 Object Storage를 연결하려면 Secret에 추가합니다.
+1일차에서 설정한 Object Storage를 연결하려면, `.env` 파일 값을 그대로 읽어 Secret에 추가합니다.
 
-아래 명령에서 `여기에...` 부분을 본인 값으로 바꾼 뒤 실행합니다.
+아래 명령을 **그대로 복사해서 실행**하면 됩니다.
 
 ```bash
-kubectl patch secret complaint-db-secret --type=merge -p '{
-  "stringData": {
-    "OBJECT_STORAGE_URL": "https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_여기에TenantID입력",
-    "OBJECT_STORAGE_CONTAINER": "minwon-attachments",
-    "OS_USERNAME": "여기에로그인이메일입력",
-    "OS_PASSWORD": "여기에API비밀번호입력"
+source /opt/complaint-app/.env
+
+kubectl patch secret complaint-db-secret --type=merge -p "{
+  \"stringData\": {
+    \"OBJECT_STORAGE_URL\": \"$OBJECT_STORAGE_URL\",
+    \"OBJECT_STORAGE_CONTAINER\": \"$OBJECT_STORAGE_CONTAINER\",
+    \"OS_USERNAME\": \"$OS_USERNAME\",
+    \"OS_PASSWORD\": \"$OS_PASSWORD\"
   }
-}'
+}"
 ```
 
-!!! info "Object Storage 정보 확인 위치"
-    - TenantID: `Storage > Object Storage > API 엔드포인트 설정`
-    - OS_USERNAME: NHN Cloud 로그인 이메일
-    - OS_PASSWORD: API 엔드포인트 설정에서 직접 설정한 API 전용 비밀번호
+!!! info "1일차 .env 파일의 값을 자동으로 읽어옵니다"
+    `source` 명령으로 `/opt/complaint-app/.env` 를 불러온 뒤, 그 변수를 그대로 Secret에 적용합니다.
+    1일차에서 Object Storage를 설정하지 않은 경우 이 단계는 건너뜁니다.
 
 ---
 
