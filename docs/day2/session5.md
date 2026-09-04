@@ -11,7 +11,7 @@
 |------|------|
 | 01 | 현재 상태 확인 |
 | 02 | Pod 삭제 → 자동 복구 관찰 |
-| 03 | 복제본 3개로 수평 확장 |
+| 03 | 복제본 10개로 수평 확장 |
 | 04 | 서비스 정상 동작 최종 확인 |
 
 ---
@@ -45,7 +45,7 @@ flowchart LR
 flowchart TB
     subgraph LOOP["♻️ Kubernetes 조정 루프 (끊임없이 반복)"]
         direction LR
-        WANT["📋 원하는 상태\nreplicas: 3"]
+        WANT["📋 원하는 상태\nreplicas: 10"]
         CHECK["👁️ 현재 상태 확인\n실제 2개만 실행 중"]
         DIFF["⚡ 차이 감지\n1개 부족!"]
         FIX["🔧 자동 수정\n새 Pod 생성"]
@@ -153,14 +153,14 @@ complaint-app-7d4b9c8f6-yyyyy   1/1     Running   0
 
 ---
 
-## STEP 03 — 복제본 3개로 수평 확장
+## STEP 03 — 복제본 10개로 수평 확장
 
 Pod를 3개로 늘리면, 하나가 죽어도 나머지 2개가 계속 서비스합니다.
 
 ### 방법 1: 명령어로 즉시 변경 (간단)
 
 ```bash
-kubectl scale deployment complaint-app --replicas=3
+kubectl scale deployment complaint-app --replicas=10
 ```
 
 ---
@@ -168,8 +168,8 @@ kubectl scale deployment complaint-app --replicas=3
 ### 방법 2: YAML 수정 후 적용
 
 ```bash
-# deployment.yaml 에서 replicas: 1 → replicas: 3 으로 수정
-sed -i 's/replicas: 1/replicas: 3/' app/deployment.yaml
+# deployment.yaml 에서 replicas: 1 → replicas: 10 으로 수정
+sed -i 's/replicas: 1/replicas: 10/' app/deployment.yaml
 
 # 수정된 내용 적용
 kubectl apply -f app/deployment.yaml
@@ -252,7 +252,7 @@ http://<EXTERNAL-IP>
 |---|---------|---------|
 | ① | Pod 삭제 후 새 Pod가 자동 생성되었다 | `kubectl get pods` |
 | ② | 삭제한 Pod와 새 Pod의 이름이 다르다 | Pod 이름 비교 |
-| ③ | 복제본이 3개로 늘었다 | `kubectl get deployments` |
+| ③ | 복제본이 10개로 늘었다 | `kubectl get deployments` |
 | ④ | Pod 3개가 모두 `Running` 상태다 | `kubectl get pods` |
 | ⑤ | 어느 Pod가 처리해도 같은 데이터가 보인다 | 브라우저 확인 |
 | ⑥ | 1일차 첨부파일이 그대로 남아 있다 | Object Storage 확인 |
@@ -292,3 +292,4 @@ http://<EXTERNAL-IP>
     | DB VM | 강사 안내에 따라 (데이터 보존 여부 확인) |
     | NCR 레지스트리 | 콘솔 > NCR > 레지스트리 삭제 |
     | 플로팅 IP | 콘솔 > Network > Floating IP > 삭제 |
+
