@@ -213,6 +213,8 @@ Network > Load Balancer → minwon-lb 클릭
 
 ### 5-1. curl로 부하 분산 확인 (정확한 방법)
 
+`curl`은 터미널에서 HTTP 요청을 보내는 명령어로, 브라우저 없이 서버 응답을 확인할 때 사용합니다.
+
 SSH 접속 상태에서 아래 명령을 실행합니다.
 
 ```bash
