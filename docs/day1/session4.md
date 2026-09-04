@@ -264,6 +264,33 @@ DB VM에는 플로팅 IP가 없으므로 임시로 연결합니다.
 
 ### 3-3. SSH 접속 (Windows PowerShell)
 
+#### SSH란? — 내 컴퓨터에서 클라우드 서버를 제어하는 방법
+
+클라우드 서버는 **모니터·키보드가 없습니다.** 대신 네트워크를 통해 명령어를 전송해서 제어합니다.
+이때 사용하는 프로토콜이 **SSH(Secure Shell)** 입니다.
+
+```mermaid
+graph LR
+    A["💻 내 PC\n(Windows PowerShell)"]
+    B["🌐 인터넷"]
+    C["🔒 SSH 암호화 터널\n(포트 22)"]
+    D["🖥️ 클라우드 VM\n(DB 서버)"]
+
+    A -->|"ssh -i MyKey.pem\nubuntu@공인IP"| B
+    B --> C
+    C -->|"명령어 전송\n결과 수신"| D
+
+    style A fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style C fill:#F5A623,color:#fff,stroke:#c47d00
+    style D fill:#7ED321,color:#fff,stroke:#5a9a18
+    style B fill:#f0f0f0,color:#333,stroke:#ccc
+```
+
+!!! info "키페어(.pem)가 필요한 이유"
+    SSH는 비밀번호 대신 **공개키/개인키 쌍**으로 인증합니다.
+    내가 가진 `.pem` 파일(개인키)과 VM에 등록된 공개키가 맞아야만 접속이 허용됩니다.
+    비밀번호보다 훨씬 강력하고 안전한 인증 방식입니다.
+
 !!! info "Windows 사용자는 PowerShell로 접속합니다"
     Windows 10/11에는 SSH가 기본 내장되어 있습니다. 별도 프로그램 설치 없이 PowerShell에서 바로 접속할 수 있습니다.
 
