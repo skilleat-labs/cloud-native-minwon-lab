@@ -23,7 +23,7 @@
 | 결정 사항 | 내용 | 예시 |
 |---------|------|------|
 | 무엇을 실행할 것인가 | 이미지 이름과 태그 | `complaint-app:latest` |
-| 어떤 포트로 들어올 것인가 | 호스트 포트 → 컨테이너 포트 | `80 → 8080` |
+| 어떤 포트로 들어올 것인가 | 호스트 포트 → 컨테이너 포트 | `8081 → 8080` |
 | 어떤 설정으로 동작할 것인가 | 환경 변수로 주입 | DB 주소, 계정, 버킷 정보 |
 
 ---
@@ -32,12 +32,12 @@
 
 ```mermaid
 flowchart LR
-    U["👤 브라우저\n:8080"]
-    VM["🖥️ App VM\n호스트 포트 :8080"]
+    U["👤 브라우저\n:8081"]
+    VM["🖥️ App VM\n호스트 포트 :8081"]
     CT["📦 컨테이너\n앱 포트 :8080"]
 
     U -->|"요청"| VM
-    VM -->|"-p 8080:8080"| CT
+    VM -->|"-p 8081:8080"| CT
 
     style CT fill:#e8f4fd,stroke:#2196F3
 ```
@@ -175,10 +175,15 @@ docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complai
 
 1일차에서 이미 `.env` 파일을 만들어뒀습니다. 그 파일을 그대로 사용하면 됩니다.
 
+!!! info "포트를 8081로 쓰는 이유"
+    1일차에 설치한 민원 앱 서비스(`complaint-app`)가 이미 **8080 포트**를 점유하고 있습니다.
+    Docker 컨테이너는 호스트 포트 **8081**로 띄워서 충돌을 피합니다.
+    (`-p 8081:8080` = 호스트 8081 → 컨테이너 8080)
+
 ```bash
 docker run -d \
   --name complaint-app \
-  -p 8080:8080 \
+  -p 8081:8080 \
   --env-file /opt/complaint-app/.env \
   43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
 ```
@@ -205,7 +210,7 @@ docker ps
 
 ```
 CONTAINER ID   IMAGE             STATUS         PORTS
-abc123...      complaint-app     Up 10 seconds  0.0.0.0:8080->8080/tcp
+abc123...      complaint-app     Up 10 seconds  0.0.0.0:8081->8080/tcp
 ```
 
 `Up` 상태가 보이면 정상입니다.
@@ -215,7 +220,7 @@ abc123...      complaint-app     Up 10 seconds  0.0.0.0:8080->8080/tcp
 **② 앱 응답 확인**
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8081/health
 ```
 
 ```json
@@ -237,14 +242,14 @@ docker logs complaint-app
 **④ 브라우저에서 접속**
 
 ```
-http://<App-VM-플로팅-IP>:8080
+http://<App-VM-플로팅-IP>:8081
 ```
 
 1일차 민원 데이터가 그대로 보이면 완벽합니다.
 
 !!! warning "접속이 안 된다면"
-    App 보안 그룹에서 **8080 포트**가 열려 있는지 확인하세요.
-    `Network > Security Groups > minwon-sg-app > 규칙 확인`
+    App 보안 그룹에서 **8081 포트**가 열려 있는지 확인하세요.
+    `Network > Security Groups > minwon-sg-app > 수신 TCP 8081 규칙 추가`
 
 ---
 
@@ -271,7 +276,7 @@ docker rm -f complaint-app
 ```bash
 docker run -d \
   --name complaint-app \
-  -p 8080:8080 \
+  -p 8081:8080 \
   --env-file /opt/complaint-app/.env \
   43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
 ```
@@ -284,7 +289,7 @@ docker exec complaint-app ls /tmp/
 # (파일 없음) ← 컨테이너가 새로 만들어졌기 때문
 
 # DB의 민원 데이터는 남아 있는가?
-curl http://localhost:8080/health
+curl http://localhost:8081/health
 # {"status": "ok"} ← 앱은 정상, 데이터도 그대로
 ```
 
