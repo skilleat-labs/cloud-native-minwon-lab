@@ -176,11 +176,27 @@ flowchart LR
 
 멤버를 등록하면 LB가 `/health` 엔드포인트로 상태 확인을 시작합니다.
 
+콘솔에서 아래 경로로 확인하세요.
+
 ```
-Network > Load Balancer > [minwon-lb] > 멤버 상태
-→ 상태: ACTIVE ← 정상
-→ 상태: ERROR  ← 아래 확인 순서 참고
+Network > Load Balancer → minwon-lb 클릭
+→ 멤버 그룹 탭 → memberGroup-1 선택
+→ 멤버 탭 → 상태 컬럼 확인
 ```
+
+![LB 멤버 헬스체크 ACTIVE 확인](./images/5-4-lb-member-active.png)
+
+두 서버 모두 **ACTIVE** 가 표시되면 헬스체크 통과입니다.
+
+| IP | 장치 | 상태 |
+|----|------|------|
+| 192.168.0.x | minwon-app-01 | ✅ ACTIVE |
+| 192.168.0.x | minwon-app-02 | ✅ ACTIVE |
+
+!!! warning "ACTIVE가 아닌 경우"
+    ```
+    → 상태: ERROR  ← 아래 확인 순서 참고
+    ```
 
 헬스체크 실패 시 확인 순서:
 
