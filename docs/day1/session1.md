@@ -92,7 +92,8 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 ### 실습
 
 1. 화면 왼쪽 상단에서 **조직 이름**을 확인합니다
-2. 조직 아래에서 **`minwon-service-edu{내 번호}`** 프로젝트를 선택합니다
+2. 조직 아래에서 **`minwon-service-edu{내 번호}`** 프로젝트를 선택합니다  
+   예: `gov1.edu3` 계정이면 → `minwon-service-edu3`
 
 ![조직과 프로젝트 화면](./images/02-org-project.png)
 
