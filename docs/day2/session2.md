@@ -137,7 +137,7 @@ docker --version
 ```
 
 ```
-Docker version 24.x.x ← 이렇게 나오면 정상
+Docker version 29.8.0, build 88096ef ← 이렇게 나오면 정상
 ```
 
 ---
