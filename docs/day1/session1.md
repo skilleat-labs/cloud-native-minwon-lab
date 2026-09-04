@@ -67,7 +67,7 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 |------|------|
 | IAM 계정 ID | `gov1.edu1` |
 | 임시 비밀번호 | 별도 전달 |
-| 콘솔 URL | `https:// `https://gov-cloud.console.nhncloud.com` |
+| IAM 계정 로그인 URL | [https://gov-cloud.console.nhncloud.com](https://gov-cloud.console.nhncloud.com) |
 
 ---
 
