@@ -23,11 +23,17 @@
 
 ### App VM 로컬에 저장하면 생기는 문제
 
-```
-App VM 1 (파일 저장)     App VM 2
-      ↑                       ↑
-  사용자 A                사용자 B
-  "내 파일 어디 갔지?"
+```mermaid
+flowchart LR
+    UA["👤 사용자 A"] -->|"파일 업로드"| VM1["🖥️ App VM 1
+파일 저장됨"]
+    UB["👤 사용자 B"] -->|"파일 요청"| VM2["🖥️ App VM 2
+❌ 파일 없음!"]
+    LB["⚖️ Load Balancer"] --> VM1
+    LB --> VM2
+
+    style VM1 fill:#fff3e0,stroke:#ff9800
+    style VM2 fill:#ffebee,stroke:#e53935
 ```
 
 - App VM이 2대 이상이면 파일이 **한 서버에만** 저장됨
@@ -36,10 +42,17 @@ App VM 1 (파일 저장)     App VM 2
 
 ### Object Storage를 쓰면
 
-```
-App VM 1 ──┐
-           ├──→ Object Storage (공용 버킷)
-App VM 2 ──┘
+```mermaid
+flowchart LR
+    VM1["🖥️ App VM 1"]
+    VM2["🖥️ App VM 2"]
+    OS["📦 Object Storage
+공용 버킷"]
+
+    VM1 -->|"파일 저장·조회"| OS
+    VM2 -->|"파일 저장·조회"| OS
+
+    style OS fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
 ```
 
 - 몇 대의 서버든 같은 버킷에서 파일 접근 가능
@@ -73,13 +86,23 @@ App VM 2 ──┘
 | App VM 로컬 | 저장하지 않음 | 서버 증가·교체 시 파일 소실 위험 |
 
 **업로드 흐름:**
-```
-사용자 (첨부파일 선택)
-      ↓
-App VM (파일 수신)
-      ↓
-Object Storage ← 파일 본문 저장
-DB VM          ← 파일 경로(URL)만 기록
+```mermaid
+flowchart TD
+    U["👤 사용자
+첨부파일 선택"]
+    A["🖥️ App VM
+파일 수신"]
+    O["📦 Object Storage
+파일 본문 저장"]
+    D["🗄️ DB VM
+파일 경로(URL)만 기록"]
+
+    U -->|"업로드"| A
+    A -->|"파일 본문"| O
+    A -->|"파일 URL"| D
+
+    style O fill:#e8f5e9,stroke:#4caf50
+    style D fill:#fce4ec,stroke:#e91e63
 ```
 
 ---
