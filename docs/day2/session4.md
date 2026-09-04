@@ -124,7 +124,31 @@ git pull
 
 ---
 
-### 2-3. deployment.yaml 수정
+### 2-3. DB 보안그룹에 NKS 허용 규칙 추가
+
+Kubernetes Pod에서 DB VM으로 접속하려면 DB 보안그룹에 NKS 워커 노드의 보안그룹을 허용해야 합니다.
+
+```
+콘솔 > Network > Security Groups > minwon-db-secgroup 선택
+> 인바운드 규칙 탭 > 규칙 추가
+```
+
+| 항목 | 값 |
+|------|---|
+| 방향 | 수신 (인바운드) |
+| 프로토콜 | TCP |
+| 포트 | 3306 |
+| 출발지 | `minwon-cluster-...-secgroup_kube_minion-...` |
+
+!!! tip "CIDR 대신 보안그룹을 소스로 지정하는 이유"
+    IP 대역 대신 보안그룹 이름을 소스로 지정하면, 노드가 늘어나거나 IP가 바뀌어도 규칙을 수정할 필요가 없습니다.
+
+!!! info "NKS 워커 보안그룹 이름 확인 위치"
+    `콘솔 > Compute > Instance` 에서 NKS 워커 노드 클릭 → **보안 그룹** 탭에서 `secgroup_kube_minion` 이 포함된 이름을 확인합니다.
+
+---
+
+### 2-4. deployment.yaml 수정
 
 아래 명령에서 `여기에DB사설IP입력` 을 **본인 DB VM의 사설 IP로 바꾼 뒤** 실행합니다.
 
@@ -140,7 +164,7 @@ sed -i 's|192.168.0.20|192.168.0.15|g' app/deployment.yaml
 
 ---
 
-### 2-4. imagePullSecrets 추가
+### 2-5. imagePullSecrets 추가
 
 Kubernetes가 NCR에서 이미지를 받을 때 아까 만든 Secret을 사용하도록 설정합니다.
 
@@ -152,7 +176,7 @@ sed -i '/      containers:/i\      imagePullSecrets:\n      - name: ncr-secret' 
 
 ---
 
-### 2-5. 수정 결과 확인
+### 2-6. 수정 결과 확인
 
 ```bash
 cat app/deployment.yaml
