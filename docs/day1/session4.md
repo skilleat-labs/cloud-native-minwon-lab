@@ -293,6 +293,7 @@ graph LR
 
 !!! info "Windows 사용자는 PowerShell로 접속합니다"
     Windows 10/11에는 SSH가 기본 내장되어 있습니다. 별도 프로그램 설치 없이 PowerShell에서 바로 접속할 수 있습니다.
+    PowerShell은 Windows에 기본 설치된 명령줄 도구로, 리눅스의 터미널과 같은 역할을 합니다.
 
 **① PowerShell 열기**
 
