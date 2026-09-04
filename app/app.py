@@ -1,8 +1,14 @@
 import os
 import socket
+import logging
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from werkzeug.utils import secure_filename
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "민원서비스-교육용-키")
@@ -90,14 +96,28 @@ def allowed_file(filename):
 
 def get_os_token():
     """NHN Cloud Object Storage 인증 토큰 발급"""
-    import urllib.request, json
+    import urllib.request, json as _json
     auth_url = "https://api-identity.infrastructure.cloud.toast.com/v2.0/tokens"
-    # Tenant ID는 OBJECT_STORAGE_URL에서 추출 (AUTH_{TenantID})
+
+    if not OBJECT_STORAGE_URL:
+        logging.warning("[ObjectStorage] OBJECT_STORAGE_URL 환경변수가 설정되지 않았습니다.")
+        return None
+    if not OS_USERNAME:
+        logging.warning("[ObjectStorage] OS_USERNAME 환경변수가 설정되지 않았습니다.")
+        return None
+    if not OS_PASSWORD:
+        logging.warning("[ObjectStorage] OS_PASSWORD 환경변수가 설정되지 않았습니다.")
+        return None
+
     try:
         tenant_id = OBJECT_STORAGE_URL.split("AUTH_")[1].rstrip("/")
     except IndexError:
+        logging.error("[ObjectStorage] OBJECT_STORAGE_URL에서 Tenant ID를 추출할 수 없습니다: %s", OBJECT_STORAGE_URL)
         return None
-    payload = json.dumps({
+
+    logging.info("[ObjectStorage] 토큰 발급 시도 — tenant_id=%s, username=%s", tenant_id, OS_USERNAME)
+
+    payload = _json.dumps({
         "auth": {
             "tenantId": tenant_id,
             "passwordCredentials": {
@@ -110,9 +130,16 @@ def get_os_token():
                                  headers={"Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=5) as resp:
-            data = json.loads(resp.read())
-            return data["access"]["token"]["id"]
-    except Exception:
+            data = _json.loads(resp.read())
+            token = data["access"]["token"]["id"]
+            logging.info("[ObjectStorage] 토큰 발급 성공")
+            return token
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")
+        logging.error("[ObjectStorage] 토큰 발급 실패 — HTTP %s: %s", e.code, body)
+        return None
+    except Exception as e:
+        logging.error("[ObjectStorage] 토큰 발급 중 오류: %s", e)
         return None
 
 
@@ -121,15 +148,23 @@ def upload_to_object_storage(file_obj, filename):
     import urllib.request
     token = get_os_token()
     if not token:
+        logging.error("[ObjectStorage] 토큰 없음 — 업로드 중단")
         return None
     url = f"{OBJECT_STORAGE_URL.rstrip('/')}/{OBJECT_STORAGE_CONTAINER}/{filename}"
+    logging.info("[ObjectStorage] 업로드 시도 — %s", url)
     data = file_obj.read()
     req = urllib.request.Request(url, data=data, method="PUT",
                                  headers={"X-Auth-Token": token})
     try:
         with urllib.request.urlopen(req, timeout=10):
+            logging.info("[ObjectStorage] 업로드 성공 — %s", url)
             return url
-    except Exception:
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")
+        logging.error("[ObjectStorage] 업로드 실패 — HTTP %s: %s", e.code, body)
+        return None
+    except Exception as e:
+        logging.error("[ObjectStorage] 업로드 중 오류: %s", e)
         return None
 
 
