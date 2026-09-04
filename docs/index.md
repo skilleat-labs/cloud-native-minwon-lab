@@ -7,7 +7,7 @@ NHN Cloud를 활용해 온라인 민원 서비스를 직접 구축하며, 클라
 | 구분 | 내용 |
 |------|------|
 | 대상 | 공공기관 클라우드 운영자 |
-| 일정 | 2일 과정 / 일 6시간 (10:00~16:00) |
+| 일정 | 2일 과정 / 일 7시간 (10:00~17:00) |
 | 방식 | 이론 + 콘솔 실습 + 시나리오 미션 |
 | 실습 환경 | NHN Cloud 콘솔 (개인 실습 계정) |
 
@@ -15,28 +15,31 @@ NHN Cloud를 활용해 온라인 민원 서비스를 직접 구축하며, 클라
 
 ```mermaid
 flowchart LR
-    S1["🔑 1차시\n콘솔 로그인\n& 환경 확인"]
-    S2["🌐 2차시\n네트워크\n& 보안 그룹"]
-    S3["🖥️ 3차시\nVM 생성\n& Block Storage"]
-    S4["⚖️ 4차시\n서비스 배포\n& LB 등록"]
-    S5["📦 5차시\nObject Storage\n& 저장소 분리"]
+    S1["🔑 1차시\n콘솔 로그인"]
+    S2["📐 2차시\n인프라 계획"]
+    S3["🌐 3차시\n네트워크 & LB"]
+    S4["🖥️ 4차시\nVM & Block Storage"]
+    S5["🚀 5차시\n서비스 자동 배포"]
+    S6["📦 6차시\nObject Storage"]
 
-    S1 --> S2 --> S3 --> S4 --> S5
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6
 
     style S1 fill:#e8f4fd,stroke:#2196F3
     style S2 fill:#e8f4fd,stroke:#2196F3
     style S3 fill:#e8f4fd,stroke:#2196F3
     style S4 fill:#e8f4fd,stroke:#2196F3
     style S5 fill:#e8f4fd,stroke:#2196F3
+    style S6 fill:#e8f4fd,stroke:#2196F3
 ```
 
 | 일차 | 차시 | 주제 |
 |------|------|------|
-| Day 1 | 1차시 | [콘솔 로그인 & 환경 확인](day1/session1.md) |
-| Day 1 | 2차시 | [네트워크 & 보안 그룹 구성](day1/session2.md) |
-| Day 1 | 3차시 | [VM 생성 & Block Storage 연결](day1/session3.md) |
-| Day 1 | 4차시 | [서비스 배포 & Load Balancer 등록](day1/session4.md) |
-| Day 1 | 5차시 | [Object Storage & 저장소 분리](day1/session5.md) |
+| Day 1 | 1차시 | [콘솔에 로그인하자](day1/session1.md) |
+| Day 1 | 2차시 | [어디에 올릴지 그려보자](day1/session2.md) |
+| Day 1 | 3차시 | [네트워크 & 보안 그룹 & LB 구성](day1/session3.md) |
+| Day 1 | 4차시 | [VM 생성 & Block Storage 연결](day1/session4.md) |
+| Day 1 | 5차시 | [서비스 자동 배포 & LB 등록](day1/session5.md) |
+| Day 1 | 6차시 | [Object Storage & 저장소 분리](day1/session6.md) |
 
 ## 1일차 최종 아키텍처
 
@@ -49,11 +52,11 @@ flowchart TB
     end
 
     subgraph VPC["🏢 VPC — 192.168.0.0/16"]
-        subgraph SUBNET_APP["📡 App 서브넷 (192.168.0.0/24)"]
+        subgraph SUBNET_APP["📡 App 서브넷 (192.168.10.x)"]
             LB["⚖️ Load Balancer\n단일 진입점 · 헬스체크"]
             APP["🖥️ App VM\n민원 서비스 앱 · :8080"]
         end
-        subgraph SUBNET_DB["🔒 DB 서브넷 (192.168.1.0/24)"]
+        subgraph SUBNET_DB["🔒 DB 서브넷 (192.168.20.x)"]
             DB["🗄️ DB VM\nMySQL · :3306"]
         end
         subgraph STORAGE["💾 스토리지"]
