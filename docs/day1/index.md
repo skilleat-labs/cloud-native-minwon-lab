@@ -15,24 +15,38 @@ VM 기반으로 웹·애플리케이션 계층과 DB 계층을 분리한 2-Tier 
 
 ## Day 1 최종 아키텍처
 
-```
-민원 신청자 (인터넷)
-        │
-        ▼
-  플로팅 IP (공인 IP)
-        │
-        ▼
-   Load Balancer          ← 단일 진입점, 헬스체크
-        │
-        ▼
-     App VM               → Object Storage (첨부파일)
-  192.168.10.x
-        │
-        ▼
-     DB VM                ← Block Storage (DB 데이터)
-  192.168.20.x
+```mermaid
+graph TD
+    User["👤 민원 신청자\n인터넷으로 민원 접수"]
 
-VPC: 192.168.0.0/16
+    FIP["🌐 플로팅 IP\n공인 IP — 인터넷에서 들어오는 문"]
+
+    LB["⚖️ 로드밸런서\n트래픽 분산 · 서버 상태 체크"]
+
+    subgraph VPC["🏢 VPC — 192.168.0.0/16　클라우드 내부 전용 네트워크"]
+        subgraph AppNet["앱 서브넷　192.168.10.x"]
+            AppVM["🖥️ App VM\n민원 접수 웹 서버"]
+        end
+        subgraph DBNet["DB 서브넷　192.168.20.x"]
+            DBVM["🗄️ DB VM\n민원 데이터베이스"]
+        end
+    end
+
+    ObjStorage["📦 Object Storage\n첨부파일 저장 PDF · 이미지 등"]
+    BlockStorage["💾 Block Storage\nDB 전용 디스크"]
+
+    User -->|"민원 접수 요청"| FIP
+    FIP --> LB
+    LB -->|"요청 전달"| AppVM
+    AppVM -->|"데이터 조회 · 저장"| DBVM
+    AppVM -->|"첨부파일 업로드"| ObjStorage
+    DBVM --- BlockStorage
+
+    style VPC fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
+    style AppNet fill:#fff3e0,stroke:#ff9800,stroke-width:1px
+    style DBNet fill:#fce4ec,stroke:#e91e63,stroke-width:1px
+    style ObjStorage fill:#e8f5e9,stroke:#4caf50,stroke-width:1px
+    style BlockStorage fill:#f3e5f5,stroke:#9c27b0,stroke-width:1px
 ```
 
 !!! warning "주의"
