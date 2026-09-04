@@ -14,10 +14,69 @@
 
 이 차시를 마치면 다음을 할 수 있습니다.
 
+- 리전과 가용성 영역의 개념을 설명할 수 있다
 - 오늘 구축할 민원 서비스의 전체 아키텍처를 그림으로 설명할 수 있다
-- 리전을 올바르게 선택하고, 잘못 선택했을 때 나타나는 증상을 설명할 수 있다
 - 프로젝트에서 필요한 서비스를 활성화할 수 있다
 - 조직 역할과 프로젝트 역할의 차이를 설명할 수 있다
+
+---
+
+## 이론 — 리전과 가용성 영역
+
+### 리전(Region)이란?
+
+클라우드 자원이 실제로 존재하는 **지리적 위치**입니다.  
+리전이 다르면 자원 목록이 완전히 분리되며, 서로 보이지 않습니다.
+
+```mermaid
+graph LR
+    subgraph KR1["🇰🇷 한국(판교) — 이 실습에서 사용"]
+        A["서버·네트워크·스토리지"]
+    end
+    subgraph KR2["🇰🇷 한국(평촌) — 재해복구용"]
+        B["서버·네트워크·스토리지"]
+    end
+    subgraph JP["🇯🇵 일본(도쿄) — 해외 서비스용"]
+        C["서버·네트워크·스토리지"]
+    end
+
+    style KR1 fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
+    style KR2 fill:#f5f5f5,stroke:#9e9e9e
+    style JP fill:#f5f5f5,stroke:#9e9e9e
+```
+
+!!! warning "자원이 목록에 보이지 않을 때"
+    삭제된 것이 아니라 **다른 리전을 보고 있는 경우**가 대부분입니다.  
+    콘솔 오른쪽 위에서 리전을 먼저 확인하세요.
+
+### 가용성 영역(Availability Zone, AZ)이란?
+
+리전 안에서 **물리적으로 분리된 데이터센터** 단위입니다.  
+같은 리전이라도 다른 AZ에 자원을 분산하면, 한 곳에 장애가 나도 서비스가 유지됩니다.
+
+```mermaid
+graph TD
+    subgraph Region["🇰🇷 한국(판교) 리전"]
+        subgraph AZ1["🏢 가용성 영역 A"]
+            VM1["App VM"]
+        end
+        subgraph AZ2["🏢 가용성 영역 B"]
+            VM2["App VM (복제)"]
+        end
+    end
+
+    LB["⚖️ Load Balancer"] --> VM1
+    LB --> VM2
+
+    note["AZ-A에 장애 발생해도\nAZ-B가 서비스 유지"]
+
+    style Region fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
+    style AZ1 fill:#fff3e0,stroke:#ff9800
+    style AZ2 fill:#e8f5e9,stroke:#4caf50
+```
+
+!!! info "이 실습에서는"
+    단일 AZ로 구성합니다. AZ 분산은 Day 2(Kubernetes)에서 다룹니다.
 
 ---
 
@@ -72,51 +131,11 @@ graph TD
 | Block Storage | DB 데이터 영구 저장 | DB VM에 연결 |
 | Object Storage | 민원 첨부파일 저장 | 앱에서 API로 직접 연결 |
 
-### 왜 2-Tier 구조인가?
-
-```mermaid
-graph LR
-    subgraph T1["❌ 1-Tier — 단일 서버"]
-        A["App + DB\n한 서버에 모두"]
-    end
-
-    subgraph T2["✅ 2-Tier — 계층 분리"]
-        B["🖥️ App VM"]
-        C["🗄️ DB VM"]
-        B --> C
-    end
-
-    style T1 fill:#ffebee,stroke:#e53935,stroke-width:2px
-    style T2 fill:#e8f5e9,stroke:#43a047,stroke-width:2px
-    style A fill:#ffcdd2,stroke:#e53935
-    style B fill:#c8e6c9,stroke:#43a047
-    style C fill:#c8e6c9,stroke:#43a047
-```
-
-| | 1-Tier | 2-Tier |
-|--|--------|--------|
-| 장애 | 앱이 다운되면 DB도 중단 | 계층별 독립 운영·확장 |
-| 보안 | 보안 경계 없음 | DB는 외부 직접 접근 차단 |
-
-공공 서비스는 **보안**과 **가용성**이 중요합니다.  
-App 계층과 DB 계층을 분리하면 각각 독립적으로 관리할 수 있고, DB에 대한 직접 접근을 네트워크 수준에서 차단할 수 있습니다.
-
 ---
 
 ## STEP 04 — 리전 확인
 
-> **이 단계에서 할 일**: 자원이 생성될 지리적 위치(리전)를 확인하고 올바르게 설정합니다.
-
-### 리전이란?
-
-클라우드 자원이 실제로 존재하는 지리적 위치입니다.
-리전이 다르면 자원 목록도 완전히 분리됩니다.
-
-| 리전 | 용도 |
-|------|------|
-| 한국(판교) | **이 실습에서 사용** |
-| 한국(평촌) | 재해복구용 |
-| 일본(도쿄) | 해외 서비스용 |
+> **이 단계에서 할 일**: 자원이 생성될 리전을 확인하고 올바르게 설정합니다.
 
 ### 실습
 
@@ -124,8 +143,6 @@ App 계층과 DB 계층을 분리하면 각각 독립적으로 관리할 수 있
 2. **한국(판교)** 로 선택되어 있는지 확인합니다
 
 ![리전 선택 화면](./images/03-region-select.png)
-
-> **자원이 목록에 보이지 않을 때**: 삭제된 것이 아니라 다른 리전을 보고 있는 경우가 대부분입니다. 리전을 먼저 확인하세요.
 
 ---
 
@@ -273,7 +290,7 @@ IAM 계정은 **조직 → 멤버 관리 → IAM 계정** 탭에서 생성합니
 ## 자가 점검 질문
 
 1. 리전을 잘못 선택하면 어떤 증상이 나타나는가?
-2. 오늘 만들 서비스에서 App VM과 DB VM을 분리하는 이유는?
+2. 가용성 영역(AZ)을 나누는 이유는 무엇인가?
 3. 민원 신청자의 요청은 어떤 순서로 흘러가는가?
 4. Object Storage와 Block Storage의 차이는?
 
