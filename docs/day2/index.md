@@ -2,10 +2,33 @@
 
 ## 오늘의 미션
 
-> 1일차에 만든 민원 서비스가 **서버 한 대**에서 돌아가고 있습니다.
-> 이 서버가 죽으면? 서비스도 죽습니다.
+> 1일차에서 App VM 2대를 LB 뒤에 세우고, 트래픽을 분산했습니다. 잘 되는 것 같죠?
 >
-> 오늘은 **자동으로 살아나고, 트래픽이 몰려도 버티는** 구조로 바꿉니다.
+> 그런데 이게 끝일까요?
+
+### VM 방식으로는 해결 못한 것 3가지
+
+```mermaid
+graph LR
+    A["⚠️ 새 버전 배포"]
+    B["⚠️ 갑작스러운 트래픽 폭주"]
+    C["⚠️ VM 자체가 죽으면"]
+
+    A --> DA["app-01, app-02에\n각각 SSH 접속 → 업데이트 → 재시작\n순서 어긋나면 두 서버 버전이 달라짐"]
+    B --> DB["이미지 생성 → VM 생성 → LB 등록\n10분 이상 소요\n폭주 중엔 이미 늦음"]
+    C --> DC["LB가 트래픽은 막아주지만\nVM은 자동으로 살아나지 않음\n운영자가 직접 복구해야 함"]
+
+    style A fill:#fff3cd,stroke:#f0ad4e
+    style B fill:#fff3cd,stroke:#f0ad4e
+    style C fill:#fff3cd,stroke:#f0ad4e
+    style DA fill:#fdf2f8,stroke:#e0a0c0
+    style DB fill:#fdf2f8,stroke:#e0a0c0
+    style DC fill:#fdf2f8,stroke:#e0a0c0
+```
+
+> VM을 2대로 늘려도 **배포·확장·복구**는 여전히 사람이 직접 해야 합니다.
+>
+> 오늘은 이 세 가지를 **자동으로** 처리하는 구조로 바꿉니다.
 
 1일차에 만든 **DB와 Object Storage는 그대로 두고**,
 민원 앱만 **컨테이너 → Kubernetes** 환경으로 옮깁니다.
