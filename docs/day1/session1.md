@@ -36,7 +36,7 @@ NHN Cloud는 국내 기업 NHN이 운영하는 퍼블릭 클라우드 서비스�
 |------|---------------|---------|
 | 생성 방법 | 이메일로 직접 가입 | 조직 관리자가 발급 |
 | 주요 역할 | 조직 생성·결제 관리 | 프로젝트 내 작업 수행 |
-| 로그인 주소 | ` `https://gov-cloud.console.nhncloud.com` | ` `https://gov-cloud.console.nhncloud.com` |
+| 로그인 주소 | `console.nhncloud.com` | `gov-cloud.console.nhncloud.com` |
 | 이 실습에서 | 강사(조직 관리자)가 사용 | **수강생이 사용** |
 
 > 수강생은 **IAM 계정**으로 콘솔에 접속합니다.
