@@ -314,6 +314,10 @@ def lb_status():
         client_ip = xff.split(",")[0].strip()
         return {"connected": True, "client_ip": client_ip,
                 "proto": proto or "http", "port": port or "80"}
+    # K8s 환경에서는 L4 LB라 X-Forwarded-For 헤더가 없지만 실제로는 LB 경유 중
+    if os.environ.get("KUBERNETES_SERVICE_HOST"):
+        return {"connected": True, "client_ip": "K8s Service (L4 LB)",
+                "proto": "http", "port": "80"}
     return {"connected": False}
 
 
@@ -328,3 +332,4 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8080"))
     debug = os.environ.get("DEBUG", "false").lower() == "true"
     app.run(host="0.0.0.0", port=port, debug=debug)
+
