@@ -546,7 +546,7 @@ APP_DIR="/opt/complaint-app"
 
 echo "===== [1/6] 패키지 설치 ====="
 apt-get update -y
-apt-get install -y python3 python3-pip git
+apt-get install -y python3 python3-pip git bash-completion
 
 echo "===== [2/6] 소스 clone ====="
 git clone "$GITHUB_REPO" /tmp/minwon-repo
@@ -599,6 +599,8 @@ curl -LO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
 chmod +x kubectl
 mv kubectl /usr/local/bin/
 kubectl completion bash > /etc/bash_completion.d/kubectl
+# 모든 사용자 로그인 시 bash-completion 및 kubectl completion 자동 로드
+echo 'source /usr/share/bash-completion/bash_completion' >> /etc/bash.bashrc
 echo 'source /etc/bash_completion.d/kubectl' >> /etc/bash.bashrc
 
 echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT}"
