@@ -26,13 +26,7 @@
 ### NHN Cloud란?
 
 NHN Cloud는 국내 기업 NHN이 운영하는 퍼블릭 클라우드 서비스입니다.  
-공공기관을 위한 **공공 클라우드(Gov Cloud)** 환경을 별도로 제공하며, 이 실습에서는 Gov Cloud 콘솔을 사용합니다.
-
-| 구분 | 일반 클라우드 | 공공 클라우드 (Gov Cloud) |
-|------|-------------|------------------------|
-| 접속 URL | console.nhncloud.com | gov-cloud.console.nhncloud.com |
-| 대상 | 일반 기업 | 공공기관 |
-| 보안 등급 | 일반 | 공공기관 보안 요건 충족 |
+이 실습에서는 **일반 퍼블릭 클라우드** 콘솔(`console.nhncloud.com`)을 사용합니다.
 
 ### 클라우드 계정 유형
 
@@ -42,10 +36,10 @@ NHN Cloud는 국내 기업 NHN이 운영하는 퍼블릭 클라우드 서비스�
 |------|---------------|---------|
 | 생성 방법 | 이메일로 직접 가입 | 조직 관리자가 발급 |
 | 주요 역할 | 조직 생성·결제 관리 | 프로젝트 내 작업 수행 |
-| 로그인 주소 | `console.nhncloud.com` | `https://gov-cloud.console.nhncloud.com` |
+| 로그인 주소 | `console.nhncloud.com` | `console.nhncloud.com` |
 | 이 실습에서 | 강사(조직 관리자)가 사용 | **수강생이 사용** |
 
-> 수강생은 **IAM 계정**으로 조직 전용 URL에 접속합니다.
+> 수강생은 **IAM 계정**으로 콘솔에 접속합니다.
 
 ### 조직과 프로젝트 계층 구조
 
@@ -71,20 +65,19 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 
 | 항목 | 예시 |
 |------|------|
-| IAM 계정 ID | `hong.gildong` |
+| IAM 계정 ID | `user01` |
 | 임시 비밀번호 | 별도 전달 |
-| 조직 전용 콘솔 URL | `https://gov-cloud.console.nhncloud.com` |
-| 실습 프로젝트 이름 | `minwon-service` |
+| 콘솔 URL | `https://console.nhncloud.com` |
 
 ---
 
 ## STEP 01 — 콘솔 로그인
 
-> **이 단계에서 할 일**: IAM 계정으로 조직 전용 URL에 접속해 콘솔에 로그인합니다.
+> **이 단계에서 할 일**: IAM 계정으로 콘솔에 접속해 로그인합니다.
 
 ### 로그인 방법
 
-1. **[https://gov-cloud.console.nhncloud.com](https://gov-cloud.console.nhncloud.com)** 으로 접속합니다
+1. **[https://console.nhncloud.com](https://console.nhncloud.com)** 으로 접속합니다
 2. IAM 계정 ID와 비밀번호를 입력합니다
 3. 2단계 인증(이메일 또는 OTP)을 완료합니다
 
@@ -99,7 +92,7 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 ### 실습
 
 1. 화면 왼쪽 상단에서 **조직 이름**을 확인합니다
-2. 조직 아래에서 **`minwon-service`** 프로젝트를 선택합니다
+2. 조직 아래에서 **`minwon-service-{내 번호}`** 프로젝트를 선택합니다
 
 ![조직과 프로젝트 화면](./images/02-org-project.png)
 
@@ -132,15 +125,15 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 
 | 항목 | 값 |
 |------|-----|
-| 프로젝트 이름 | `minwon-{본인계정ID}` (예: `minwon-hong.gildong`) |
+| 프로젝트 이름 | `minwon-service-{내 번호}` (예: `minwon-service-01`, `minwon-service-02`) |
 | 설명 | 자유 입력 |
 
 4. **확인** 버튼을 클릭합니다
 5. 방금 만든 프로젝트가 목록에 나타나는지 확인합니다
 
-!!! tip "프로젝트 이름 규칙"
-    영문 소문자, 숫자, 하이픈(-)만 사용 가능합니다.
-    팀원과 이름이 겹치지 않도록 본인 계정 ID를 포함하세요.
+!!! tip "내 번호 확인"
+    강사가 배부한 계정 목록에서 본인 번호를 확인하세요.
+    예: 계정이 `user01`이면 프로젝트 이름은 `minwon-service-01`
 
 !!! info "프로젝트와 자원"
     방금 만든 프로젝트는 비어있는 상태입니다.
