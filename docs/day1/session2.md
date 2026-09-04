@@ -152,6 +152,44 @@ NHN Cloud는 서비스를 **프로젝트 단위로 켜야** 사용할 수 있습
 
 > **이 단계에서 할 일**: 서비스 활성화 시 자동 생성되는 Default Network를 삭제합니다. 이 실습에서는 VPC를 직접 설계합니다.
 
+### Default Network란?
+
+NHN Cloud는 VPC 서비스를 처음 활성화하면 **Default Network**를 자동으로 만들어줍니다.  
+사용자가 네트워크 설정 없이도 바로 인스턴스를 생성할 수 있도록 CSP(클라우드 서비스 제공자)가 편의상 제공하는 기본 네트워크입니다.
+
+**그런데 왜 지워야 할까요?**
+
+Default Network는 설계 없이 만들어진 네트워크입니다. IP 대역, 서브넷 구조, 보안 정책이 실제 서비스 요건과 맞지 않을 수 있고, 실수로 자원을 여기에 만들면 나중에 정리하기 어려워집니다.
+
+```mermaid
+graph LR
+    subgraph Bad["❌ Default Network 그대로 사용"]
+        D["Default Network
+(설계 없이 자동 생성)"]
+        D --> VM1["VM 생성
+(어떤 대역인지 모름)"]
+        D --> VM2["VM 생성
+(보안 정책 미적용)"]
+    end
+
+    subgraph Good["✅ 직접 설계한 VPC 사용"]
+        V["minwon-vpc
+192.168.0.0/16
+(목적에 맞게 설계)"]
+        V --> App["App 서브넷
+192.168.10.x"]
+        V --> DB["DB 서브넷
+192.168.20.x"]
+    end
+
+    style Bad fill:#ffebee,stroke:#e53935,stroke-width:2px
+    style Good fill:#e8f5e9,stroke:#43a047,stroke-width:2px
+```
+
+!!! info "실무에서도 마찬가지"
+    실제 운영 환경에서도 Default Network를 그대로 사용하는 경우는 드뭅니다.  
+    보안 요건, IP 설계, 계층 분리 등을 고려한 **전용 VPC를 처음부터 직접 설계**하는 것이 표준 관행입니다.
+
 ### 콘솔 경로
 
 ```
