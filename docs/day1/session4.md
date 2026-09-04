@@ -279,7 +279,26 @@ cd C:\Users\사용자이름\Downloads
 
 > 키페어 `.pem` 파일을 다운로드한 폴더로 이동합니다. 대부분 `Downloads` 폴더에 있습니다.
 
-**③ SSH 접속**
+**③ 키페어 권한 설정 (Windows 필수)**
+
+Windows는 `.pem` 파일을 다운로드하면 권한이 열려있어서 SSH가 거부됩니다.  
+접속 전에 반드시 아래 명령을 실행하세요.
+
+```powershell
+icacls "MyKey.pem" /inheritance:r /grant:r "$($env:USERNAME):(R)"
+```
+
+!!! danger "이 단계를 건너뛰면 아래 오류가 발생합니다"
+    ```
+    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    @         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
+    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    Permissions 0644 for 'MyKey.pem' are too open.
+    Load key "MyKey.pem": bad permissions
+    Permission denied (publickey).
+    ```
+
+**④ SSH 접속**
 
 ```powershell
 ssh -i MyKey.pem ubuntu@<DB-VM-플로팅-IP>
