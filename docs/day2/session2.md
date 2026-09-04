@@ -12,9 +12,11 @@
 | 01 | App VM에 SSH 접속 |
 | 02 | Docker 설치 |
 | 03 | NCR 로그인 |
-| 04 | 이미지 Pull & 컨테이너 실행 |
-| 05 | 동작 확인 |
-| 06 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
+| 04 | 강사 이미지 주소 확인 |
+| 05 | 이미지 Pull & 컨테이너 실행 |
+| 06 | 보안 그룹 8081 포트 오픈 |
+| 07 | 동작 확인 |
+| 08 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
 
 ---
 
@@ -218,7 +220,62 @@ DB 주소, Object Storage 정보 등을 따로 입력할 필요가 없어요.
 
 ---
 
-## STEP 06 — 동작 확인
+## STEP 06 — 보안 그룹 8081 포트 오픈
+
+컨테이너는 실행됐지만 외부에서 접속하려면 **보안 그룹(방화벽)이 8081 포트를 허용**해야 합니다.
+
+```mermaid
+graph LR
+    U["👤 사용자\n브라우저"]
+    SG["🔒 보안 그룹\nminwon-sg-app\n(방화벽)"]
+    VM["🖥️ App VM\n:8081"]
+    CT["📦 컨테이너\n:8080"]
+
+    U -->|"요청\n:8081"| SG
+    SG -->|"❌ 8081 차단됨\n규칙 없음"| VM
+
+    style SG fill:#ffebee,stroke:#e53935,color:#c62828
+    style U fill:#e8f4fd,stroke:#2196F3
+    style VM fill:#e0e0e0,stroke:#999,color:#666
+    style CT fill:#e0e0e0,stroke:#999,color:#666
+```
+
+8081 규칙을 추가하면:
+
+```mermaid
+graph LR
+    U["👤 사용자\n브라우저"]
+    SG["✅ 보안 그룹\nminwon-sg-app\nTCP 8081 허용"]
+    VM["🖥️ App VM\n:8081"]
+    CT["📦 컨테이너\n:8080"]
+
+    U -->|"요청\n:8081"| SG
+    SG -->|"✅ 통과"| VM
+    VM -->|"-p 8081:8080"| CT
+
+    style SG fill:#e8f5e9,stroke:#4caf50,color:#2e7d32
+    style U fill:#e8f4fd,stroke:#2196F3
+    style VM fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style CT fill:#7ED321,color:#fff,stroke:#5a9a18
+```
+
+**보안 그룹에 8081 규칙 추가**
+
+```
+Network > Security Groups > minwon-sg-app
+→ 규칙 관리 > 규칙 추가
+```
+
+| 항목 | 값 |
+|------|---|
+| 방향 | 수신 |
+| 프로토콜 | TCP |
+| 포트 | 8081 |
+| CIDR | 0.0.0.0/0 |
+
+---
+
+## STEP 07 — 동작 확인
 
 **① 컨테이너 실행 상태 확인**
 
@@ -271,11 +328,11 @@ http://<App-VM-플로팅-IP>:8081
 
 ---
 
-## STEP 07 — 컨테이너 삭제 후 재실행 관찰
+## STEP 08 — 컨테이너 삭제 후 재실행 관찰
 
 컨테이너를 지우면 **컨테이너 안의 데이터는 사라지지만, DB와 Object Storage는 그대로**임을 확인합니다.
 
-### 7-1. 컨테이너 안에 파일 만들기
+### 8-1. 컨테이너 안에 파일 만들기
 
 ```bash
 docker exec complaint-app touch /tmp/my-test-file.txt
@@ -283,13 +340,13 @@ docker exec complaint-app ls /tmp/
 # my-test-file.txt ← 존재함
 ```
 
-### 7-2. 컨테이너 삭제
+### 8-2. 컨테이너 삭제
 
 ```bash
 docker rm -f complaint-app
 ```
 
-### 7-3. 같은 명령으로 다시 실행
+### 8-3. 같은 명령으로 다시 실행
 
 ```bash
 docker run -d \
@@ -299,7 +356,7 @@ docker run -d \
   43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
 ```
 
-### 7-4. 결과 확인
+### 8-4. 결과 확인
 
 ```bash
 # 아까 만든 파일이 사라졌는가?
