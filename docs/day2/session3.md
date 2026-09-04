@@ -10,7 +10,7 @@
 | STEP | 내용 |
 |------|------|
 | 01 | NKS 서비스 활성화 & 클러스터 생성 |
-| 02 | App VM에 kubectl 설치 |
+| 02 | App VM SSH 접속 및 kubectl 확인 |
 | 03 | kubeconfig 적용 |
 | 04 | 클러스터 연결 확인 |
 
@@ -177,42 +177,16 @@ Containers > NHN Kubernetes Service(NKS) > + 클러스터 생성
 
 ---
 
-## STEP 02 — App VM에 kubectl 설치
+## STEP 02 — App VM SSH 접속
 
-2차시에서 사용했던 App VM에 SSH로 접속해서 kubectl을 설치합니다.
-
-### 2-1. App VM SSH 접속
-
-PowerShell을 열고 아래 명령을 입력합니다.
+kubectl은 App VM 생성 시 사용자 스크립트로 자동 설치되어 있습니다.
+PowerShell을 열고 App VM에 접속합니다.
 
 ```powershell
 ssh -i C:\Users\사용자이름\Downloads\nhn-temp-key.pem ubuntu@<App-VM-플로팅-IP>
 ```
 
-!!! tip "2차시에서 컨테이너가 실행 중이라면"
-    App VM에 이미 접속한 상태라면 바로 다음 단계로 넘어갑니다.
-    새 PowerShell 창이면 위 명령으로 다시 접속하세요.
-
----
-
-### 2-2. kubectl 설치
-
-App VM 터미널에서 아래 명령을 순서대로 실행합니다.
-
-**① kubectl 바이너리 다운로드**
-
-```bash
-curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-```
-
-**② 실행 권한 부여 및 시스템 경로 이동**
-
-```bash
-chmod +x kubectl
-sudo mv kubectl /usr/local/bin/
-```
-
-**③ 설치 확인**
+접속 후 설치 여부를 확인합니다.
 
 ```bash
 kubectl version --client
@@ -221,6 +195,14 @@ kubectl version --client
 ```
 Client Version: v1.x.x  ← 이렇게 나오면 정상
 ```
+
+!!! info "kubectl이 없다고 나온다면"
+    사용자 스크립트 실행 중 네트워크 문제로 설치가 실패했을 수 있습니다.
+    아래 명령으로 수동 설치하세요.
+    ```bash
+    curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+    ```
 
 ---
 
