@@ -127,19 +127,13 @@ NKS(NHN Kubernetes Service)는 NHN Cloud가 제공하는 **관리형 Kubernetes*
 
 ---
 
-## STEP 01 — NKS 서비스 활성화 & 클러스터 생성
+## STEP 01 — NKS 클러스터 생성
 
-### 1-1. 서비스 활성화
+!!! info "NKS는 별도 활성화가 필요 없습니다"
+    NHN Cloud에서 NKS는 기본 인프라에 포함되어 있습니다.
+    서비스 활성화 없이 바로 `Containers > NHN Kubernetes Service(NKS)` 에서 클러스터를 생성할 수 있습니다.
 
-```
-상단 메뉴 > 서비스 선택 > Containers > NHN Kubernetes Service(NKS) > 서비스 활성화
-```
-
-활성화 확인 팝업에서 **확인** 클릭
-
----
-
-### 1-2. 클러스터 생성
+### 1-1. 클러스터 생성
 
 ```
 Containers > NHN Kubernetes Service(NKS) > + 클러스터 생성
