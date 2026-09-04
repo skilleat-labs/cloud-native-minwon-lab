@@ -159,9 +159,27 @@ Password: (강사 제공)
 
 ---
 
-## STEP 04 — 이미지 Pull & 컨테이너 실행
+## STEP 04 — 강사 이미지 주소 확인
 
-### 4-1. 이미지 받기
+이번 실습에서는 강사가 미리 만들어 둔 이미지를 사용합니다.
+
+!!! info "이미지 빌드는 이 과정 범위 밖입니다"
+    Dockerfile 작성, `docker build` 는 다루지 않습니다.
+    완성된 민원 서비스 이미지가 강사 레지스트리에 올라가 있습니다.
+
+이미지 전체 주소는 아래와 같습니다.
+
+```
+43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
+```
+
+이 주소를 가져오려면 로그인이 필요합니다 (STEP 03에서 완료했습니다).
+
+---
+
+## STEP 05 — 이미지 Pull & 컨테이너 실행
+
+### 5-1. 이미지 받기
 
 ```bash
 docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
@@ -171,7 +189,7 @@ docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complai
 
 ---
 
-### 4-2. 컨테이너 실행
+### 5-2. 컨테이너 실행
 
 1일차에서 이미 `.env` 파일을 만들어뒀습니다. 그 파일을 그대로 사용하면 됩니다.
 
@@ -200,7 +218,7 @@ DB 주소, Object Storage 정보 등을 따로 입력할 필요가 없어요.
 
 ---
 
-## STEP 05 — 동작 확인
+## STEP 06 — 동작 확인
 
 **① 컨테이너 실행 상태 확인**
 
@@ -253,11 +271,11 @@ http://<App-VM-플로팅-IP>:8081
 
 ---
 
-## STEP 06 — 컨테이너 삭제 후 재실행 관찰
+## STEP 07 — 컨테이너 삭제 후 재실행 관찰
 
 컨테이너를 지우면 **컨테이너 안의 데이터는 사라지지만, DB와 Object Storage는 그대로**임을 확인합니다.
 
-### 5-1. 컨테이너 안에 파일 만들기
+### 7-1. 컨테이너 안에 파일 만들기
 
 ```bash
 docker exec complaint-app touch /tmp/my-test-file.txt
@@ -265,13 +283,13 @@ docker exec complaint-app ls /tmp/
 # my-test-file.txt ← 존재함
 ```
 
-### 5-2. 컨테이너 삭제
+### 7-2. 컨테이너 삭제
 
 ```bash
 docker rm -f complaint-app
 ```
 
-### 5-3. 같은 명령으로 다시 실행
+### 7-3. 같은 명령으로 다시 실행
 
 ```bash
 docker run -d \
@@ -281,7 +299,7 @@ docker run -d \
   43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
 ```
 
-### 5-4. 결과 확인
+### 7-4. 결과 확인
 
 ```bash
 # 아까 만든 파일이 사라졌는가?
