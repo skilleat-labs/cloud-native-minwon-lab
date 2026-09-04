@@ -544,20 +544,20 @@ GITHUB_REPO="https://github.com/skilleat-labs/cloud-native-minwon-lab.git"
 APP_DIR="/opt/complaint-app"
 # ──────────────────────────────────────────────────
 
-echo "===== [1/5] 패키지 설치 ====="
+echo "===== [1/6] 패키지 설치 ====="
 apt-get update -y
 apt-get install -y python3 python3-pip git
 
-echo "===== [2/5] 소스 clone ====="
+echo "===== [2/6] 소스 clone ====="
 git clone "$GITHUB_REPO" /tmp/minwon-repo
 mkdir -p "$APP_DIR"
 cp -r /tmp/minwon-repo/app/. "$APP_DIR/"
 
-echo "===== [3/5] 의존성 설치 ====="
+echo "===== [3/6] 의존성 설치 ====="
 pip3 install -r "$APP_DIR/requirements.txt" --break-system-packages 2>/dev/null || \
   pip3 install -r "$APP_DIR/requirements.txt"
 
-echo "===== [4/5] 환경변수 파일 생성 ====="
+echo "===== [4/6] 환경변수 파일 생성 ====="
 cat > "$APP_DIR/.env" <<EOF
 DB_HOST=${DB_HOST}
 DB_PORT=${DB_PORT}
@@ -567,7 +567,7 @@ DB_NAME=${DB_NAME}
 PORT=${APP_PORT}
 EOF
 
-echo "===== [5/5] systemd 서비스 등록 ====="
+echo "===== [5/6] systemd 서비스 등록 ====="
 cat > /etc/systemd/system/complaint-app.service <<EOF
 [Unit]
 Description=온라인 민원 서비스
@@ -592,6 +592,14 @@ PRIVATE_IP=$(hostname -I | awk '{print $1}')
 sed -i "s/127.0.1.1/$PRIVATE_IP/" /etc/hosts
 
 systemctl start complaint-app
+
+echo "===== [6/6] kubectl 설치 및 bash completion 설정 ====="
+KUBECTL_VER=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+curl -LO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
+chmod +x kubectl
+mv kubectl /usr/local/bin/
+kubectl completion bash > /etc/bash_completion.d/kubectl
+echo 'source /etc/bash_completion.d/kubectl' >> /etc/bash.bashrc
 
 echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT}"
 ```
