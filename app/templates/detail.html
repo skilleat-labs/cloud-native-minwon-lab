@@ -23,7 +23,8 @@
         {% if complaint[4] %}
           {% set fp = complaint[4] %}
           {% set img_exts = ['png','jpg','jpeg','gif','webp'] %}
-          {% set ext = fp.rsplit('.',1)[-1].lower() %}
+          {% set filename = fp.rsplit('/',1)[-1] %}
+          {% set ext = (filename.rsplit('.',1)[-1].lower()) if ('.' in filename) else filename.lower() %}
           {% if fp.startswith('http') %}
             {% set img_url = fp %}
           {% else %}
@@ -60,7 +61,7 @@
           <!-- 이미지 아닌 파일은 다운로드 링크 -->
           <div class="mt-3 p-2 bg-light rounded">
             <small class="text-muted">📎 첨부파일:
-              <a href="{{ img_url }}" download>{{ fp.rsplit('/',1)[-1] }}</a>
+              <a href="{{ img_url }}" download>{{ filename }}</a>
             </small>
           </div>
           {% endif %}
