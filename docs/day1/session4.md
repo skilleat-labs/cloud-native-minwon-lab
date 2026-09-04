@@ -599,9 +599,9 @@ curl -LO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
 chmod +x kubectl
 mv kubectl /usr/local/bin/
 kubectl completion bash > /etc/bash_completion.d/kubectl
-# 모든 사용자 로그인 시 bash-completion 및 kubectl completion 자동 로드
-echo 'source /usr/share/bash-completion/bash_completion' >> /etc/bash.bashrc
-echo 'source /etc/bash_completion.d/kubectl' >> /etc/bash.bashrc
+# ubuntu 유저 로그인 시 자동 로드
+echo 'source /usr/share/bash-completion/bash_completion' >> /home/ubuntu/.bashrc
+echo 'source /etc/bash_completion.d/kubectl' >> /home/ubuntu/.bashrc
 
 echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT}"
 ```
