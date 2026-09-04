@@ -275,6 +275,13 @@ def lb_status():
     return {"connected": False}
 
 
+@app.after_request
+def disable_keepalive(response):
+    # 매 요청마다 새 TCP 연결을 맺도록 강제 → LB 라운드로빈 분산 효과 확인 가능
+    response.headers["Connection"] = "close"
+    return response
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8080"))
     debug = os.environ.get("DEBUG", "false").lower() == "true"
