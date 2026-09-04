@@ -121,23 +121,28 @@ flowchart LR
     style FIP fill:#fff3cd,stroke:#f0ad4e
 ```
 
-### 이후 (5차시) — 플로팅 IP를 LB로 이동, LB를 통해 접속
+### 이후 (5차시) — 플로팅 IP를 LB로 이동, LB가 2대로 분산
 
 ```mermaid
 flowchart LR
     U["👤 사용자\n브라우저"]
     FIP["🌐 플로팅 IP\n133.186.240.131 : 80"]
     LB["⚖️ minwon-lb"]
-    APP["🖥️ minwon-app-01\n192.168.0.x : 8080"]
+    APP1["🖥️ minwon-app-01\n192.168.0.x : 8080"]
+    APP2["🖥️ minwon-app-02\n192.168.0.x : 8080"]
     DB["🗄️ minwon-db-01\n192.168.1.x : 3306"]
 
     U -->|"HTTP :80"| FIP
     FIP --> LB
-    LB -->|"HTTP :8080"| APP
-    APP -->|"MySQL :3306"| DB
+    LB -->|"HTTP :8080"| APP1
+    LB -->|"HTTP :8080"| APP2
+    APP1 -->|"MySQL :3306"| DB
+    APP2 -->|"MySQL :3306"| DB
 
     style FIP fill:#fff3cd,stroke:#f0ad4e
     style LB fill:#d4edda,stroke:#28a745
+    style APP1 fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style APP2 fill:#4A90D9,color:#fff,stroke:#2c5f8a
 ```
 
 ### 3-1. App VM에서 플로팅 IP 해제
