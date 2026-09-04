@@ -363,6 +363,8 @@ Containers > NHN Kubernetes Service(NKS) > + 클러스터 생성
 | K8s API 엔드포인트 | Public |
 | 강화된 보안 규칙 | 사용 안 함 |
 
+![NKS 클러스터 설정 화면](./images/3-1-nks-cluster-create-settings.png)
+
 !!! info "노드 그룹 설정은 3차시에서 자세히 설명합니다"
     지금은 기본값 그대로 진행해도 됩니다.
     상세 설정값은 [3차시 교안](session3.md)을 참고하세요.
