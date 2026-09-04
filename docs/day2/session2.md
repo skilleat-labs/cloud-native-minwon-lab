@@ -189,6 +189,19 @@ docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complai
 
 레이어를 다운로드하는 메시지가 나오고 `Pull complete` 가 보이면 완료입니다.
 
+아래 명령으로 이미지가 정상적으로 받아졌는지 확인합니다.
+
+```bash
+docker images
+```
+
+```
+REPOSITORY                                                               TAG      IMAGE ID       SIZE
+43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app   latest   abc123...   150MB
+```
+
+목록에 이미지가 보이면 정상입니다.
+
 ---
 
 ### 5-2. 컨테이너 실행
