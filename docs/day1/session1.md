@@ -65,7 +65,7 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 
 | 항목 | 예시 |
 |------|------|
-| IAM 계정 ID | `user01` |
+| IAM 계정 ID | `gov1.edu1` |
 | 임시 비밀번호 | 별도 전달 |
 | 콘솔 URL | `https:// `https://gov-cloud.console.nhncloud.com` |
 
@@ -92,7 +92,7 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 ### 실습
 
 1. 화면 왼쪽 상단에서 **조직 이름**을 확인합니다
-2. 조직 아래에서 **`minwon-service-{내 번호}`** 프로젝트를 선택합니다
+2. 조직 아래에서 **`minwon-service-edu{내 번호}`** 프로젝트를 선택합니다
 
 ![조직과 프로젝트 화면](./images/02-org-project.png)
 
@@ -125,7 +125,7 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 
 | 항목 | 값 |
 |------|-----|
-| 프로젝트 이름 | `minwon-service-{내 번호}` (예: `minwon-service-01`, `minwon-service-02`) |
+| 프로젝트 이름 | `minwon-service-edu{내 번호}` (예: `minwon-service-edu1`, `minwon-service-edu2`) |
 | 설명 | 자유 입력 |
 
 4. **확인** 버튼을 클릭합니다
@@ -133,7 +133,7 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 
 !!! tip "내 번호 확인"
     강사가 배부한 계정 목록에서 본인 번호를 확인하세요.
-    예: 계정이 `user01`이면 프로젝트 이름은 `minwon-service-01`
+    예: 계정이 `gov1.edu1`이면 프로젝트 이름은 `minwon-service-01`
 
 !!! info "프로젝트와 자원"
     방금 만든 프로젝트는 비어있는 상태입니다.
