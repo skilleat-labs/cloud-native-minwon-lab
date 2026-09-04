@@ -214,43 +214,6 @@ graph LR
 
 ---
 
-## STEP 06 — 내 계정 역할 확인
-
-> **이 단계에서 할 일**: 내 계정의 권한 수준을 확인하고 권한 계층 구조를 이해합니다.
-
-### 권한 계층 구조
-
-```mermaid
-graph TD
-    O["🏢 조직 역할\nOWNER · ADMIN · MEMBER"]
-    P["📁 프로젝트 역할\nADMIN · MEMBER · BILLING VIEWER"]
-    A["⚙️ 실제 작업 권한\n생성 · 읽기 · 수정 · 삭제"]
-
-    O --> P --> A
-
-    style O fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
-    style P fill:#fff3e0,stroke:#ff9800,stroke-width:2px
-    style A fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
-```
-
-| 프로젝트 역할 | 할 수 있는 것 |
-|-------------|-------------|
-| ADMIN | 자원 생성·수정·삭제, 구성원 역할 지정 |
-| MEMBER | 허용된 범위에서 자원 사용 |
-| BILLING VIEWER | 요금 확인만 가능 |
-
-### 실습
-
-1. 오른쪽 위 계정 아이콘 → **계정 정보** 에서 내 역할을 확인합니다
-2. `minwon-service-edu{내 번호}` 프로젝트에서 **MEMBER** 이상인지 확인합니다
-
-| 항목 | 내가 확인한 값 |
-|------|-------------|
-| 내 계정 종류 (NHN Cloud / IAM) | |
-| 프로젝트 역할 | |
-
----
-
 ## 2차시 체크포인트
 
 다음이 모두 확인되면 3차시를 시작할 수 있습니다.
@@ -260,7 +223,6 @@ graph TD
 | ① | 리전 — 한국(판교) 선택 | ☐ |
 | ② | 기본 인프라(Network · Compute · Block Storage) + Object Storage 활성화 | ☐ |
 | ③ | Default Network(VPC) 삭제 완료 | ☐ |
-| ④ | 내 계정 역할 확인 | ☐ |
 
 ---
 
