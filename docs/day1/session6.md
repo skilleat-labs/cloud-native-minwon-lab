@@ -155,10 +155,10 @@ Storage > Object Storage > API 엔드포인트 설정 버튼 클릭
 |------|---|---------|
 | Object Storage URL | `https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_{TenantID}` | API 엔드포인트 설정 |
 | Tenant ID | `AUTH_` 뒤의 문자열 | API 엔드포인트 설정 |
-| username | **NHN Cloud 로그인 이메일** | 내 계정 정보 |
+| username | **IAM 계정 ID** (예: `gov1.edu1`) | 강사에게 받은 계정 |
 | API 비밀번호 | Object Storage 전용 비밀번호 | API 엔드포인트 설정에서 직접 설정 |
 
-!!! warning "API 비밀번호 ≠ NHN Cloud 로그인 비밀번호"
+!!! warning "API 비밀번호 ≠ IAM 로그인 비밀번호"
     API 비밀번호는 Object Storage 전용으로 별도 설정하는 값입니다.
     **API 엔드포인트 설정** 창에서 직접 입력하고 저장해야 합니다.
 
@@ -189,14 +189,14 @@ Storage > Object Storage > API 엔드포인트 설정 버튼 클릭
 sudo tee -a /opt/complaint-app/.env << 'EOF'
 OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_여기에TenantID입력
 OBJECT_STORAGE_CONTAINER=minwon-attachments
-OS_USERNAME=여기에로그인이메일입력
+OS_USERNAME=여기에IAM계정ID입력
 OS_PASSWORD=여기에API비밀번호입력
 EOF
 ```
 
 !!! warning "붙여넣기 전에 반드시 값을 먼저 수정하세요"
     - `여기에TenantID입력` → Object Storage API 엔드포인트 설정에서 복사한 Tenant ID
-    - `여기에로그인이메일입력` → NHN Cloud 로그인 이메일 (예: `hong@korea.kr`)
+    - `여기에IAM계정ID입력` → IAM 계정 ID (예: `gov1.edu1`)
     - `여기에API비밀번호입력` → API 엔드포인트 설정에서 설정한 API 전용 비밀번호
 
 입력이 완료되면 아래처럼 추가된 내용이 그대로 출력됩니다.
@@ -204,7 +204,7 @@ EOF
 ```
 OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_abc123...
 OBJECT_STORAGE_CONTAINER=minwon-attachments
-OS_USERNAME=hong@korea.kr
+OS_USERNAME=gov1.edu1
 OS_PASSWORD=mypassword
 ```
 
