@@ -150,10 +150,15 @@ Containers > NHN Kubernetes Service(NKS) > + 클러스터 생성
 | 항목 | 값 |
 |------|---|
 | 클러스터 이름 | `minwon-cluster` |
-| Kubernetes 버전 | 최신 지원 버전 선택 |
+| Kubernetes 버전 | `v1.35.5` |
+| 키페어 | 1일차와 동일한 키페어 |
 | VPC | `minwon-vpc` |
 | 서브넷 | `minwon-subnet-app` |
-| API 엔드포인트 | Public |
+| K8s API 엔드포인트 | Public |
+| 강화된 보안 규칙 | 사용 안 함 |
+| 기밀 데이터 암호화 | 기본 암호화 |
+
+![NKS 클러스터 설정 화면](./images/3-1-nks-cluster-create-settings.png)
 
 **기본 노드 그룹 설정**
 
