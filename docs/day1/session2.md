@@ -27,24 +27,36 @@
 
 오늘 하루 동안 아래 구조를 직접 만들어봅니다.
 
-```
-민원 신청자 (인터넷)
-        │
-        ▼
-  플로팅 IP (공인 IP)       ← 외부에서 접근 가능한 단일 진입점
-        │
-        ▼
-   Load Balancer            ← 트래픽 분산, 헬스체크
-        │
-        ▼
-     App VM                 → Object Storage (첨부파일 저장)
-  192.168.10.x
-        │
-        ▼
-     DB VM                  ← Block Storage (DB 데이터 저장)
-  192.168.20.x
+```mermaid
+graph TD
+    User["👤 민원 신청자\n인터넷으로 민원 접수"]
+    FIP["🌐 플로팅 IP\n외부에서 접근 가능한 단일 진입점"]
+    LB["⚖️ Load Balancer\n트래픽 분산 · 헬스체크"]
 
-VPC: 192.168.0.0/16
+    subgraph VPC["🏢 VPC — 192.168.0.0/16"]
+        subgraph AppNet["앱 서브넷　192.168.10.x"]
+            AppVM["🖥️ App VM\n민원 접수 웹 서버"]
+        end
+        subgraph DBNet["DB 서브넷　192.168.20.x"]
+            DBVM["🗄️ DB VM\n민원 데이터베이스"]
+        end
+    end
+
+    ObjStorage["📦 Object Storage\n첨부파일 저장"]
+    BlockStorage["💾 Block Storage\nDB 전용 디스크"]
+
+    User -->|"민원 접수 요청"| FIP
+    FIP --> LB
+    LB -->|"요청 전달"| AppVM
+    AppVM -->|"데이터 조회·저장"| DBVM
+    AppVM -->|"첨부파일 업로드"| ObjStorage
+    DBVM --- BlockStorage
+
+    style VPC fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
+    style AppNet fill:#fff3e0,stroke:#ff9800,stroke-width:1px
+    style DBNet fill:#fce4ec,stroke:#e91e63,stroke-width:1px
+    style ObjStorage fill:#e8f5e9,stroke:#4caf50,stroke-width:1px
+    style BlockStorage fill:#f3e5f5,stroke:#9c27b0,stroke-width:1px
 ```
 
 ### 각 구성요소의 역할
@@ -62,15 +74,29 @@ VPC: 192.168.0.0/16
 
 ### 왜 2-Tier 구조인가?
 
+```mermaid
+graph LR
+    subgraph T1["❌ 1-Tier — 단일 서버"]
+        A["App + DB\n한 서버에 모두"]
+    end
+
+    subgraph T2["✅ 2-Tier — 계층 분리"]
+        B["🖥️ App VM"]
+        C["🗄️ DB VM"]
+        B --> C
+    end
+
+    style T1 fill:#ffebee,stroke:#e53935,stroke-width:2px
+    style T2 fill:#e8f5e9,stroke:#43a047,stroke-width:2px
+    style A fill:#ffcdd2,stroke:#e53935
+    style B fill:#c8e6c9,stroke:#43a047
+    style C fill:#c8e6c9,stroke:#43a047
 ```
-1-Tier (단일 서버)         2-Tier (계층 분리)
-  ┌──────────┐              ┌──────────┐  ┌──────────┐
-  │  App + DB │              │   App VM  │  │   DB VM  │
-  └──────────┘              └──────────┘  └──────────┘
-  
-  ✗ 앱이 다운되면 DB도 중단  ✓ 계층별 독립 운영·확장
-  ✗ 보안 경계 없음           ✓ DB는 외부 직접 접근 차단
-```
+
+| | 1-Tier | 2-Tier |
+|--|--------|--------|
+| 장애 | 앱이 다운되면 DB도 중단 | 계층별 독립 운영·확장 |
+| 보안 | 보안 경계 없음 | DB는 외부 직접 접근 차단 |
 
 공공 서비스는 **보안**과 **가용성**이 중요합니다.  
 App 계층과 DB 계층을 분리하면 각각 독립적으로 관리할 수 있고, DB에 대한 직접 접근을 네트워크 수준에서 차단할 수 있습니다.
@@ -192,12 +218,17 @@ NHN Cloud는 서비스를 **프로젝트 단위로 켜야** 사용할 수 있습
 
 ### 권한 계층 구조
 
-```
-조직 역할 (OWNER / ADMIN / MEMBER)
-      ↓
-프로젝트 역할 (ADMIN / MEMBER / BILLING VIEWER)
-      ↓
-실제 작업 권한 (생성 · 읽기 · 갱신 · 삭제)
+```mermaid
+graph TD
+    O["🏢 조직 역할\nOWNER · ADMIN · MEMBER"]
+    P["📁 프로젝트 역할\nADMIN · MEMBER · BILLING VIEWER"]
+    A["⚙️ 실제 작업 권한\n생성 · 읽기 · 수정 · 삭제"]
+
+    O --> P --> A
+
+    style O fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
+    style P fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style A fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
 ```
 
 | 프로젝트 역할 | 할 수 있는 것 |
@@ -217,7 +248,7 @@ IAM 계정은 **조직 → 멤버 관리 → IAM 계정** 탭에서 생성합니
 ### 실습
 
 1. 오른쪽 위 계정 아이콘 → **계정 정보** 에서 내 역할을 확인합니다
-2. `minwon-service` 프로젝트에서 **MEMBER** 이상인지 확인합니다
+2. `minwon-service-edu{내 번호}` 프로젝트에서 **MEMBER** 이상인지 확인합니다
 
 | 항목 | 내가 확인한 값 |
 |------|-------------|
