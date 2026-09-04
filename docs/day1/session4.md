@@ -383,6 +383,23 @@ sudo lsblk
 **파티션**이란 디스크를 논리적으로 나누는 구역입니다. 새 디스크는 빈 공간만 있으므로 OS가 사용할 수 있도록 구역을 먼저 만들어야 합니다.
 **파일시스템**은 파티션 위에 파일을 저장하는 규칙(형식)입니다. 포맷하지 않으면 데이터를 읽고 쓸 수 없습니다.
 
+```mermaid
+graph LR
+    A["💾 빈 디스크\n/dev/vdb\n(Block Storage 연결 직후)"]
+    B["📐 파티션 생성\nfdisk\n전체를 1개 구역으로"]
+    C["🗂️ 파일시스템 생성\nmkfs -t xfs\nXFS 형식으로 포맷"]
+    D["✅ 사용 가능한 디스크\n/dev/vdb1\n파일 읽기·쓰기 가능"]
+
+    A -->|"① fdisk"| B
+    B -->|"② mkfs"| C
+    C --> D
+
+    style A fill:#e0e0e0,color:#333,stroke:#999
+    style B fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style C fill:#F5A623,color:#fff,stroke:#c47d00
+    style D fill:#7ED321,color:#fff,stroke:#5a9a18
+```
+
 ```bash
 # 파티션 생성 (디스크 전체를 하나의 파티션으로)
 echo -e "n\np\n1\n\n\nw" | sudo fdisk /dev/vdb
@@ -392,6 +409,25 @@ sudo mkfs -t xfs /dev/vdb1
 ```
 
 ### 3-6. 마운트 및 자동 마운트 등록
+
+**마운트**란 디스크를 특정 폴더 경로에 연결하는 작업입니다. 마운트 후에는 `/mnt/data` 경로에 파일을 저장하면 Block Storage에 저장됩니다.
+
+```mermaid
+graph LR
+    A["🗂️ /dev/vdb1\n(포맷된 디스크)"]
+    B["📁 /mnt/data\n(마운트 포인트 폴더)"]
+    C["📋 /etc/fstab\n(자동 마운트 등록)"]
+    D["🔄 재부팅 후에도\n자동으로 연결 유지"]
+
+    A -->|"mount\n연결"| B
+    B -->|"fstab 등록"| C
+    C --> D
+
+    style A fill:#F5A623,color:#fff,stroke:#c47d00
+    style B fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style C fill:#9B59B6,color:#fff,stroke:#7d3c98
+    style D fill:#7ED321,color:#fff,stroke:#5a9a18
+```
 
 ```bash
 # 마운트 포인트 생성
