@@ -9,7 +9,7 @@
 
 | STEP | 작업 |
 |------|------|
-| 01 | DB / 앱 서비스 정상 동작 확인 |
+| 01 | 이미지로 App VM 복제 생성 (강사 진행) |
 | 02 | App VM을 Load Balancer 멤버로 등록 |
 | 03 | App VM 플로팅 IP → LB로 이동 |
 | 04 | 헬스체크 통과 확인 |
@@ -25,7 +25,57 @@
 
 ---
 
-## STEP 01 — App VM을 Load Balancer 멤버로 등록
+## STEP 01 — 이미지로 App VM 복제 생성
+
+!!! tip "이 단계는 강사와 함께 진행합니다"
+    개인별로 진행하지 않고 강사가 시범을 보이며 함께 따라합니다.
+
+### 왜 복제하나요?
+
+4차시에서 `minwon-app-01` 이미지를 저장했습니다. 이 이미지에는 패키지 설치·앱 배포·환경변수 설정까지 **모든 것이 완성된 상태**가 담겨 있습니다.
+
+이 이미지로 새 VM을 만들면 처음부터 설정할 필요 없이 **완성된 앱 서버가 즉시 실행**됩니다. 이렇게 만든 두 번째 서버를 LB 아래에 연결하면 트래픽이 두 서버로 분산됩니다.
+
+```mermaid
+graph LR
+    A["🗃️ minwon-app-image-01\n(4차시에서 저장한 이미지)"]
+    B["🖥️ minwon-app-02\n(이미지로 바로 생성)"]
+    C["⚖️ Load Balancer"]
+    D["🖥️ minwon-app-01"]
+
+    A -->|"인스턴스 생성"| B
+    D --> C
+    B --> C
+
+    style A fill:#F5A623,color:#fff,stroke:#c47d00
+    style B fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style D fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style C fill:#7ED321,color:#fff,stroke:#5a9a18
+```
+
+### 생성 방법
+
+1. `Compute > Instance` 에서 **인스턴스 생성** 클릭
+2. 이미지 선택 화면에서 **개인 이미지** 탭 클릭
+3. `minwon-app-image-01` 선택
+4. 나머지 설정은 `minwon-app-01` 과 동일하게 입력
+
+| 항목 | 값 |
+|------|----|
+| 이름 | `minwon-app-02` |
+| 가용성 영역 | `kr-pub-b` (app-01과 다른 AZ) |
+| Flavor | `t2.c1m1` |
+| 서브넷 | `minwon-subnet-app` |
+| 보안 그룹 | `minwon-sg-app` |
+| 키페어 | 기존 키페어 선택 |
+| 플로팅 IP | **사용 안 함** (LB를 통해서만 접근) |
+
+!!! info "사용자 스크립트는 넣지 않아도 됩니다"
+    이미지에 이미 앱이 배포된 상태이므로 사용자 스크립트 없이도 바로 실행됩니다.
+
+---
+
+## STEP 02 — App VM을 Load Balancer 멤버로 등록
 
 ### 콘솔 경로
 
@@ -47,7 +97,7 @@
 
 ---
 
-## STEP 02 — App VM 플로팅 IP → LB로 이동
+## STEP 03 — App VM 플로팅 IP → LB로 이동
 
 4차시에서 직접 접속 테스트를 위해 App VM에 연결했던 플로팅 IP를 **LB로 이동**합니다.
 이후부터는 LB를 통해서만 민원 서비스에 접속할 수 있습니다.
@@ -117,7 +167,7 @@ flowchart LR
 
 ---
 
-## STEP 03 — 헬스체크 통과 확인
+## STEP 04 — 헬스체크 통과 확인
 
 멤버를 등록하면 LB가 `/health` 엔드포인트로 상태 확인을 시작합니다.
 
@@ -138,7 +188,7 @@ Network > Load Balancer > [minwon-lb] > 멤버 상태
 
 ---
 
-## STEP 04 — 브라우저에서 민원 서비스 접속
+## STEP 05 — 브라우저에서 민원 서비스 접속
 
 LB 플로팅 IP의 **80번 포트**로 접속합니다.
 
@@ -155,7 +205,7 @@ http://<LB-플로팅-IP>
 
 ---
 
-## STEP 05 — DB VM 플로팅 IP 해제 및 정리
+## STEP 06 — DB VM 플로팅 IP 해제 및 정리
 
 민원 서비스가 LB를 통해 정상 접속되는 것을 확인했으면, **DB VM의 플로팅 IP도 해제**합니다.
 DB는 내부 통신만 하면 되므로 공인 IP가 필요 없습니다.
