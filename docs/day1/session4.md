@@ -760,7 +760,47 @@ http://<App-VM-플로팅-IP>:8080
 
 아래와 같이 **온라인 민원 서비스** 화면이 보이면 배포 완료입니다! 🎉
 
-![브라우저에서 민원 서비스 확인](./images/3-17-browser-check.png)
+![브라우저에서 민원 서비스 확인](./images/6-6-browser-service-check.png)
+
+---
+
+### 6-7. App VM 이미지 생성 (복제 준비)
+
+지금까지 모든 설정이 완료된 App VM을 **이미지로 저장**합니다.
+
+!!! info "왜 이미지를 만드나요?"
+    지금 이 VM에는 패키지 설치, 앱 배포, 환경변수 설정까지 **모든 것이 완료된 상태**입니다.
+    이 상태를 이미지로 저장해두면, 나중에 이 이미지로 새 VM을 만들 때 처음부터 설정할 필요 없이
+    **이미 완성된 앱 서버가 바로 실행**됩니다.
+    새로 만든 VM을 LB(로드밸런서) 아래에 바로 연결하면 — 트래픽이 두 서버로 분산됩니다.
+
+```mermaid
+graph LR
+    A["🖥️ minwon-app-01\n(설정 완료 상태)"]
+    B["🗃️ 이미지 저장\n(스냅샷)"]
+    C["🖥️ minwon-app-02\n(이미지로 생성)"]
+    D["⚖️ Load Balancer\n트래픽 분산"]
+
+    A -->|"이미지 생성"| B
+    B -->|"새 VM 생성"| C
+    A --> D
+    C --> D
+
+    style A fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style B fill:#F5A623,color:#fff,stroke:#c47d00
+    style C fill:#4A90D9,color:#fff,stroke:#2c5f8a
+    style D fill:#7ED321,color:#fff,stroke:#5a9a18
+```
+
+**이미지 생성 방법**
+
+1. `Compute > Instance` 에서 `minwon-app-01` 을 **체크**합니다
+2. 상단 **추가 기능 > 이미지 생성** 클릭합니다
+3. 이미지 이름을 입력합니다 (예: `minwon-app-image-01`)
+4. **확인** 을 클릭합니다
+
+!!! warning "이미지 생성 중에는 VM이 잠시 멈출 수 있습니다"
+    생성이 완료되면 `Compute > Image` 에서 상태가 **Active** 인지 확인하세요.
 
 ## 4차시 체크포인트
 
