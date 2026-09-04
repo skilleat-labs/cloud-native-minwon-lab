@@ -140,15 +140,7 @@ sed -i 's|192.168.0.20|192.168.0.15|g' app/deployment.yaml
 
 ---
 
-### 2-4. 이미지 주소 수정
-
-```bash
-sed -i 's|<레지스트리 주소>/complaint-app:latest|43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest|g' app/deployment.yaml
-```
-
----
-
-### 2-5. imagePullSecrets 추가
+### 2-4. imagePullSecrets 추가
 
 Kubernetes가 NCR에서 이미지를 받을 때 아까 만든 Secret을 사용하도록 설정합니다.
 
@@ -160,7 +152,7 @@ sed -i '/      containers:/i\      imagePullSecrets:\n      - name: ncr-secret' 
 
 ---
 
-### 2-6. Object Storage 설정 추가 (선택)
+### 2-5. Object Storage 설정 추가 (선택)
 
 1일차에서 설정한 Object Storage를 연결하려면 Secret에 추가합니다.
 
@@ -184,7 +176,7 @@ kubectl patch secret complaint-db-secret --type=merge -p '{
 
 ---
 
-### 2-7. 수정 결과 확인
+### 2-6. 수정 결과 확인
 
 ```bash
 cat app/deployment.yaml
@@ -339,3 +331,4 @@ http://<EXTERNAL-IP>
 ---
 
 **다음 차시**: 일부러 Pod를 삭제해서 자동 복구를 관찰하고, 복제본을 3개로 늘려 수평 확장을 실습합니다.
+
