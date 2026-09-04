@@ -221,6 +221,13 @@ def detail(cid):
                            lb=lb_status(), server_ip=get_server_ip())
 
 
+# ── 로컬 업로드 파일 서빙 ────────────────────────────────────────────────────
+@app.route("/uploads/<path:filename>")
+def serve_upload(filename):
+    from flask import send_from_directory
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+
 # ── Load Balancer 헬스체크 엔드포인트 ────────────────────────────────────────
 @app.route("/health")
 def health():
