@@ -152,32 +152,7 @@ sed -i '/      containers:/i\      imagePullSecrets:\n      - name: ncr-secret' 
 
 ---
 
-### 2-5. Object Storage 설정 추가 (선택)
-
-1일차에서 설정한 Object Storage를 연결하려면, `.env` 파일 값을 그대로 읽어 Secret에 추가합니다.
-
-아래 명령을 **그대로 복사해서 실행**하면 됩니다.
-
-```bash
-source /opt/complaint-app/.env
-
-kubectl patch secret complaint-db-secret --type=merge -p "{
-  \"stringData\": {
-    \"OBJECT_STORAGE_URL\": \"$OBJECT_STORAGE_URL\",
-    \"OBJECT_STORAGE_CONTAINER\": \"$OBJECT_STORAGE_CONTAINER\",
-    \"OS_USERNAME\": \"$OS_USERNAME\",
-    \"OS_PASSWORD\": \"$OS_PASSWORD\"
-  }
-}"
-```
-
-!!! info "1일차 .env 파일의 값을 자동으로 읽어옵니다"
-    `source` 명령으로 `/opt/complaint-app/.env` 를 불러온 뒤, 그 변수를 그대로 Secret에 적용합니다.
-    1일차에서 Object Storage를 설정하지 않은 경우 이 단계는 건너뜁니다.
-
----
-
-### 2-6. 수정 결과 확인
+### 2-5. 수정 결과 확인
 
 ```bash
 cat app/deployment.yaml
@@ -220,6 +195,35 @@ flowchart LR
     style A fill:#fff3cd,stroke:#f0ad4e
     style F fill:#e8f5e9,stroke:#4caf50
 ```
+
+---
+
+## STEP 03-1 — Object Storage 연결 (선택)
+
+1일차에서 Object Storage를 설정한 경우, 배포 직후 아래 명령으로 Secret에 추가합니다.
+
+아래 명령을 **그대로 복사해서 실행**하면 됩니다.
+
+```bash
+source /opt/complaint-app/.env
+
+kubectl patch secret complaint-db-secret --type=merge -p "{
+  \"stringData\": {
+    \"OBJECT_STORAGE_URL\": \"$OBJECT_STORAGE_URL\",
+    \"OBJECT_STORAGE_CONTAINER\": \"$OBJECT_STORAGE_CONTAINER\",
+    \"OS_USERNAME\": \"$OS_USERNAME\",
+    \"OS_PASSWORD\": \"$OS_PASSWORD\"
+  }
+}"
+```
+
+!!! info "1일차 .env 파일의 값을 자동으로 읽어옵니다"
+    `source` 명령으로 `/opt/complaint-app/.env` 를 불러온 뒤, 그 변수를 그대로 Secret에 적용합니다.
+    1일차에서 Object Storage를 설정하지 않은 경우 이 단계는 건너뜁니다.
+
+!!! warning "kubectl apply 이후에 실행하세요"
+    `complaint-db-secret` 은 STEP 03에서 `kubectl apply` 를 실행해야 생성됩니다.
+    그 전에 실행하면 `secrets not found` 오류가 납니다.
 
 ---
 
