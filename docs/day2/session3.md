@@ -1,7 +1,7 @@
 # Day 2 · 3차시 — 컨테이너가 많아지면 누가 관리하지?
 
 **소요 시간**: 50분 (13:00~13:50)
-**목표**: Kubernetes의 구조를 이해하고, NKS 클러스터를 생성해 kubectl로 연결한다
+**목표**: Kubernetes의 구조를 이해하고, NKS 클러스터에 kubectl로 연결한다
 
 ---
 
@@ -9,10 +9,9 @@
 
 | STEP | 내용 |
 |------|------|
-| 01 | NKS 서비스 활성화 & 클러스터 생성 |
-| 02 | App VM SSH 접속 및 kubectl 확인 |
-| 03 | kubeconfig 적용 |
-| 04 | 클러스터 연결 확인 |
+| 01 | App VM SSH 접속 및 kubectl 확인 |
+| 02 | kubeconfig 적용 |
+| 03 | 클러스터 연결 확인 |
 
 !!! info "kubectl은 App VM에서 실행합니다"
     2차시에서 접속했던 App VM(Ubuntu)에 kubectl을 설치합니다.
@@ -127,64 +126,7 @@ NKS(NHN Kubernetes Service)는 NHN Cloud가 제공하는 **관리형 Kubernetes*
 
 ---
 
-## STEP 01 — NKS 클러스터 생성
-
-!!! info "NKS는 별도 활성화가 필요 없습니다"
-    NHN Cloud에서 NKS는 기본 인프라에 포함되어 있습니다.
-    서비스 활성화 없이 바로 `Containers > NHN Kubernetes Service(NKS)` 에서 클러스터를 생성할 수 있습니다.
-
-### 1-1. 클러스터 생성
-
-```
-Containers > NHN Kubernetes Service(NKS) > + 클러스터 생성
-```
-
-**클러스터 기본 설정**
-
-| 항목 | 값 |
-|------|---|
-| 클러스터 이름 | `minwon-cluster` |
-| Kubernetes 버전 | `v1.35.5` |
-| 키페어 | 1일차와 동일한 키페어 |
-| VPC | `minwon-vpc` |
-| 서브넷 | `minwon-subnet-app` |
-| K8s API 엔드포인트 | Public |
-| 강화된 보안 규칙 | 사용 안 함 |
-| 기밀 데이터 암호화 | 기본 암호화 |
-
-![NKS 클러스터 설정 화면](./images/3-1-nks-cluster-create-settings.png)
-
-**다음** 클릭 → **Add-ons 설정** 화면은 기본값 그대로 **다음** 클릭
-
----
-
-**기본 노드 그룹 설정**
-
-| 항목 | 값 | 비고 |
-|------|---|------|
-| 이미지 | `Ubuntu Server 22.04 LTS` | |
-| 가용성 영역 | 한국(판교) | |
-| 인스턴스 타입 | `c2.m4` | 기본값에서 변경 |
-| 노드 수 | 2 | |
-| 키페어 | 1일차와 동일한 키페어 | |
-| 루트 블록 스토리지 | HDD **50GB** | 기본값(20GB)에서 변경 |
-
-!!! warning "인스턴스 타입과 블록 스토리지는 반드시 변경하세요"
-    기본값으로 두면 실습 중 리소스 부족이 발생할 수 있습니다.
-
-**다음** 클릭 → **추가 설정** 화면은 기본값 그대로 **다음** 클릭 → **최종 검토** 화면에서 설정 확인 후 **생성** 클릭
-
-!!! info "클러스터 생성에는 약 10분이 소요됩니다"
-    상태가 `CREATE_COMPLETE`가 될 때까지 기다립니다.
-    기다리는 동안 STEP 02를 먼저 진행할 수 있습니다.
-
-!!! tip "노드는 결국 인스턴스"
-    노드 그룹 설정은 1일차에서 만든 App VM과 똑같은 개념입니다.
-    이미지, 인스턴스 타입, 키페어, 블록 스토리지 — 모두 익숙한 설정입니다.
-
----
-
-## STEP 02 — App VM SSH 접속
+## STEP 01 — App VM SSH 접속
 
 kubectl은 App VM 생성 시 사용자 스크립트로 자동 설치되어 있습니다.
 PowerShell을 열고 App VM에 접속합니다.
@@ -213,7 +155,7 @@ Client Version: v1.x.x  ← 이렇게 나오면 정상
 
 ---
 
-## STEP 03 — kubeconfig 적용
+## STEP 02 — kubeconfig 적용
 
 kubeconfig는 **클러스터에 접근하기 위한 인증 정보**가 담긴 파일입니다.
 
@@ -256,7 +198,7 @@ chmod 600 ~/.kube/config
 
 ---
 
-## STEP 04 — 클러스터 연결 확인
+## STEP 03 — 클러스터 연결 확인
 
 NKS 클러스터 상태가 `CREATE_COMPLETE`인지 먼저 확인하세요.
 
@@ -302,10 +244,9 @@ kube-system 네임스페이스의 Pod들이 `Running` 상태이면 정상입니�
 
 | # | 확인 항목 | 확인 방법 |
 |---|---------|---------|
-| ① | NKS 클러스터가 `CREATE_COMPLETE` 상태다 | 콘솔 > NKS 목록 |
-| ② | App VM에 kubectl이 설치되었다 | `kubectl version --client` |
-| ③ | kubeconfig가 적용되었다 | `kubectl cluster-info` |
-| ④ | 노드가 `Ready` 상태다 | `kubectl get nodes` |
+| ① | App VM에 kubectl이 설치되었다 | `kubectl version --client` |
+| ② | kubeconfig가 적용되었다 | `kubectl cluster-info` |
+| ③ | 노드가 `Ready` 상태다 | `kubectl get nodes` |
 
 ---
 
