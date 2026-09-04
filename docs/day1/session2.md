@@ -80,59 +80,6 @@ graph TD
 
 ---
 
-## 이론 — 오늘 만들 서비스를 그려보자
-
-### 민원 서비스 아키텍처 개요
-
-오늘 하루 동안 아래 구조를 직접 만들어봅니다.
-
-```mermaid
-graph TD
-    User["👤 민원 신청자\n인터넷으로 민원 접수"]
-    FIP["🌐 플로팅 IP\n외부에서 접근 가능한 단일 진입점"]
-    LB["⚖️ Load Balancer\n트래픽 분산 · 헬스체크"]
-
-    subgraph VPC["🏢 VPC — 192.168.0.0/16"]
-        subgraph AppNet["앱 서브넷　192.168.10.x"]
-            AppVM["🖥️ App VM\n민원 접수 웹 서버"]
-        end
-        subgraph DBNet["DB 서브넷　192.168.20.x"]
-            DBVM["🗄️ DB VM\n민원 데이터베이스"]
-        end
-    end
-
-    ObjStorage["📦 Object Storage\n첨부파일 저장"]
-    BlockStorage["💾 Block Storage\nDB 전용 디스크"]
-
-    User -->|"민원 접수 요청"| FIP
-    FIP --> LB
-    LB -->|"요청 전달"| AppVM
-    AppVM -->|"데이터 조회·저장"| DBVM
-    AppVM -->|"첨부파일 업로드"| ObjStorage
-    DBVM --- BlockStorage
-
-    style VPC fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
-    style AppNet fill:#fff3e0,stroke:#ff9800,stroke-width:1px
-    style DBNet fill:#fce4ec,stroke:#e91e63,stroke-width:1px
-    style ObjStorage fill:#e8f5e9,stroke:#4caf50,stroke-width:1px
-    style BlockStorage fill:#f3e5f5,stroke:#9c27b0,stroke-width:1px
-```
-
-### 각 구성요소의 역할
-
-| 구성요소 | 역할 | 이 실습에서 |
-|---------|------|-----------|
-| VPC | 격리된 가상 네트워크 | 192.168.0.0/16 대역 사용 |
-| 보안 그룹 | 계층별 접근 규칙 | App 계층 / DB 계층 분리 |
-| Load Balancer | 단일 진입점, 헬스체크 | 포트 80 수신 → App VM 8080 전달 |
-| 플로팅 IP | 공인 IP | LB에 연결, 외부 접속용 |
-| App VM | 민원 앱 실행 서버 | 192.168.10.x 서브넷 |
-| DB VM | MySQL 데이터베이스 | 192.168.20.x 서브넷 |
-| Block Storage | DB 데이터 영구 저장 | DB VM에 연결 |
-| Object Storage | 민원 첨부파일 저장 | 앱에서 API로 직접 연결 |
-
----
-
 ## STEP 04 — 리전 확인
 
 > **이 단계에서 할 일**: 자원이 생성될 리전을 확인하고 올바르게 설정합니다.
