@@ -103,6 +103,32 @@ Compute > Instance > 인스턴스 생성
     DB VM은 App VM에서만 접근하면 됩니다.
     외부 인터넷에 노출시킬 필요가 없으므로 플로팅 IP를 연결하지 않습니다.
 
+## 개념 — 사용자 스크립트(User Data)란?
+
+```mermaid
+flowchart TD
+    A["🖥️ 인스턴스 생성
+(콘솔에서 클릭)"]
+    B["🔄 첫 부팅 시
+cloud-init 자동 실행"]
+    C["📜 사용자 스크립트 실행
+(root 권한)"]
+    D["✅ 완료
+패키지 설치 · DB 생성 · 앱 배포"]
+
+    A --> B --> C --> D
+
+    style A fill:#e8f0fe,stroke:#4285f4
+    style B fill:#fff3e0,stroke:#ff9800
+    style C fill:#fff3e0,stroke:#ff9800
+    style D fill:#e8f5e9,stroke:#4caf50
+```
+
+VM을 생성할 때 **추가 설정 > 사용자 스크립트** 란에 셸 스크립트를 붙여넣으면, 인스턴스가 처음 부팅될 때 자동으로 실행됩니다. SSH 접속 없이도 서버 환경을 완성할 수 있습니다.
+
+
+---
+
 ### ⑥ 사용자 스크립트 입력
 
 **추가 설정 > 사용자 스크립트** 란에 아래 내용을 **그대로** 붙여넣습니다.
@@ -166,32 +192,6 @@ echo "✅ DB 초기화 완료"
     ```
 
 ---
-
----
-
-## 개념 — 사용자 스크립트(User Data)란?
-
-```mermaid
-flowchart TD
-    A["🖥️ 인스턴스 생성
-(콘솔에서 클릭)"]
-    B["🔄 첫 부팅 시
-cloud-init 자동 실행"]
-    C["📜 사용자 스크립트 실행
-(root 권한)"]
-    D["✅ 완료
-패키지 설치 · DB 생성 · 앱 배포"]
-
-    A --> B --> C --> D
-
-    style A fill:#e8f0fe,stroke:#4285f4
-    style B fill:#fff3e0,stroke:#ff9800
-    style C fill:#fff3e0,stroke:#ff9800
-    style D fill:#e8f5e9,stroke:#4caf50
-```
-
-VM을 생성할 때 **추가 설정 > 사용자 스크립트** 란에 셸 스크립트를 붙여넣으면, 인스턴스가 처음 부팅될 때 자동으로 실행됩니다. SSH 접속 없이도 서버 환경을 완성할 수 있습니다.
-
 
 ---
 
