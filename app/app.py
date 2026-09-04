@@ -240,9 +240,16 @@ def get_server_ip():
     if SERVER_IP:
         return SERVER_IP
     try:
-        SERVER_IP = socket.gethostbyname(socket.gethostname())
+        # 실제 외부 통신에 사용하는 인터페이스 IP (루프백 127.x 제외)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        SERVER_IP = s.getsockname()[0]
+        s.close()
     except Exception:
-        SERVER_IP = "unknown"
+        try:
+            SERVER_IP = socket.gethostbyname(socket.gethostname())
+        except Exception:
+            SERVER_IP = "unknown"
     return SERVER_IP
 
 
