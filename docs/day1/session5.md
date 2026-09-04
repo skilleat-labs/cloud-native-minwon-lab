@@ -25,40 +25,7 @@
 
 ---
 
-## STEP 01 — DB / 앱 서비스 정상 동작 확인
-
-LB에 등록하기 전에 각 VM에서 서비스가 정상 실행 중인지 확인합니다.
-
-### DB VM 확인
-
-```bash
-# DB VM에 SSH 접속 후
-sudo systemctl status mysql
-# Active: active (running) ← 정상
-```
-
-### App VM 확인
-
-```bash
-# App VM에 SSH 접속 후
-sudo systemctl status complaint-app
-# Active: active (running) ← 정상
-
-# 앱이 응답하는지 직접 확인
-curl http://localhost:8080/health
-# {"status": "ok"} ← 정상
-```
-
-!!! warning "아직 실행 중이 아니라면"
-    사용자 스크립트는 부팅 후 약 2~3분 소요됩니다. 로그를 확인하세요.
-    ```bash
-    sudo tail -50 /var/log/cloud-init-output.log
-    ```
-    `✅ 앱 배포 완료` 메시지가 있으면 정상 완료입니다.
-
----
-
-## STEP 02 — App VM을 Load Balancer 멤버로 등록
+## STEP 01 — App VM을 Load Balancer 멤버로 등록
 
 ### 콘솔 경로
 
@@ -80,7 +47,7 @@ curl http://localhost:8080/health
 
 ---
 
-## STEP 03 — App VM 플로팅 IP → LB로 이동
+## STEP 02 — App VM 플로팅 IP → LB로 이동
 
 4차시에서 직접 접속 테스트를 위해 App VM에 연결했던 플로팅 IP를 **LB로 이동**합니다.
 이후부터는 LB를 통해서만 민원 서비스에 접속할 수 있습니다.
@@ -150,7 +117,7 @@ flowchart LR
 
 ---
 
-## STEP 04 — 헬스체크 통과 확인
+## STEP 03 — 헬스체크 통과 확인
 
 멤버를 등록하면 LB가 `/health` 엔드포인트로 상태 확인을 시작합니다.
 
@@ -171,7 +138,7 @@ Network > Load Balancer > [minwon-lb] > 멤버 상태
 
 ---
 
-## STEP 05 — 브라우저에서 민원 서비스 접속
+## STEP 04 — 브라우저에서 민원 서비스 접속
 
 LB 플로팅 IP의 **80번 포트**로 접속합니다.
 
@@ -188,7 +155,7 @@ http://<LB-플로팅-IP>
 
 ---
 
-## STEP 06 — DB VM 플로팅 IP 해제 및 정리
+## STEP 05 — DB VM 플로팅 IP 해제 및 정리
 
 민원 서비스가 LB를 통해 정상 접속되는 것을 확인했으면, **DB VM의 플로팅 IP도 해제**합니다.
 DB는 내부 통신만 하면 되므로 공인 IP가 필요 없습니다.
