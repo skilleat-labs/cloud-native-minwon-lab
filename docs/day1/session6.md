@@ -88,20 +88,25 @@ flowchart LR
 **업로드 흐름:**
 ```mermaid
 flowchart TD
-    U["👤 사용자
-첨부파일 선택"]
-    A["🖥️ App VM
-파일 수신"]
-    O["📦 Object Storage
-파일 본문 저장"]
-    D["🗄️ DB VM
-파일 경로(URL)만 기록"]
+    U["👤 사용자\n첨부파일 선택"]
+    LB["⚖️ Load Balancer"]
+    A1["🖥️ minwon-app-01\n파일 수신"]
+    A2["🖥️ minwon-app-02\n파일 수신"]
+    O["📦 Object Storage\n파일 본문 저장"]
+    D["🗄️ DB VM\n파일 경로(URL)만 기록"]
 
-    U -->|"업로드"| A
-    A -->|"파일 본문"| O
-    A -->|"파일 URL"| D
+    U -->|"업로드"| LB
+    LB --> A1
+    LB --> A2
+    A1 -->|"파일 본문"| O
+    A2 -->|"파일 본문"| O
+    A1 -->|"파일 URL"| D
+    A2 -->|"파일 URL"| D
 
-    style O fill:#e8f5e9,stroke:#4caf50
+    style LB fill:#e8f5e9,stroke:#4caf50
+    style A1 fill:#fff3e0,stroke:#ff9800
+    style A2 fill:#fff3e0,stroke:#ff9800
+    style O fill:#e3f2fd,stroke:#2196F3
     style D fill:#fce4ec,stroke:#e91e63
 ```
 
