@@ -380,7 +380,7 @@ sudo ls /var/lib/mysql
 sudo lsblk
 ```
 
-명령 실행 후 아래처럼 `vdb` 디스크가 보이면 Block Storage가 정상 연결된 것입니다.
+**명령 실행 후 아래처럼 `vdb` 디스크가 보이면 Block Storage가 정상 연결된 것입니다.**
 
 ![lsblk 및 fdisk 파티션 생성 화면](./images/3-12-lsblk-fdisk.png)
 > 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
