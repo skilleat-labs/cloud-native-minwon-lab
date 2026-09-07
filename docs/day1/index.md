@@ -25,7 +25,8 @@ graph TD
 
     subgraph VPC["🏢 VPC — 192.168.0.0/16　클라우드 내부 전용 네트워크"]
         subgraph AppNet["앱 서브넷　192.168.10.x"]
-            AppVM["🖥️ App VM\n민원 접수 웹 서버"]
+            AppVM1["🖥️ App VM 1\n민원 접수 웹 서버"]
+            AppVM2["🖥️ App VM 2\n민원 접수 웹 서버"]
         end
         subgraph DBNet["DB 서브넷　192.168.20.x"]
             DBVM["🗄️ DB VM\n민원 데이터베이스"]
@@ -37,9 +38,12 @@ graph TD
 
     User -->|"민원 접수 요청"| FIP
     FIP --> LB
-    LB -->|"요청 전달"| AppVM
-    AppVM -->|"데이터 조회 · 저장"| DBVM
-    AppVM -->|"첨부파일 업로드"| ObjStorage
+    LB -->|"요청 전달"| AppVM1
+    LB -->|"요청 전달"| AppVM2
+    AppVM1 -->|"데이터 조회 · 저장"| DBVM
+    AppVM2 -->|"데이터 조회 · 저장"| DBVM
+    AppVM1 -->|"첨부파일 업로드"| ObjStorage
+    AppVM2 -->|"첨부파일 업로드"| ObjStorage
     DBVM --- BlockStorage
 
     style VPC fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
