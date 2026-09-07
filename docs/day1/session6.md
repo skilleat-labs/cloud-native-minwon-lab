@@ -131,7 +131,7 @@ Storage > Object Storage > 컨테이너 생성
 | 항목 | 값 |
 |------|---|
 | 이름 | `minwon-attachments` |
-| 접근 정책 | **PRIVATE** |
+| 접근 정책 | **PUBLIC** |
 | 스토리지 클래스 | Standard |
 
 ![컨테이너 생성 — 이름·접근 정책 입력](./images/5-1-container-create.png)
@@ -141,11 +141,12 @@ Storage > Object Storage > 컨테이너 생성
 
 | 정책 | 설명 | 언제 사용 |
 |------|------|---------|
-| PRIVATE | 프로젝트 사용자만 접근 (인증 토큰 필요) | **민원 첨부파일 (기본값)** |
-| PUBLIC | URL만 알면 인증 없이 접근 가능 | 공개 안내 자료, 정적 파일 |
+| PRIVATE | 프로젝트 사용자만 접근 (인증 토큰 필요) | 외부에 노출하면 안 되는 파일 |
+| PUBLIC | URL만 알면 인증 없이 접근 가능 | **이번 실습 — 첨부파일을 브라우저에서 바로 표시** |
 
-!!! warning "민원 첨부파일은 반드시 PRIVATE"
-    개인정보가 포함될 수 있는 파일을 PUBLIC으로 설정하면 누구나 URL로 접근 가능합니다.
+!!! info "실습에서 PUBLIC을 사용하는 이유"
+    첨부파일 URL을 브라우저에서 바로 불러오려면 인증 없이 접근 가능해야 합니다.
+    실제 서비스에서는 PRIVATE + 서명된 URL(Presigned URL) 방식을 사용하지만, 이번 실습에서는 PUBLIC으로 진행합니다.
 
 ---
 
