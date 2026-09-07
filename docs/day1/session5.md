@@ -359,9 +359,9 @@ DB는 내부 통신만 하면 되므로 공인 IP가 필요 없습니다.
 | # | 확인 항목 | 확인 방법 |
 |---|----------|---------|
 | ① | DB VM에서 MySQL이 실행 중이다 | `sudo systemctl status mysql` |
-| ② | App VM에서 앱이 실행 중이다 | `sudo systemctl status complaint-app` |
-| ③ | App VM이 LB 멤버로 등록되었다 | LB > 멤버 그룹 탭 |
-| ④ | 헬스체크 상태가 ACTIVE다 | LB > 멤버 상태 |
+| ② | 두 App VM(app-01, app-02) 모두 앱이 실행 중이다 | `sudo systemctl status complaint-app` |
+| ③ | 두 App VM이 모두 LB 멤버로 등록되었다 | LB > 멤버 그룹 탭 |
+| ④ | 두 멤버의 헬스체크 상태가 모두 ACTIVE다 | LB > 멤버 상태 |
 | ⑤ | LB 플로팅 IP로 민원 서비스가 접속된다 | 브라우저 확인 |
 | ⑥ | 민원을 접수하면 목록에서 조회된다 | 서비스 직접 사용 |
 | ⑦ | App VM과 DB VM의 플로팅 IP가 해제되었다 | Instance 목록 확인 |
