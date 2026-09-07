@@ -360,11 +360,11 @@ Storage > Object Storage > [minwon-attachments]
 Compute > Instance
 ```
 
-| 인스턴스 | 방법 |
-|---------|------|
-| `minwon-app-01` | 체크 → 추가 기능 → 인스턴스 종료 클릭 |
-| `minwon-app-02` | 체크 → 추가 기능 → 인스턴스 종료 클릭 |
-| `minwon-db-01` | 체크 → 추가 기능 → 인스턴스 종료 클릭 |
+1. `minwon-app-01`, `minwon-app-02`, `minwon-db-01` 3대를 모두 체크합니다
+2. 상단 **추가 기능** 버튼 클릭
+3. **인스턴스 종료** 클릭 → 확인
+
+종료 후 인스턴스 상태가 **`SHELVED_OFFLOADED`** 로 바뀌면 완료입니다.
 
 !!! warning "종료 ≠ 삭제"
     **종료(Shelve)** 는 인스턴스를 보존한 채 자원만 반납하는 것입니다.
