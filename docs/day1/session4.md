@@ -505,7 +505,7 @@ Compute > Instance > 인스턴스 생성
 | 이름 | **`minwon-app-01`** | |
 | 이미지 | Ubuntu Server 22.04 LTS | OS > Ubuntu 선택 |
 | 인스턴스 타입 | `t2.c1m1` (1 vCPU, 1GB RAM) | |
-| 가용성 영역 | 한국(판교) 선택 | |
+| 가용성 영역 | 임의의 가용성 영역 | |
 | 루트 디스크 | HDD 20GB | |
 | VPC | `minwon-vpc` | |
 | 서브넷 | **`minwon-subnet-app`** | ⚠️ DB와 다름 |
