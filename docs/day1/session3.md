@@ -231,7 +231,7 @@ Network > Internet Gateway > Internet Gateway 생성
 생성 후 바로 라우팅 테이블에 연결해야 합니다.
 
 ```
-Network > VPC > 라우팅 테이블
+Network > Routing > 라우팅 테이블
 → minwon-vpc 라우팅 테이블 선택
 → [인터넷 게이트웨이] 탭 > 연결 변경
 → minwon-ig 선택 후 저장
