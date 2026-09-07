@@ -78,10 +78,11 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 ### 로그인 방법
 
 1. **[https://gov-cloud.console.nhncloud.com](https://gov-cloud.console.nhncloud.com)** 으로 접속합니다
-2. IAM 계정 ID와 비밀번호를 입력합니다
 
-![콘솔 홈 화면](./images/01-console-home.png)
+![IAM 로그인 화면](./images/01-iam-login.png)
 > 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
+
+2. IAM 계정 ID와 비밀번호를 입력합니다
 
 ---
 
