@@ -318,9 +318,13 @@ Storage > Object Storage > [minwon-attachments]
 2. 새 민원 접수 (제목, 내용 입력)
 3. 첨부파일 업로드 (이미지 또는 PDF)
 4. 민원 목록에서 접수된 내용 확인
-5. 첨부파일 링크 클릭 후 파일 열기
+5. 첨부파일 클릭 후 이미지가 브라우저에서 바로 표시되면 Object Storage PUBLIC 연동 완료
 
 모두 확인되면 **1일차 미션 완료**입니다.
+
+!!! warning "반드시 확인 — App VM 플로팅 IP가 해제되어 있어야 합니다"
+    실습 중 임시로 연결한 플로팅 IP가 남아 있으면 과금됩니다.
+    `Network > Floating IP` 에서 남아 있는 IP가 없는지 확인하세요.
 
 !!! warning "2일차를 위해 반드시 남겨두세요"
     | 자원 | 이유 |
@@ -328,4 +332,6 @@ Storage > Object Storage > [minwon-attachments]
     | DB VM | 2일차에도 기존 민원 데이터 그대로 사용 |
     | Block Storage | DB VM에 연결된 상태 유지 |
     | Object Storage 컨테이너 | 기존 첨부파일 유지 |
-    | VPC, 서브넷 | Kubernetes 클러스터도 같은 네트워크 사용 |
+    | VPC, 서브넷, 보안 그룹 | Kubernetes 클러스터도 같은 네트워크 사용 |
+    | App VM (app-01, app-02) | 2일차에서 컨테이너 방식과 비교 참고용 |
+    | Load Balancer | 2일차에서 재사용 가능 |
