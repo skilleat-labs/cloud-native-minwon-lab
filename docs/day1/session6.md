@@ -305,9 +305,10 @@ Storage > Object Storage > [minwon-attachments]
 
 | # | 확인 항목 | 확인 방법 |
 |---|----------|---------|
-| ① | `minwon-attachments` 컨테이너가 PRIVATE으로 생성되었다 | 컨테이너 상세 확인 |
-| ② | 민원 신청 시 첨부파일이 버킷에 저장된다 | Object Storage 오브젝트 목록 |
-| ③ | DB에는 파일 본문이 아닌 경로(URL)가 저장된다 | 민원 상세에서 첨부파일 링크 동작 확인 |
+| ① | `minwon-attachments` 컨테이너가 PUBLIC으로 생성되었다 | 컨테이너 상세 확인 |
+| ② | app-01, app-02 모두 .env에 Object Storage 설정이 완료되었다 | SSH 접속 후 `cat /opt/complaint-app/.env` |
+| ③ | 민원 신청 시 첨부파일이 Object Storage에 저장된다 | Object Storage 오브젝트 목록 |
+| ④ | 첨부파일이 브라우저에서 정상적으로 표시된다 | 민원 상세에서 첨부파일 이미지 확인 |
 
 ---
 
