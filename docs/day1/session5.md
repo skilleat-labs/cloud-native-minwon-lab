@@ -263,6 +263,51 @@ Network > Load Balancer → minwon-lb 클릭
 ![헬스체크 메뉴 — 서버 IP 확인 2 (새로고침 후)](./images/5-5-health-check-2.png)
 > 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
+### 5-3. 민원 게시판에 직접 글 올려보기
+
+LB를 통해 서비스가 정상 동작하는 것을 확인했습니다.
+이번에는 민원 게시판에 **글과 이미지를 직접 올려보세요**.
+
+1. 브라우저에서 민원 서비스에 접속합니다
+2. 민원 게시판에서 **새 민원 접수**를 클릭합니다
+3. 제목과 내용을 아무거나 입력합니다
+4. **이미지 파일도 첨부**해서 게시합니다
+
+게시 후 **새로고침을 여러 번** 해보세요.
+
+!!! question "생각해보기 — 이미지가 보였다 사라졌다 하는 이유는?"
+    새로고침할 때마다 이미지가 보이기도 하고 없어지기도 합니다.
+    왜 그럴까요?
+
+    현재 아키텍처를 다시 한번 살펴보세요.
+
+    ```mermaid
+    flowchart LR
+        User["🌐 사용자"]
+        LB["⚖️ Load Balancer\n(공인 IP)"]
+        App1["🖥️ minwon-app-01\n이미지 저장: /uploads"]
+        App2["🖥️ minwon-app-02\n이미지 저장: /uploads"]
+        DB["🗄️ DB VM\n(MariaDB)"]
+
+        User --> LB
+        LB -->|"요청 1"| App1
+        LB -->|"요청 2"| App2
+        App1 --> DB
+        App2 --> DB
+
+        style App1 fill:#fff3e0,stroke:#ff9800
+        style App2 fill:#fff3e0,stroke:#ff9800
+        style LB fill:#e8f5e9,stroke:#4caf50
+        style DB fill:#fce4ec,stroke:#e91e63
+    ```
+
+    **힌트**: LB는 요청마다 두 서버 중 하나로 연결합니다.
+    이미지를 업로드한 서버(`app-01`)에만 파일이 저장됩니다.
+    새로고침해서 `app-02`로 연결되면 그 파일이 없습니다.
+
+    → 두 서버가 **파일을 공유하지 않기 때문**입니다.
+    이 문제는 다음 차시에서 **Object Storage**로 해결합니다.
+
 ---
 
 ## STEP 06 — DB VM 플로팅 IP 해제 및 정리
