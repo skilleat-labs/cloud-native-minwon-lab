@@ -216,7 +216,7 @@ VPC가 인터넷과 통신하려면 **인터넷 게이트웨이가 라우팅 테
 ### 1단계 — 인터넷 게이트웨이 생성
 
 ```
-Network > VPC > 인터넷 게이트웨이 > 인터넷 게이트웨이 생성
+Network > Internet Gateway > Internet Gateway 생성
 ```
 
 | 항목 | 값 |
