@@ -131,7 +131,7 @@ VPC를 생성하면 **기본 라우팅 테이블이 자동으로 함께 생성**
 ### 콘솔 경로
 
 ```
-Network > VPC > [minwon-vpc] 클릭 > 라우팅 테이블 탭
+Network > Routing > 라우팅 테이블
 ```
 
 ### 확인 항목
@@ -245,7 +245,7 @@ Network > Routing > 라우팅 테이블
 인터넷 게이트웨이를 연결한 뒤 아래 경로로 이동해 경로가 추가됐는지 직접 확인합니다.
 
 ```
-Network > VPC > [minwon-vpc] > 라우팅 테이블 탭
+Network > Routing > 라우팅 테이블
 → 라우팅 테이블 선택 > 경로(Route) 탭
 ```
 
