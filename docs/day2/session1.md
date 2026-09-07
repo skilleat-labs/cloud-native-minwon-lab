@@ -173,10 +173,12 @@ flowchart LR
 2. **Container** 분류에서 **NHN Container Registry(NCR)** 클릭
 
 ![서비스 선택 — NHN Container Registry(NCR) 선택](./images/d2-1-ncr-service-select.png)
+> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
 3. 활성화 확인 팝업에서 **확인** 클릭
 
 ![NCR 서비스 활성화 확인](./images/d2-1-ncr-activate-confirm.png)
+> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
 4. 왼쪽 메뉴에 **Container > NHN Container Registry(NCR)** 가 나타나면 완료
 
@@ -195,6 +197,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 | 용도 | 일반 |
 
 ![레지스트리 생성 — minwon-registry 입력](./images/d2-1-ncr-registry-create.png)
+> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
 ---
 
@@ -203,11 +206,12 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 `minwon-registry` 클릭 → **기본 정보** 탭에서 아래 정보를 확인합니다.
 
 ![레지스트리 기본 정보 — Public URI · Docker 접근 명령어](./images/d2-1-ncr-registry-info.png)
+> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
-| 항목 | 설명 | 내가 확인한 값 |
-|------|------|-------------|
-| Public URI | 이미지를 올리고 받을 주소 | |
-| Docker 접근 명령어 | `docker login` 시 사용할 주소 | |
+| 항목 | 설명 |
+|------|------|
+| Public URI | 이미지를 올리고 받을 주소 |
+| Docker 접근 명령어 | `docker login` 시 사용할 주소 |
 
 !!! tip "복사 버튼 활용"
     각 항목 옆의 **복사** 버튼을 누르면 클립보드에 바로 복사됩니다.

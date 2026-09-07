@@ -434,6 +434,7 @@ Containers > NHN Kubernetes Service(NKS) > + 클러스터 생성
 | 강화된 보안 규칙 | 사용 안 함 |
 
 ![NKS 클러스터 설정 화면](./images/3-1-nks-cluster-create-settings.png)
+> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
 **다음** 클릭 → **Add-ons 설정** 기본값 그대로 **다음** 클릭
 
