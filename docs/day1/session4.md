@@ -50,7 +50,7 @@ Compute > Instance > 인스턴스 생성
 | 이름 | `minwon-db-01` |
 | 이미지 | Ubuntu Server 22.04 LTS |
 | 인스턴스 타입 | `t2.c1m1` (1 vCPU, 1GB RAM) |
-| 가용성 영역 | 한국(판교) — **Block Storage와 같은 AZ** |
+| 가용성 영역 | 임의의 가용성 영역 |
 | 루트 디스크 | HDD 20GB |
 
 이미지는 **OS > Ubuntu** 를 선택한 뒤 목록에서 **Ubuntu Server 22.04 LTS** 를 선택합니다.
