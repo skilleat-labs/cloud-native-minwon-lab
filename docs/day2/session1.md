@@ -9,10 +9,11 @@
 
 | STEP | 내용 |
 |------|------|
-| 01 | NCR 서비스 활성화 |
-| 02 | 레지스트리 생성 |
-| 03 | 레지스트리 접근 정보 확인 |
-| 04 | 강사 레지스트리에서 이미지 주소 확인 |
+| 01 | Docker 설치 |
+| 02 | NCR 서비스 활성화 |
+| 03 | 레지스트리 생성 |
+| 04 | 레지스트리 접근 정보 확인 |
+| 05 | 강사 레지스트리에서 이미지 주소 확인 |
 
 ---
 
@@ -167,7 +168,42 @@ flowchart LR
 
 ---
 
-## STEP 01 — NCR 서비스 활성화
+## STEP 01 — Docker 설치
+
+App VM 터미널에서 아래 명령을 **순서대로** 실행합니다.
+
+**① Docker 설치**
+
+```bash
+curl -fsSL https://get.docker.com | sudo sh
+```
+
+설치에 1~2분 소요됩니다.
+
+---
+
+**② 현재 사용자에게 Docker 권한 부여**
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+---
+
+**③ 설치 확인**
+
+```bash
+docker --version
+```
+
+```
+Docker version 29.8.0, build 88096ef ← 이렇게 나오면 정상
+```
+
+---
+
+## STEP 02 — NCR 서비스 활성화
 
 1. 콘솔 상단 **서비스 선택** 클릭
 2. **Container** 분류에서 **NHN Container Registry(NCR)** 클릭
@@ -184,7 +220,7 @@ flowchart LR
 
 ---
 
-## STEP 02 — 레지스트리 생성
+## STEP 03 — 레지스트리 생성
 
 ```
 Container > NHN Container Registry(NCR) > + 레지스트리 생성
@@ -201,7 +237,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 03 — 레지스트리 접근 정보 확인
+## STEP 04 — 레지스트리 접근 정보 확인
 
 `minwon-registry` 클릭 → **기본 정보** 탭에서 아래 정보를 확인합니다.
 
@@ -218,7 +254,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 04 — 강사 이미지 주소 확인
+## STEP 05 — 강사 이미지 주소 확인
 
 이번 실습에서는 강사가 미리 만들어 둔 이미지를 사용합니다.
 
@@ -242,8 +278,9 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 |---|---------|
 | ① | 어제 방식에서 서버마다 결과가 달라지는 이유를 말할 수 있다 |
 | ② | 이미지와 컨테이너의 차이를 설명할 수 있다 |
-| ③ | NCR 레지스트리가 생성되었다 |
-| ④ | 강사 이미지 주소를 확인했다 |
+| ③ | App VM에 Docker가 설치되었다 (`docker --version` 확인) |
+| ④ | NCR 레지스트리가 생성되었다 |
+| ⑤ | 강사 이미지 주소를 확인했다 |
 
 ---
 
