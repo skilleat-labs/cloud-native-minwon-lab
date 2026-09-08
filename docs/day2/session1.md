@@ -513,54 +513,42 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ## STEP 07 — 내 이미지를 레지스트리에 올리기
 
-> STEP 03에서 만든 `my-nginx-custom:v1` 이미지를 내 NCR 레지스트리에 push합니다.
+> STEP 03에서 만든 `my-nginx-custom:v1` 이미지를 강사 레지스트리에 push합니다.
 
-### ① API 보안 설정에서 키 발급
+!!! info "강사 레지스트리를 사용하는 이유"
+    실습 계정(IAM 계정)은 NCR docker login을 지원하지 않습니다.
+    강사가 제공하는 레지스트리 주소와 인증 정보를 사용합니다.
 
-docker login에는 NHN Cloud 계정 이메일/비밀번호가 아니라 **User Access Key**를 사용합니다.
+### ① 강사 레지스트리 로그인
 
-콘솔 우측 상단 계정명 클릭 → **마이페이지** → **API 보안 설정** → **User Access Key ID 생성**
-
-| 항목 | 설명 |
-|------|------|
-| User Access Key ID | docker login 시 **Username**으로 입력 |
-| Secret Access Key | docker login 시 **Password**로 입력 |
-
-!!! warning "Secret Access Key는 발급 시 한 번만 표시됩니다"
-    창을 닫으면 다시 확인할 수 없으니 발급 즉시 메모장에 복사해 두세요.
-    분실 시 재생성해야 합니다.
-
----
-
-### ② NCR 로그인
-
-STEP 06에서 확인한 **Docker 접근 명령어**를 복사해서 실행합니다.
+강사에게 받은 인증 정보로 로그인합니다.
 
 ```bash
-docker login <Public-URI>
+docker login 43c329ba-kr1-registry.container.nhncloud.com
 ```
 
 ```
-Username: {User Access Key ID}
-Password: {Secret Access Key}
+Username: {강사가 제공한 User Access Key ID}
+Password: {강사가 제공한 Secret Access Key}
 Login Succeeded
 ```
 
 ---
 
-### ③ 이미지에 레지스트리 주소 태그 붙이기
+### ② 이미지에 레지스트리 주소 태그 붙이기
 
-Docker는 이미지를 push할 때 **이미지 이름 앞에 레지스트리 주소**가 포함되어 있어야 합니다.
-STEP 06에서 확인한 Public URI로 새 태그를 붙입니다.
+**태그의 이니셜 부분을 본인 이니셜(영문 소문자)로** 바꿔서 실행합니다. 수강생 이미지를 구분하기 위해서입니다.
 
 ```bash
-docker tag my-nginx-custom:v1 <Public-URI>/my-nginx-custom:v1
+docker tag my-nginx-custom:v1 43c329ba-kr1-registry.container.nhncloud.com/student/my-nginx:hgd
 ```
 
-예시:
-```bash
-docker tag my-nginx-custom:v1 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/my-nginx-custom:v1
-```
+| 부분 | 설명 |
+|------|------|
+| `43c329ba-kr1-registry.container.nhncloud.com` | 강사 레지스트리 주소 |
+| `student` | 레지스트리 내 저장소 이름 |
+| `my-nginx` | 이미지 이름 |
+| `:hgd` | 태그 — **본인 이니셜로 변경** (예: 홍길동 → `hgd`) |
 
 태그가 잘 붙었는지 확인합니다:
 
@@ -569,44 +557,35 @@ docker images
 ```
 
 ```
-REPOSITORY                                                                        TAG   ...
-43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/my-nginx-custom     v1    ...
-my-nginx-custom                                                                   v1    ...
-nginx                                                                             latest ...
+REPOSITORY                                                   TAG   ...
+43c329ba-kr1-registry.container.nhncloud.com/student/my-nginx  hgd   ...
+my-nginx-custom                                              v1    ...
+nginx                                                        latest ...
 ```
-
-같은 이미지에 태그만 추가된 것입니다. 용량이 두 배가 되는 것이 아닙니다.
 
 ---
 
-### ④ 이미지 Push
+### ③ 이미지 Push
 
 ```bash
-docker push <Public-URI>/my-nginx-custom:v1
-```
-
-예시:
-```bash
-docker push 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/my-nginx-custom:v1
+docker push 43c329ba-kr1-registry.container.nhncloud.com/student/my-nginx:hgd
 ```
 
 ```
-The push refers to repository [43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/my-nginx-custom]
+The push refers to repository [43c329ba-kr1-registry.container.nhncloud.com/student/my-nginx]
 ...
 v1: digest: sha256:xxxx size: xxxx
 ```
 
 ---
 
-### ⑤ 콘솔에서 확인
+### ④ 강사 화면에서 확인
 
-NHN Cloud 콘솔 → `Container > NHN Container Registry(NCR) > minwon-registry` 클릭
-
-**이미지** 탭에 `my-nginx-custom` 이 올라온 것을 확인합니다.
+강사 콘솔에서 `student` 저장소에 수강생 이름별 이미지가 올라온 것을 함께 확인합니다.
 
 !!! success "완료!"
-    내가 직접 만든 이미지가 레지스트리(창고)에 저장되었습니다.
-    이제 이 주소만 알면 어느 서버에서든 `docker pull` 로 꺼내 쓸 수 있습니다.
+    내가 만든 이미지가 공용 레지스트리에 저장되었습니다.
+    같은 이미지 주소로 어느 서버에서든 `docker pull` 해서 실행할 수 있습니다.
 
 ---
 
