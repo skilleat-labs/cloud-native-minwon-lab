@@ -704,7 +704,17 @@ cd C:\Users\사용자이름\Downloads
 ssh -i MyKey.pem ubuntu@<App-VM-플로팅-IP>
 ```
 
-> `<App-VM-플로팅-IP>` 자리에 6-1에서 확인한 공인 IP를 입력합니다.
+!!! warning "`<App-VM-플로팅-IP>` 자리에는 **숫자 IP만** 입력합니다"
+    꺾쇠(`<` `>`)와 텍스트를 그대로 입력하는 것이 아닙니다.
+    콘솔에서 확인한 숫자 IP 주소로 바꿔서 입력하세요.
+
+    ```powershell
+    # ❌ 잘못된 예
+    ssh -i MyKey.pem ubuntu@<App-VM-플로팅-IP>
+
+    # ✅ 올바른 예
+    ssh -i MyKey.pem ubuntu@133.186.159.145
+    ```
 
 접속 성공 시 `ubuntu@minwon-app-01:~$` 프롬프트가 나타납니다.
 

@@ -135,6 +135,18 @@ PowerShell을 열고 App VM에 접속합니다.
 ssh -i C:\Users\사용자이름\Downloads\nhn-temp-key.pem ubuntu@<App-VM-플로팅-IP>
 ```
 
+!!! warning "`<App-VM-플로팅-IP>` 자리에는 **숫자 IP만** 입력합니다"
+    꺾쇠(`<` `>`)와 텍스트를 그대로 입력하는 것이 아닙니다.
+    콘솔에서 확인한 숫자 IP 주소로 바꿔서 입력하세요.
+
+    ```powershell
+    # ❌ 잘못된 예
+    ssh -i ... ubuntu@<App-VM-플로팅-IP>
+
+    # ✅ 올바른 예
+    ssh -i ... ubuntu@133.186.159.145
+    ```
+
 접속 후 설치 여부를 확인합니다.
 
 ```bash

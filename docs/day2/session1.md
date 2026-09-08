@@ -124,6 +124,18 @@ flowchart TB
 ssh -i C:\Users\사용자이름\Downloads\nhn-temp-key.pem ubuntu@<App-VM-플로팅-IP>
 ```
 
+!!! warning "`<App-VM-플로팅-IP>` 자리에는 **숫자 IP만** 입력합니다"
+    꺾쇠(`<` `>`)와 텍스트를 그대로 입력하는 것이 아닙니다.
+    콘솔에서 확인한 숫자 IP 주소로 바꿔서 입력하세요.
+
+    ```powershell
+    # ❌ 잘못된 예
+    ssh -i ... ubuntu@<App-VM-플로팅-IP>
+
+    # ✅ 올바른 예
+    ssh -i ... ubuntu@133.186.159.145
+    ```
+
 !!! warning "App VM 플로팅 IP 확인"
     1일차에서 App VM에 연결된 플로팅 IP를 확인합니다.
 
