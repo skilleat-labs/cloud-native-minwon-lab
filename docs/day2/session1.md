@@ -353,10 +353,10 @@ docker exec -it my-nginx bash
 
 ### ③ 기본 페이지 수정
 
-아래 명령에서 이름 부분만 본인 이름으로 바꿔서 실행합니다:
+아래 명령에서 이름 부분만 본인 이름(영문)으로 바꿔서 실행합니다:
 
 ```bash
-echo '<h1>안녕하세요! 홍길동의 민원 서비스입니다</h1>' > /usr/share/nginx/html/index.html
+echo '<h1>Hello! This is Gildong page.</h1>' > /usr/share/nginx/html/index.html
 ```
 
 잘 저장됐는지 확인합니다:
@@ -366,7 +366,7 @@ cat /usr/share/nginx/html/index.html
 ```
 
 ```
-<h1>안녕하세요! 홍길동의 민원 서비스입니다</h1>
+<h1>Hello! This is Gildong page.</h1>
 ```
 
 !!! info "왜 nano 대신 echo를 쓰나요?"
