@@ -560,6 +560,54 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
+## 개념 — 이미지 주소 체계
+
+Docker 이미지 주소는 최대 4개 부분으로 구성됩니다.
+
+```
+[레지스트리 주소]/[저장소]/[이미지 이름]:[태그]
+```
+
+### 각 부분의 의미
+
+| 부분 | 예시 | 생략하면? |
+|------|------|---------|
+| 레지스트리 주소 | `43c329ba-kr1-registry.container.nhncloud.com` | Docker Hub (`docker.io`) 사용 |
+| 저장소 | `student` | 레지스트리 기본 저장소 사용 |
+| 이미지 이름 | `my-nginx` | 필수 — 생략 불가 |
+| 태그 | `hgd` | `latest` 로 자동 적용 |
+
+### 실제 예시로 비교
+
+```
+# 짧게 쓴 것 → Docker Hub에서 최신 버전
+nginx
+
+# 풀어 쓰면
+docker.io/library/nginx:latest
+```
+
+```
+# 강사 레지스트리의 이미지
+43c329ba-kr1-registry.container.nhncloud.com/student/my-nginx:hgd
+
+# 레지스트리 주소        / 저장소  / 이미지이름 : 태그
+# 43c329ba-kr1-...com  / student / my-nginx  : hgd
+```
+
+```
+# 태그를 생략하면 latest로 적용
+43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app
+→ 실제로는 complaint-app:latest 와 동일
+```
+
+!!! tip "정리"
+    - `nginx` 한 단어만 써도 되는 건 레지스트리·저장소·태그가 모두 생략된 것
+    - 회사/기관 레지스트리를 쓸 때는 **레지스트리 주소를 앞에 반드시 붙여야** 함
+    - 태그는 버전 구분용이며 생략 시 항상 `latest` 를 가리킴
+
+---
+
 ## STEP 08 — 내 이미지를 레지스트리에 올리기
 
 > STEP 03에서 만든 `my-nginx-custom:v1` 이미지를 강사 레지스트리에 push합니다.
