@@ -351,31 +351,28 @@ docker exec -it my-nginx bash
 
 ---
 
-### ③ nano 편집기 설치
+### ③ 기본 페이지 수정
+
+아래 명령에서 이름 부분만 본인 이름으로 바꿔서 실행합니다:
 
 ```bash
-apt-get update && apt-get install -y nano
+echo '<h1>안녕하세요! 홍길동의 민원 서비스입니다</h1>' > /usr/share/nginx/html/index.html
 ```
 
-!!! info "왜 설치가 되나요?"
-    컨테이너는 Ubuntu 기반이라 `apt-get`을 그대로 사용할 수 있습니다.
-    단, 여기서 설치한 내용은 **이 컨테이너 안에만** 존재합니다.
-
----
-
-### ④ 기본 페이지 수정
+잘 저장됐는지 확인합니다:
 
 ```bash
-nano /usr/share/nginx/html/index.html
+cat /usr/share/nginx/html/index.html
 ```
 
-기존 내용을 모두 지우고 아래처럼 작성합니다 (이름은 본인 이름으로):
-
-```html
+```
 <h1>안녕하세요! 홍길동의 민원 서비스입니다</h1>
 ```
 
-저장: `Ctrl + O` → `Enter` | 나가기: `Ctrl + X`
+!!! info "왜 nano 대신 echo를 쓰나요?"
+    Docker 컨테이너는 기본적으로 한글 로케일이 설정되어 있지 않아
+    nano 같은 편집기에서 한글이 깨져 보입니다.
+    `echo`로 직접 파일에 쓰면 이 문제를 피할 수 있습니다.
 
 ---
 
