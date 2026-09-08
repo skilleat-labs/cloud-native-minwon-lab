@@ -704,6 +704,29 @@ v1: digest: sha256:xxxx size: xxxx
 
 ---
 
+## 실습 정리
+
+2차시에서 8081 포트로 민원 앱을 띄울 예정입니다.
+실행 중인 컨테이너가 포트를 점유하지 않도록 지금 정리합니다.
+
+```bash
+docker stop my-nginx-v2
+docker rm my-nginx-v2
+```
+
+실행 중인 컨테이너가 없는지 확인합니다:
+
+```bash
+docker ps
+```
+
+```
+CONTAINER ID   IMAGE   COMMAND   CREATED   STATUS   PORTS   NAMES
+(아무것도 없으면 정상)
+```
+
+---
+
 ## 1차시 체크포인트
 
 | # | 확인 항목 |
