@@ -10,10 +10,11 @@
 | STEP | 내용 |
 |------|------|
 | 01 | Docker 설치 |
-| 02 | NCR 서비스 활성화 |
-| 03 | 레지스트리 생성 |
-| 04 | 레지스트리 접근 정보 확인 |
-| 05 | 강사 레지스트리에서 이미지 주소 확인 |
+| 02 | 컨테이너 맛보기 — nginx · httpd 실행 |
+| 03 | NCR 서비스 활성화 |
+| 04 | 레지스트리 생성 |
+| 05 | 레지스트리 접근 정보 확인 |
+| 06 | 강사 레지스트리에서 이미지 주소 확인 |
 
 ---
 
@@ -203,7 +204,108 @@ Docker version 29.8.0, build 88096ef ← 이렇게 나오면 정상
 
 ---
 
-## STEP 02 — NCR 서비스 활성화
+## STEP 02 — 컨테이너 맛보기
+
+> 명령어 한 줄이면 서버가 뜹니다. 직접 확인해봅니다.
+
+### nginx 실행
+
+```bash
+docker run -d -p 80:80 --name nginx-test nginx
+```
+
+| 옵션 | 의미 |
+|------|------|
+| `-d` | 백그라운드로 실행 |
+| `-p 80:80` | 호스트 80포트 → 컨테이너 80포트 연결 |
+| `--name nginx-test` | 컨테이너 이름 지정 |
+| `nginx` | Docker Hub에서 가져올 이미지 이름 |
+
+처음 실행 시 이미지를 자동으로 다운로드합니다:
+
+```
+Unable to find image 'nginx:latest' locally
+latest: Pulling from library/nginx
+...
+Status: Downloaded newer image for nginx:latest
+```
+
+---
+
+### 실행 중인 컨테이너 확인
+
+```bash
+docker ps
+```
+
+```
+CONTAINER ID   IMAGE   COMMAND                  CREATED         STATUS         PORTS                NAMES
+a1b2c3d4e5f6   nginx   "/docker-entrypoint.…"   5 seconds ago   Up 4 seconds   0.0.0.0:80->80/tcp   nginx-test
+```
+
+`Up` 상태가 보이면 정상입니다.
+
+---
+
+### httpd(Apache) 추가 실행
+
+```bash
+docker run -d -p 8080:80 --name httpd-test httpd
+```
+
+다시 `docker ps`로 두 컨테이너가 동시에 뜬 것을 확인합니다:
+
+```bash
+docker ps
+```
+
+```
+CONTAINER ID   IMAGE   ...   PORTS                  NAMES
+b2c3d4e5f6a7   httpd   ...   0.0.0.0:8080->80/tcp   httpd-test
+a1b2c3d4e5f6   nginx   ...   0.0.0.0:80->80/tcp     nginx-test
+```
+
+!!! tip "포인트"
+    이미지가 다르면 포트만 다르게 지정해서 **같은 서버에서 동시에 여러 서비스**를 실행할 수 있습니다.
+
+---
+
+### 이미지 목록 확인
+
+```bash
+docker images
+```
+
+```
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+httpd        latest    xxxxxxxxxxxx   2 weeks ago    148MB
+nginx        latest    xxxxxxxxxxxx   3 weeks ago    192MB
+```
+
+수백 MB짜리 웹 서버가 명령어 한 줄로 수 초 만에 실행되었습니다.
+
+---
+
+### 컨테이너 정리
+
+실습이 끝나면 정리합니다.
+
+```bash
+docker stop nginx-test httpd-test
+docker rm nginx-test httpd-test
+```
+
+```bash
+docker ps   # 아무것도 안 나오면 정상
+```
+
+!!! info "stop vs rm"
+    - `stop`: 컨테이너 중지 (이미지는 남아 있음)
+    - `rm`: 컨테이너 삭제 (이미지는 남아 있음, `docker images`로 확인 가능)
+
+---
+
+## STEP 03 — NCR 서비스 활성화
 
 1. 콘솔 상단 **서비스 선택** 클릭
 2. **Container** 분류에서 **NHN Container Registry(NCR)** 클릭
@@ -220,7 +322,7 @@ Docker version 29.8.0, build 88096ef ← 이렇게 나오면 정상
 
 ---
 
-## STEP 03 — 레지스트리 생성
+## STEP 04 — 레지스트리 생성
 
 ```
 Container > NHN Container Registry(NCR) > + 레지스트리 생성
@@ -237,7 +339,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 04 — 레지스트리 접근 정보 확인
+## STEP 05 — 레지스트리 접근 정보 확인
 
 `minwon-registry` 클릭 → **기본 정보** 탭에서 아래 정보를 확인합니다.
 
@@ -254,7 +356,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 05 — 강사 이미지 주소 확인
+## STEP 06 — 강사 이미지 주소 확인
 
 이번 실습에서는 강사가 미리 만들어 둔 이미지를 사용합니다.
 
@@ -279,8 +381,9 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 | ① | 어제 방식에서 서버마다 결과가 달라지는 이유를 말할 수 있다 |
 | ② | 이미지와 컨테이너의 차이를 설명할 수 있다 |
 | ③ | App VM에 Docker가 설치되었다 (`docker --version` 확인) |
-| ④ | NCR 레지스트리가 생성되었다 |
-| ⑤ | 강사 이미지 주소를 확인했다 |
+| ④ | nginx · httpd 컨테이너를 실행하고 `docker ps`로 확인했다 |
+| ⑤ | NCR 레지스트리가 생성되었다 |
+| ⑥ | 강사 이미지 주소를 확인했다 |
 
 ---
 
