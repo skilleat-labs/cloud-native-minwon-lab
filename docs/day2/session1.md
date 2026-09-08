@@ -11,10 +11,11 @@
 |------|------|
 | 01 | Docker 설치 |
 | 02 | 컨테이너 맛보기 — nginx · httpd 실행 |
-| 03 | NCR 서비스 활성화 |
-| 04 | 레지스트리 생성 |
-| 05 | 레지스트리 접근 정보 확인 |
-| 06 | 강사 레지스트리에서 이미지 주소 확인 |
+| 03 | 나만의 nginx 이미지 만들기 |
+| 04 | NCR 서비스 활성화 |
+| 05 | 레지스트리 생성 |
+| 06 | 레지스트리 접근 정보 확인 |
+| 07 | 강사 레지스트리에서 이미지 주소 확인 |
 
 ---
 
@@ -328,6 +329,104 @@ Ubuntu 기본 파일              ← 거의 안 바뀌는 층
 
 ---
 
+## STEP 03 — 나만의 nginx 이미지 만들기
+
+> 컨테이너 안에서 직접 파일을 수정하고, 그 상태를 새 이미지로 저장해봅니다.
+
+### ① nginx 컨테이너 실행
+
+```bash
+docker run -d -p 9090:80 --name my-nginx nginx
+```
+
+---
+
+### ② 컨테이너 안으로 들어가기
+
+```bash
+docker exec -it my-nginx bash
+```
+
+프롬프트가 `root@컨테이너ID:/#` 로 바뀌면 컨테이너 안에 있는 상태입니다.
+
+---
+
+### ③ nano 편집기 설치
+
+```bash
+apt-get update && apt-get install -y nano
+```
+
+!!! info "왜 설치가 되나요?"
+    컨테이너는 Ubuntu 기반이라 `apt-get`을 그대로 사용할 수 있습니다.
+    단, 여기서 설치한 내용은 **이 컨테이너 안에만** 존재합니다.
+
+---
+
+### ④ 기본 페이지 수정
+
+```bash
+nano /usr/share/nginx/html/index.html
+```
+
+기존 내용을 모두 지우고 아래처럼 작성합니다 (이름은 본인 이름으로):
+
+```html
+<h1>안녕하세요! 홍길동의 민원 서비스입니다</h1>
+```
+
+저장: `Ctrl + O` → `Enter` | 나가기: `Ctrl + X`
+
+---
+
+### ⑤ 컨테이너에서 나오기
+
+```bash
+exit
+```
+
+---
+
+### ⑥ 컨테이너를 이미지로 저장
+
+```bash
+docker commit my-nginx my-nginx-custom:v1
+```
+
+```bash
+docker images
+```
+
+```
+REPOSITORY        TAG      IMAGE ID       CREATED         SIZE
+my-nginx-custom   v1       xxxxxxxxxxxx   5 seconds ago   197MB
+nginx             latest   xxxxxxxxxxxx   3 weeks ago     192MB
+```
+
+`my-nginx-custom:v1` 이미지가 새로 생겼습니다.
+
+!!! tip "docker commit 이란?"
+    실행 중인 컨테이너의 **현재 상태를 스냅샷으로 찍어 이미지로 저장**합니다.
+    원본 `nginx` 이미지는 그대로이고, 내 변경사항이 담긴 새 이미지가 만들어집니다.
+
+---
+
+### ⑦ 원본 컨테이너 제거 후 새 이미지로 실행
+
+```bash
+docker stop my-nginx && docker rm my-nginx
+docker run -d -p 9090:80 --name my-nginx-v2 my-nginx-custom:v1
+```
+
+브라우저에서 `http://<App-VM-플로팅-IP>:9090` 에 접속하면 내가 수정한 페이지가 보입니다.
+
+!!! success "핵심 확인"
+    - 원본 `nginx` 이미지는 변하지 않았습니다
+    - `my-nginx-custom:v1` 은 nano + 수정된 index.html이 담긴 **나만의 이미지**입니다
+    - 이 이미지를 다른 서버에서 `docker run` 해도 **동일한 페이지**가 뜹니다
+
+---
+
 ## 개념 — 레지스트리
 
 > 이미지를 보관하고 꺼내쓰는 **창고**
@@ -352,7 +451,7 @@ flowchart LR
 
 ---
 
-## STEP 03 — NCR 서비스 활성화
+## STEP 04 — NCR 서비스 활성화
 
 1. 콘솔 상단 **서비스 선택** 클릭
 2. **Container** 분류에서 **NHN Container Registry(NCR)** 클릭
@@ -369,7 +468,7 @@ flowchart LR
 
 ---
 
-## STEP 04 — 레지스트리 생성
+## STEP 05 — 레지스트리 생성
 
 ```
 Container > NHN Container Registry(NCR) > + 레지스트리 생성
@@ -386,7 +485,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 05 — 레지스트리 접근 정보 확인
+## STEP 06 — 레지스트리 접근 정보 확인
 
 `minwon-registry` 클릭 → **기본 정보** 탭에서 아래 정보를 확인합니다.
 
@@ -403,7 +502,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 06 — 강사 이미지 주소 확인
+## STEP 07 — 강사 이미지 주소 확인
 
 이번 실습에서는 강사가 미리 만들어 둔 이미지를 사용합니다.
 
@@ -429,8 +528,9 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 | ② | 이미지와 컨테이너의 차이를 설명할 수 있다 |
 | ③ | App VM에 Docker가 설치되었다 (`docker --version` 확인) |
 | ④ | nginx · httpd 컨테이너를 실행하고 `docker ps`로 확인했다 |
-| ⑤ | NCR 레지스트리가 생성되었다 |
-| ⑥ | 강사 이미지 주소를 확인했다 |
+| ⑤ | `docker commit`으로 나만의 이미지를 만들고 실행했다 |
+| ⑥ | NCR 레지스트리가 생성되었다 |
+| ⑦ | 강사 이미지 주소를 확인했다 |
 
 ---
 
