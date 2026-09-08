@@ -9,14 +9,15 @@
 
 | STEP | 내용 |
 |------|------|
-| 01 | Docker 설치 |
-| 02 | 컨테이너 맛보기 — nginx · httpd 실행 |
-| 03 | 나만의 nginx 이미지 만들기 |
-| 04 | NCR 서비스 활성화 |
-| 05 | 레지스트리 생성 |
-| 06 | 레지스트리 접근 정보 확인 |
-| 07 | 내 이미지를 레지스트리에 올리기 |
-| 08 | 강사 레지스트리에서 이미지 주소 확인 |
+| 01 | App VM에 SSH 접속 |
+| 02 | Docker 설치 |
+| 03 | 컨테이너 맛보기 — nginx · httpd 실행 |
+| 04 | 나만의 nginx 이미지 만들기 |
+| 05 | NCR 서비스 활성화 |
+| 06 | 레지스트리 생성 |
+| 07 | 레지스트리 접근 정보 확인 |
+| 08 | 내 이미지를 레지스트리에 올리기 |
+| 09 | 강사 레지스트리에서 이미지 주소 확인 |
 
 ---
 
@@ -102,7 +103,43 @@ flowchart TB
 
 ---
 
-## STEP 01 — Docker 설치
+## STEP 01 — App VM에 SSH 접속
+
+**① Windows PowerShell 열기**
+
+시작 메뉴에서 **PowerShell** 검색 후 실행
+
+---
+
+**② 키파일 위치 확인**
+
+1일차에서 다운로드한 `nhn-temp-key.pem` 파일 위치를 확인합니다.
+보통 `C:\Users\사용자이름\Downloads\` 에 있습니다.
+
+---
+
+**③ SSH 접속**
+
+```powershell
+ssh -i C:\Users\사용자이름\Downloads\nhn-temp-key.pem ubuntu@<App-VM-플로팅-IP>
+```
+
+!!! warning "App VM 플로팅 IP 확인"
+    1일차에서 App VM에 연결된 플로팅 IP를 확인합니다.
+
+    `Compute > Instance > minwon-app-01 체크 > 플로팅 IP 관리`
+
+처음 접속 시 아래 메시지가 나오면 `yes` 입력 후 Enter:
+
+```
+Are you sure you want to continue connecting? yes
+```
+
+`ubuntu@minwon-app-01:~$` 가 보이면 접속 성공입니다.
+
+---
+
+## STEP 02 — Docker 설치
 
 App VM 터미널에서 아래 명령을 **순서대로** 실행합니다.
 
@@ -137,7 +174,7 @@ Docker version 29.8.0, build 88096ef ← 이렇게 나오면 정상
 
 ---
 
-## STEP 02 — 컨테이너 맛보기
+## STEP 03 — 컨테이너 맛보기
 
 > 명령어 한 줄이면 서버가 뜹니다. 직접 확인해봅니다.
 
@@ -330,7 +367,7 @@ Ubuntu 기본 파일              ← 거의 안 바뀌는 층
 
 ---
 
-## STEP 03 — 나만의 nginx 이미지 만들기
+## STEP 04 — 나만의 nginx 이미지 만들기
 
 > 컨테이너 안에서 직접 파일을 수정하고, 그 상태를 새 이미지로 저장해봅니다.
 
@@ -460,7 +497,7 @@ flowchart LR
 
 ---
 
-## STEP 04 — NCR 서비스 활성화
+## STEP 05 — NCR 서비스 활성화
 
 1. 콘솔 상단 **서비스 선택** 클릭
 2. **Container** 분류에서 **NHN Container Registry(NCR)** 클릭
@@ -477,7 +514,7 @@ flowchart LR
 
 ---
 
-## STEP 05 — 레지스트리 생성
+## STEP 06 — 레지스트리 생성
 
 ```
 Container > NHN Container Registry(NCR) > + 레지스트리 생성
@@ -494,7 +531,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 06 — 레지스트리 접근 정보 확인
+## STEP 07 — 레지스트리 접근 정보 확인
 
 `minwon-registry` 클릭 → **기본 정보** 탭에서 아래 정보를 확인합니다.
 
@@ -511,7 +548,7 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 07 — 내 이미지를 레지스트리에 올리기
+## STEP 08 — 내 이미지를 레지스트리에 올리기
 
 > STEP 03에서 만든 `my-nginx-custom:v1` 이미지를 강사 레지스트리에 push합니다.
 
@@ -589,7 +626,7 @@ v1: digest: sha256:xxxx size: xxxx
 
 ---
 
-## STEP 08 — 강사 이미지 주소 확인
+## STEP 09 — 강사 이미지 주소 확인
 
 이번 실습에서는 강사가 미리 만들어 둔 이미지를 사용합니다.
 
@@ -613,12 +650,13 @@ v1: digest: sha256:xxxx size: xxxx
 |---|---------|
 | ① | 어제 방식에서 서버마다 결과가 달라지는 이유를 말할 수 있다 |
 | ② | 이미지와 컨테이너의 차이를 설명할 수 있다 |
-| ③ | App VM에 Docker가 설치되었다 (`docker --version` 확인) |
-| ④ | nginx · httpd 컨테이너를 실행하고 `docker ps`로 확인했다 |
-| ⑤ | `docker commit`으로 나만의 이미지를 만들고 실행했다 |
-| ⑥ | NCR 레지스트리가 생성되었다 |
-| ⑦ | 내 이미지를 NCR에 push하고 콘솔에서 확인했다 |
-| ⑧ | 강사 이미지 주소를 확인했다 |
+| ③ | App VM에 SSH 접속했다 |
+| ④ | App VM에 Docker가 설치되었다 (`docker --version` 확인) |
+| ⑤ | nginx · httpd 컨테이너를 실행하고 `docker ps`로 확인했다 |
+| ⑥ | `docker commit`으로 나만의 이미지를 만들고 실행했다 |
+| ⑦ | NCR 레지스트리가 생성되었다 |
+| ⑧ | 내 이미지를 강사 레지스트리에 push하고 확인했다 |
+| ⑨ | 강사 이미지 주소를 확인했다 |
 
 ---
 

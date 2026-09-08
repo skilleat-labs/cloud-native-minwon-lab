@@ -9,14 +9,12 @@
 
 | STEP | 내용 |
 |------|------|
-| 01 | App VM에 SSH 접속 |
-| 02 | Docker 설치 |
-| 03 | NCR 로그인 |
-| 04 | 강사 이미지 주소 확인 |
-| 05 | 이미지 Pull & 컨테이너 실행 |
-| 06 | 보안 그룹 8081 포트 오픈 |
-| 07 | 동작 확인 |
-| 08 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
+| 01 | NCR 로그인 |
+| 02 | 강사 이미지 주소 확인 |
+| 03 | 이미지 Pull & 컨테이너 실행 |
+| 04 | 보안 그룹 8081 포트 오픈 |
+| 05 | 동작 확인 |
+| 06 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
 
 ---
 
@@ -73,78 +71,7 @@ flowchart LR
 
 ---
 
-## STEP 01 — App VM에 SSH 접속
-
-**① Windows PowerShell 열기**
-
-시작 메뉴에서 **PowerShell** 검색 후 실행
-
----
-
-**② 키파일 위치 확인**
-
-1일차에서 다운로드한 `nhn-temp-key.pem` 파일 위치를 확인합니다.
-보통 `C:\Users\사용자이름\Downloads\` 에 있습니다.
-
----
-
-**③ SSH 접속**
-
-```powershell
-ssh -i C:\Users\사용자이름\Downloads\nhn-temp-key.pem ubuntu@<App-VM-플로팅-IP>
-```
-
-!!! warning "App VM 플로팅 IP 확인"
-    4차시에서 App VM의 플로팅 IP를 LB로 옮겼습니다.
-    접속을 위해 **새 플로팅 IP를 임시로 생성**해서 App VM에 연결하세요.
-
-    `Compute > Instance > minwon-app-01 체크 > 플로팅 IP 관리 > 생성 후 연결`
-
-처음 접속 시 아래 메시지가 나오면 `yes` 입력 후 Enter:
-```
-Are you sure you want to continue connecting? yes
-```
-
-`ubuntu@minwon-app-01:~$` 가 보이면 접속 성공입니다.
-
----
-
-## STEP 02 — Docker 설치
-
-App VM 터미널에서 아래 명령을 **순서대로** 실행합니다.
-
-**① Docker 설치**
-
-```bash
-curl -fsSL https://get.docker.com | sudo sh
-```
-
-설치에 1~2분 소요됩니다.
-
----
-
-**② 현재 사용자에게 Docker 권한 부여**
-
-```bash
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
----
-
-**③ 설치 확인**
-
-```bash
-docker --version
-```
-
-```
-Docker version 29.8.0, build 88096ef ← 이렇게 나오면 정상
-```
-
----
-
-## STEP 03 — NCR 로그인
+## STEP 01 — NCR 로그인
 
 강사에게 받은 아이디와 비밀번호로 로그인합니다.
 
@@ -161,7 +88,7 @@ Password: (강사 제공)
 
 ---
 
-## STEP 04 — 강사 이미지 주소 확인
+## STEP 02 — 강사 이미지 주소 확인
 
 이번 실습에서는 강사가 미리 만들어 둔 이미지를 사용합니다.
 
@@ -179,7 +106,7 @@ Password: (강사 제공)
 
 ---
 
-## STEP 05 — 이미지 Pull & 컨테이너 실행
+## STEP 03 — 이미지 Pull & 컨테이너 실행
 
 ### 5-1. 이미지 받기
 
@@ -233,7 +160,7 @@ DB 주소, Object Storage 정보 등을 따로 입력할 필요가 없어요.
 
 ---
 
-## STEP 06 — 보안 그룹 8081 포트 오픈
+## STEP 04 — 보안 그룹 8081 포트 오픈
 
 컨테이너는 실행됐지만 외부에서 접속하려면 **보안 그룹(방화벽)이 8081 포트를 허용**해야 합니다.
 
@@ -288,7 +215,7 @@ Network > Security Groups > minwon-sg-app
 
 ---
 
-## STEP 07 — 동작 확인
+## STEP 05 — 동작 확인
 
 **① 컨테이너 실행 상태 확인**
 
@@ -341,7 +268,7 @@ http://<App-VM-플로팅-IP>:8081
 
 ---
 
-## STEP 08 — 컨테이너 삭제 후 재실행 관찰
+## STEP 06 — 컨테이너 삭제 후 재실행 관찰
 
 컨테이너를 지우면 **컨테이너 안의 데이터는 사라지지만, DB와 Object Storage는 그대로**임을 확인합니다.
 
