@@ -515,7 +515,24 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 > STEP 03에서 만든 `my-nginx-custom:v1` 이미지를 내 NCR 레지스트리에 push합니다.
 
-### ① NCR 로그인
+### ① API 보안 설정에서 키 발급
+
+docker login에는 NHN Cloud 계정 이메일/비밀번호가 아니라 **User Access Key**를 사용합니다.
+
+콘솔 우측 상단 계정명 클릭 → **마이페이지** → **API 보안 설정** → **User Access Key ID 생성**
+
+| 항목 | 설명 |
+|------|------|
+| User Access Key ID | docker login 시 **Username**으로 입력 |
+| Secret Access Key | docker login 시 **Password**로 입력 |
+
+!!! warning "Secret Access Key는 발급 시 한 번만 표시됩니다"
+    창을 닫으면 다시 확인할 수 없으니 발급 즉시 메모장에 복사해 두세요.
+    분실 시 재생성해야 합니다.
+
+---
+
+### ② NCR 로그인
 
 STEP 06에서 확인한 **Docker 접근 명령어**를 복사해서 실행합니다.
 
@@ -523,17 +540,15 @@ STEP 06에서 확인한 **Docker 접근 명령어**를 복사해서 실행합니
 docker login <Public-URI>
 ```
 
-아이디와 비밀번호는 강사에게 받은 NHN Cloud 계정 정보를 입력합니다.
-
 ```
-Username: xxxxxxxx@nhncloud.com
-Password:
+Username: {User Access Key ID}
+Password: {Secret Access Key}
 Login Succeeded
 ```
 
 ---
 
-### ② 이미지에 레지스트리 주소 태그 붙이기
+### ③ 이미지에 레지스트리 주소 태그 붙이기
 
 Docker는 이미지를 push할 때 **이미지 이름 앞에 레지스트리 주소**가 포함되어 있어야 합니다.
 STEP 06에서 확인한 Public URI로 새 태그를 붙입니다.
@@ -564,7 +579,7 @@ nginx                                                                           
 
 ---
 
-### ③ 이미지 Push
+### ④ 이미지 Push
 
 ```bash
 docker push <Public-URI>/my-nginx-custom:v1
@@ -583,7 +598,7 @@ v1: digest: sha256:xxxx size: xxxx
 
 ---
 
-### ④ 콘솔에서 확인
+### ⑤ 콘솔에서 확인
 
 NHN Cloud 콘솔 → `Container > NHN Container Registry(NCR) > minwon-registry` 클릭
 
