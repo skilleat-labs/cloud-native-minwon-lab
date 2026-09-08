@@ -142,13 +142,13 @@ Docker version 29.8.0, build 88096ef ← 이렇게 나오면 정상
 ### nginx 실행
 
 ```bash
-docker run -d -p 80:80 --name nginx-test nginx
+docker run -d -p 9090:80 --name nginx-test nginx
 ```
 
 | 옵션 | 의미 |
 |------|------|
 | `-d` | 백그라운드로 실행 |
-| `-p 80:80` | 호스트 80포트 → 컨테이너 80포트 연결 |
+| `-p 9090:80` | 호스트 9090포트 → 컨테이너 80포트 연결 |
 | `--name nginx-test` | 컨테이너 이름 지정 |
 | `nginx` | Docker Hub에서 가져올 이미지 이름 |
 
@@ -170,18 +170,18 @@ docker ps
 ```
 
 ```
-CONTAINER ID   IMAGE   COMMAND                  CREATED         STATUS         PORTS                NAMES
-a1b2c3d4e5f6   nginx   "/docker-entrypoint.…"   5 seconds ago   Up 4 seconds   0.0.0.0:80->80/tcp   nginx-test
+CONTAINER ID   IMAGE   COMMAND                  CREATED         STATUS         PORTS                  NAMES
+a1b2c3d4e5f6   nginx   "/docker-entrypoint.…"   5 seconds ago   Up 4 seconds   0.0.0.0:9090->80/tcp   nginx-test
 ```
 
-`Up` 상태가 보이면 정상입니다.
+`Up` 상태가 보이면 컨테이너는 정상입니다.
 
 ---
 
 ### httpd(Apache) 추가 실행
 
 ```bash
-docker run -d -p 8080:80 --name httpd-test httpd
+docker run -d -p 9091:80 --name httpd-test httpd
 ```
 
 다시 `docker ps`로 두 컨테이너가 동시에 뜬 것을 확인합니다:
@@ -192,12 +192,59 @@ docker ps
 
 ```
 CONTAINER ID   IMAGE   ...   PORTS                  NAMES
-b2c3d4e5f6a7   httpd   ...   0.0.0.0:8080->80/tcp   httpd-test
-a1b2c3d4e5f6   nginx   ...   0.0.0.0:80->80/tcp     nginx-test
+b2c3d4e5f6a7   httpd   ...   0.0.0.0:9091->80/tcp   httpd-test
+a1b2c3d4e5f6   nginx   ...   0.0.0.0:9090->80/tcp   nginx-test
 ```
 
 !!! tip "포인트"
     이미지가 다르면 포트만 다르게 지정해서 **같은 서버에서 동시에 여러 서비스**를 실행할 수 있습니다.
+
+---
+
+### 브라우저에서 접속해봅니다
+
+브라우저 주소창에 아래 주소를 입력해봅니다.
+
+```
+http://<App-VM-플로팅-IP>:9090
+http://<App-VM-플로팅-IP>:9091
+```
+
+**접속이 안 됩니다.** 컨테이너는 정상적으로 실행 중인데 왜 안 될까요?
+
+!!! warning "컨테이너는 떴는데 왜 안 열리지?"
+    `docker ps`에서 `Up` 상태를 확인했으니 컨테이너 자체는 정상입니다.
+    문제는 **NHN Cloud 보안 그룹**이 9090, 9091 포트를 막고 있기 때문입니다.
+
+    클라우드에서는 VM 방화벽(OS)과 별도로 **보안 그룹**이라는 네트워크 레벨 방화벽이 존재합니다.
+    허용 규칙을 추가하지 않으면 포트를 열어도 외부에서 접근할 수 없습니다.
+
+```mermaid
+flowchart LR
+    U["👤 브라우저\n:9090"]
+    SG["🔒 보안 그룹\n9090 ❌ 차단"]
+    VM["🖥️ App VM\n:9090 열려 있음"]
+    CT["📦 nginx 컨테이너\n:80"]
+
+    U -->|"요청"| SG
+    SG -->|"차단"| VM
+    VM --- CT
+
+    style SG fill:#ffcccc,stroke:#dc3545
+```
+
+**보안 그룹에서 9090, 9091 포트를 허용하면 접속됩니다.**
+
+```
+Network > Security Groups > minwon-sg > + 규칙 추가
+```
+
+| 방향 | 프로토콜 | 포트 범위 |
+|------|---------|---------|
+| 수신 | TCP | 9090 |
+| 수신 | TCP | 9091 |
+
+규칙 추가 후 브라우저를 새로고침하면 nginx 기본 페이지와 httpd 기본 페이지가 각각 보입니다.
 
 ---
 
