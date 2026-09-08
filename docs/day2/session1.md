@@ -100,75 +100,6 @@ flowchart TB
 
 ---
 
-## 개념 — 이미지와 컨테이너
-
-> **이미지** = 붕어빵 **틀** (설계도, 변하지 않음)
-> **컨테이너** = 붕어빵 (이미지를 실행한 것, 여러 개 찍어낼 수 있음)
-
-```mermaid
-flowchart LR
-    IMG["📋 이미지\ncomplaint-app:latest\n(읽기 전용 설계도)"]
-    C1["📦 컨테이너 1\n실행 중"]
-    C2["📦 컨테이너 2\n실행 중"]
-    C3["📦 컨테이너 3\n실행 중"]
-
-    IMG -->|"docker run"| C1
-    IMG -->|"docker run"| C2
-    IMG -->|"docker run"| C3
-
-    style IMG fill:#fff3cd,stroke:#f0ad4e
-    style C1 fill:#e8f4fd,stroke:#2196F3
-    style C2 fill:#e8f4fd,stroke:#2196F3
-    style C3 fill:#e8f4fd,stroke:#2196F3
-```
-
-| 개념 | 설명 |
-|------|------|
-| 이미지 | 변하지 않는 읽기 전용 패키지. 같은 이미지는 어디서나 동일 |
-| 컨테이너 | 이미지를 실행한 상태. 여러 개 만들 수 있고 언제든 교체 가능 |
-| 태그 | 이미지의 버전 (예: `complaint-app:1.0`, `complaint-app:latest`) |
-
-!!! tip "어제와 달라지는 점"
-    - 어제: "서버에 들어가서 파일을 바꿨습니다"
-    - 오늘부터: "새 이미지로 컨테이너를 교체합니다"
-
-### 이미지는 층(레이어)으로 쌓여 있어요
-
-```
-민원 서비스 앱 코드          ← 자주 바뀌는 층
-앱이 쓰는 Python 라이브러리
-Python 3.11 런타임
-Ubuntu 기본 파일              ← 거의 안 바뀌는 층
-```
-
-새 버전을 배포할 때 바뀐 층만 전송하기 때문에 빠릅니다.
-
----
-
-## 개념 — 레지스트리
-
-> 이미지를 보관하고 꺼내쓰는 **창고**
-
-```mermaid
-flowchart LR
-    DEV["👨‍💻 개발자\n(강사)"]
-    REG["🏭 레지스트리\nNCR\n이미지 창고"]
-    SRV1["🖥️ 서버 1"]
-    SRV2["🖥️ 서버 2"]
-    K8S["☸️ Kubernetes\n클러스터"]
-
-    DEV -->|"docker push\n이미지 올리기"| REG
-    REG -->|"docker pull\n이미지 받기"| SRV1
-    REG -->|"docker pull\n이미지 받기"| SRV2
-    REG -->|"자동 Pull"| K8S
-
-    style REG fill:#e8f5e9,stroke:#4caf50
-```
-
-**NHN Container Registry (NCR)** 가 이 역할을 합니다.
-
----
-
 ## STEP 01 — Docker 설치
 
 App VM 터미널에서 아래 명령을 **순서대로** 실행합니다.
@@ -302,6 +233,75 @@ docker ps   # 아무것도 안 나오면 정상
 !!! info "stop vs rm"
     - `stop`: 컨테이너 중지 (이미지는 남아 있음)
     - `rm`: 컨테이너 삭제 (이미지는 남아 있음, `docker images`로 확인 가능)
+
+---
+
+## 개념 — 이미지와 컨테이너
+
+> **이미지** = 붕어빵 **틀** (설계도, 변하지 않음)
+> **컨테이너** = 붕어빵 (이미지를 실행한 것, 여러 개 찍어낼 수 있음)
+
+```mermaid
+flowchart LR
+    IMG["📋 이미지\ncomplaint-app:latest\n(읽기 전용 설계도)"]
+    C1["📦 컨테이너 1\n실행 중"]
+    C2["📦 컨테이너 2\n실행 중"]
+    C3["📦 컨테이너 3\n실행 중"]
+
+    IMG -->|"docker run"| C1
+    IMG -->|"docker run"| C2
+    IMG -->|"docker run"| C3
+
+    style IMG fill:#fff3cd,stroke:#f0ad4e
+    style C1 fill:#e8f4fd,stroke:#2196F3
+    style C2 fill:#e8f4fd,stroke:#2196F3
+    style C3 fill:#e8f4fd,stroke:#2196F3
+```
+
+| 개념 | 설명 |
+|------|------|
+| 이미지 | 변하지 않는 읽기 전용 패키지. 같은 이미지는 어디서나 동일 |
+| 컨테이너 | 이미지를 실행한 상태. 여러 개 만들 수 있고 언제든 교체 가능 |
+| 태그 | 이미지의 버전 (예: `complaint-app:1.0`, `complaint-app:latest`) |
+
+!!! tip "어제와 달라지는 점"
+    - 어제: "서버에 들어가서 파일을 바꿨습니다"
+    - 오늘부터: "새 이미지로 컨테이너를 교체합니다"
+
+### 이미지는 층(레이어)으로 쌓여 있어요
+
+```
+민원 서비스 앱 코드          ← 자주 바뀌는 층
+앱이 쓰는 Python 라이브러리
+Python 3.11 런타임
+Ubuntu 기본 파일              ← 거의 안 바뀌는 층
+```
+
+새 버전을 배포할 때 바뀐 층만 전송하기 때문에 빠릅니다.
+
+---
+
+## 개념 — 레지스트리
+
+> 이미지를 보관하고 꺼내쓰는 **창고**
+
+```mermaid
+flowchart LR
+    DEV["👨‍💻 개발자\n(강사)"]
+    REG["🏭 레지스트리\nNCR\n이미지 창고"]
+    SRV1["🖥️ 서버 1"]
+    SRV2["🖥️ 서버 2"]
+    K8S["☸️ Kubernetes\n클러스터"]
+
+    DEV -->|"docker push\n이미지 올리기"| REG
+    REG -->|"docker pull\n이미지 받기"| SRV1
+    REG -->|"docker pull\n이미지 받기"| SRV2
+    REG -->|"자동 Pull"| K8S
+
+    style REG fill:#e8f5e9,stroke:#4caf50
+```
+
+**NHN Container Registry (NCR)** 가 이 역할을 합니다.
 
 ---
 
