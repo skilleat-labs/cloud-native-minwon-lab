@@ -394,6 +394,13 @@ exit
 docker commit my-nginx my-nginx-custom:v1
 ```
 
+| 부분 | 의미 |
+|------|------|
+| `docker commit` | 컨테이너의 현재 상태를 이미지로 저장하는 명령 |
+| `my-nginx` | 저장할 **컨테이너 이름** (방금 실행한 컨테이너) |
+| `my-nginx-custom` | 새로 만들 **이미지 이름** |
+| `:v1` | 이미지 **태그** (버전 구분용, 생략하면 `:latest`) |
+
 ```bash
 docker images
 ```
