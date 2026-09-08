@@ -15,7 +15,8 @@
 | 04 | NCR 서비스 활성화 |
 | 05 | 레지스트리 생성 |
 | 06 | 레지스트리 접근 정보 확인 |
-| 07 | 강사 레지스트리에서 이미지 주소 확인 |
+| 07 | 내 이미지를 레지스트리에 올리기 |
+| 08 | 강사 레지스트리에서 이미지 주소 확인 |
 
 ---
 
@@ -510,7 +511,91 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 
 ---
 
-## STEP 07 — 강사 이미지 주소 확인
+## STEP 07 — 내 이미지를 레지스트리에 올리기
+
+> STEP 03에서 만든 `my-nginx-custom:v1` 이미지를 내 NCR 레지스트리에 push합니다.
+
+### ① NCR 로그인
+
+STEP 06에서 확인한 **Docker 접근 명령어**를 복사해서 실행합니다.
+
+```bash
+docker login <Public-URI>
+```
+
+아이디와 비밀번호는 강사에게 받은 NHN Cloud 계정 정보를 입력합니다.
+
+```
+Username: xxxxxxxx@nhncloud.com
+Password:
+Login Succeeded
+```
+
+---
+
+### ② 이미지에 레지스트리 주소 태그 붙이기
+
+Docker는 이미지를 push할 때 **이미지 이름 앞에 레지스트리 주소**가 포함되어 있어야 합니다.
+STEP 06에서 확인한 Public URI로 새 태그를 붙입니다.
+
+```bash
+docker tag my-nginx-custom:v1 <Public-URI>/my-nginx-custom:v1
+```
+
+예시:
+```bash
+docker tag my-nginx-custom:v1 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/my-nginx-custom:v1
+```
+
+태그가 잘 붙었는지 확인합니다:
+
+```bash
+docker images
+```
+
+```
+REPOSITORY                                                                        TAG   ...
+43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/my-nginx-custom     v1    ...
+my-nginx-custom                                                                   v1    ...
+nginx                                                                             latest ...
+```
+
+같은 이미지에 태그만 추가된 것입니다. 용량이 두 배가 되는 것이 아닙니다.
+
+---
+
+### ③ 이미지 Push
+
+```bash
+docker push <Public-URI>/my-nginx-custom:v1
+```
+
+예시:
+```bash
+docker push 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/my-nginx-custom:v1
+```
+
+```
+The push refers to repository [43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/my-nginx-custom]
+...
+v1: digest: sha256:xxxx size: xxxx
+```
+
+---
+
+### ④ 콘솔에서 확인
+
+NHN Cloud 콘솔 → `Container > NHN Container Registry(NCR) > minwon-registry` 클릭
+
+**이미지** 탭에 `my-nginx-custom` 이 올라온 것을 확인합니다.
+
+!!! success "완료!"
+    내가 직접 만든 이미지가 레지스트리(창고)에 저장되었습니다.
+    이제 이 주소만 알면 어느 서버에서든 `docker pull` 로 꺼내 쓸 수 있습니다.
+
+---
+
+## STEP 08 — 강사 이미지 주소 확인
 
 이번 실습에서는 강사가 미리 만들어 둔 이미지를 사용합니다.
 
@@ -538,7 +623,8 @@ Container > NHN Container Registry(NCR) > + 레지스트리 생성
 | ④ | nginx · httpd 컨테이너를 실행하고 `docker ps`로 확인했다 |
 | ⑤ | `docker commit`으로 나만의 이미지를 만들고 실행했다 |
 | ⑥ | NCR 레지스트리가 생성되었다 |
-| ⑦ | 강사 이미지 주소를 확인했다 |
+| ⑦ | 내 이미지를 NCR에 push하고 콘솔에서 확인했다 |
+| ⑧ | 강사 이미지 주소를 확인했다 |
 
 ---
 
