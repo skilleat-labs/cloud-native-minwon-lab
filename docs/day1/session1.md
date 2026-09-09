@@ -36,7 +36,7 @@ NHN Cloud는 국내 기업 NHN이 운영하는 퍼블릭 클라우드 서비스�
 |------|---------------|---------|
 | 생성 방법 | 이메일로 직접 가입 | 조직 관리자가 발급 |
 | 주요 역할 | 조직 생성·결제 관리 | 프로젝트 내 작업 수행 |
-| 로그인 주소 | `console.nhncloud.com` | `gov-cloud.console.nhncloud.com` |
+| 로그인 주소 | `console.nhncloud.com` | `gov2-cloud.console.nhncloud.com` |
 | 이 실습에서 | 강사(조직 관리자)가 사용 | **수강생이 사용** |
 
 > 수강생은 **IAM 계정**으로 콘솔에 접속합니다.
@@ -65,9 +65,9 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 
 | 항목 | 예시 |
 |------|------|
-| IAM 계정 ID | `gov1.edu1` ~ `gov1.edu20` |
+| IAM 계정 ID | `gov2.edu1` ~ `gov2.edu35` |
 | 임시 비밀번호 | 별도 전달 |
-| IAM 계정 로그인 URL | [https://gov-cloud.console.nhncloud.com](https://gov-cloud.console.nhncloud.com) |
+| IAM 계정 로그인 URL | [https://gov2-cloud.console.nhncloud.com](https://gov2-cloud.console.nhncloud.com) |
 
 ---
 
@@ -77,7 +77,7 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 
 ### 로그인 방법
 
-1. **[https://gov-cloud.console.nhncloud.com](https://gov-cloud.console.nhncloud.com)** 으로 접속합니다
+1. **[https://gov2-cloud.console.nhncloud.com](https://gov2-cloud.console.nhncloud.com)** 으로 접속합니다
 
 ![IAM 로그인 화면](./images/01-iam-login.png)
 > 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
@@ -126,7 +126,7 @@ NHN Cloud의 자원 관리는 **조직 → 프로젝트 → 자원** 계층으�
 
 !!! tip "내 번호 확인"
     강사가 배부한 계정 목록에서 본인 번호를 확인하세요.
-    예: 계정이 `gov1.edu1`이면 프로젝트 이름은 `minwon-service-01`
+    예: 계정이 `gov2.edu1`이면 프로젝트 이름은 `minwon-service-01`
 
 !!! info "프로젝트와 자원"
     방금 만든 프로젝트는 비어있는 상태입니다.
