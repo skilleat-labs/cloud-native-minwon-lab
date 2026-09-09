@@ -169,7 +169,7 @@ curl -fsSL https://get.docker.com | sudo sh
 
 ```bash
 sudo usermod -aG docker $USER
-newgrp docker
+sudo newgrp docker
 ```
 
 ---
