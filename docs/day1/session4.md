@@ -10,10 +10,10 @@
 | STEP | 자원 | 역할 |
 |------|------|------|
 | 01 | DB VM | 민원 데이터 저장 서버 (MySQL 자동 설치) |
-| 02 | Block Storage | DB 데이터 전용 디스크 |
-| 03 | Block Storage 연결 및 마운트 | 데이터 디스크 준비 |
-| 04 | DB VM 사설 IP 확인 | App VM 연결 정보 수집 |
-| 05 | App VM | 민원 서비스 실행 서버 (앱 자동 배포) |
+| 02 | DB VM 사설 IP 확인 | App VM 연결 정보 수집 |
+| 03 | App VM | 민원 서비스 실행 서버 (앱 자동 배포) |
+| 04 | Block Storage | DB 데이터 전용 디스크 |
+| 05 | Block Storage 연결 및 마운트 | 데이터 디스크 준비 |
 | 06 | 배포 확인 | 앱 정상 실행 확인 |
 
 !!! tip "순서가 중요합니다"
@@ -201,7 +201,162 @@ echo "✅ DB 초기화 완료"
 
 ---
 
-## STEP 02 — Block Storage 생성
+## STEP 02 — DB VM 사설 IP 확인
+
+App VM의 사용자 스크립트에 DB VM의 사설 IP가 필요합니다.
+
+```
+Compute > Instance > minwon-db-01 클릭
+→ 상세 정보 > IP 주소 확인
+```
+
+| 항목 | 내가 확인한 값 |
+|------|-------------|
+| DB VM 사설 IP | 192.168.1. ___ |
+
+!!! warning "이 IP는 다음 단계(App VM 생성)에서 바로 사용합니다"
+    메모해 두세요.
+
+---
+
+## STEP 03 — App VM 생성 ✋ 스스로 해보기
+
+!!! tip "이번 STEP은 캡처 없이 직접 해보는 시간입니다"
+    DB VM을 만들었던 순서와 동일합니다.
+    아래 설정값 표를 보면서 **천천히, 하나씩** 진행해보세요.
+    DB VM과 다른 항목은 **굵게** 표시했습니다.
+
+### 콘솔 경로
+
+```
+Compute > Instance > 인스턴스 생성
+```
+
+### 설정값
+
+| 항목 | 값 | 주의 |
+|------|---|------|
+| 이름 | **`minwon-app-01`** | |
+| 이미지 | Ubuntu Server 22.04 LTS | OS > Ubuntu 선택 |
+| 인스턴스 타입 | `t2.c1m1` (1 vCPU, 1GB RAM) | |
+| 가용성 영역 | 임의의 가용성 영역 | |
+| 루트 디스크 | HDD 20GB | |
+| VPC | `minwon-vpc` | |
+| 서브넷 | **`minwon-subnet-app`** | ⚠️ DB와 다름 |
+| 보안 그룹 | **`minwon-sg-app`** | ⚠️ DB와 다름 |
+| 키페어 | DB VM과 동일한 키페어 사용 | 키페어 다운로드 이미 완료 |
+| 플로팅 IP | **사용** | ⚠️ DB와 다름 — App은 공인 IP 직접 연결 |
+
+!!! danger "❌ 이 3가지를 틀리면 서비스가 절대 동작하지 않습니다"
+    1. **서브넷** → 반드시 `minwon-subnet-app` (DB 서브넷 선택 금지)
+    2. **보안 그룹** → 반드시 `minwon-sg-app` (DB 보안 그룹 선택 금지)
+    3. **플로팅 IP** → 반드시 **사용** 으로 설정 (App VM은 공인 IP로 직접 접속)
+
+### 사용자 스크립트 입력
+
+**추가 설정 > 사용자 스크립트** 란에 아래 내용을 붙여넣습니다.
+
+!!! danger "스크립트에서 딱 한 줄만 수정합니다"
+    스크립트 전체 중 **수정할 곳은 단 한 줄**입니다.
+
+    **수정 전 (그대로 붙여넣으면 안 됨)**
+    ```
+    DB_HOST="192.168.1.10"
+    ```
+
+    **수정 후 (STEP 04에서 확인한 내 DB VM 사설 IP로 교체)**
+    ```
+    DB_HOST="192.168.1.XX"   ← 내 DB VM IP로 변경
+    ```
+
+    ⚠️ `DB_PORT`, `DB_USER`, `DB_PASSWORD` 등 **나머지 줄은 절대 수정하지 마세요.**
+
+    아래 캡처는 예시입니다. **반드시 본인의 DB VM IP를 직접 확인해서 입력하세요.**
+    옆 사람 IP를 그대로 따라 쓰면 내 서비스가 동작하지 않습니다.
+
+    ![DB_HOST 수정 예시](./images/3-14-userscript-db-host.png)
+> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
+
+```bash
+#!/bin/bash
+set -e
+
+# ── ① 이 줄만 수정하세요 ───────────────────────────
+DB_HOST="192.168.1.10"        # ← 내 DB VM 사설 IP로 변경 (나머지는 수정 금지)
+DB_PORT="3306"
+DB_USER="complaint_user"
+DB_PASSWORD="Minjeon2024!"
+DB_NAME="complaints_db"
+APP_PORT="8080"
+GITHUB_REPO="https://github.com/skilleat-labs/cloud-native-minwon-lab.git"
+APP_DIR="/opt/complaint-app"
+# ──────────────────────────────────────────────────
+
+echo "===== [1/6] 패키지 설치 ====="
+apt-get update -y
+apt-get install -y python3 python3-pip git bash-completion
+
+echo "===== [2/6] 소스 clone ====="
+git clone "$GITHUB_REPO" /tmp/minwon-repo
+mkdir -p "$APP_DIR"
+cp -r /tmp/minwon-repo/app/. "$APP_DIR/"
+
+echo "===== [3/6] 의존성 설치 ====="
+pip3 install -r "$APP_DIR/requirements.txt" --break-system-packages 2>/dev/null || \
+  pip3 install -r "$APP_DIR/requirements.txt"
+
+echo "===== [4/6] 환경변수 파일 생성 ====="
+cat > "$APP_DIR/.env" <<EOF
+DB_HOST=${DB_HOST}
+DB_PORT=${DB_PORT}
+DB_USER=${DB_USER}
+DB_PASSWORD=${DB_PASSWORD}
+DB_NAME=${DB_NAME}
+PORT=${APP_PORT}
+EOF
+
+echo "===== [5/6] systemd 서비스 등록 ====="
+cat > /etc/systemd/system/complaint-app.service <<EOF
+[Unit]
+Description=온라인 민원 서비스
+After=network.target
+
+[Service]
+WorkingDirectory=${APP_DIR}
+EnvironmentFile=${APP_DIR}/.env
+ExecStart=/usr/bin/python3 ${APP_DIR}/app.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable complaint-app
+
+# hostname이 127.0.1.1로 매핑되는 Ubuntu 기본값을 실제 사설 IP로 교체
+PRIVATE_IP=$(hostname -I | awk '{print $1}')
+sed -i "s/127.0.1.1/$PRIVATE_IP/" /etc/hosts
+
+systemctl start complaint-app
+
+echo "===== [6/6] kubectl 설치 및 bash completion 설정 ====="
+KUBECTL_VER=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+curl -LO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
+chmod +x kubectl
+mv kubectl /usr/local/bin/
+kubectl completion bash > /etc/bash_completion.d/kubectl
+# ubuntu 유저 로그인 시 자동 로드
+echo 'source /usr/share/bash-completion/bash_completion' >> /home/ubuntu/.bashrc
+echo 'source /etc/bash_completion.d/kubectl' >> /home/ubuntu/.bashrc
+
+echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT}"
+```
+
+---
+
+## STEP 04 — Block Storage 생성
 
 !!! warning "생성 전 — DB VM의 가용성 영역을 먼저 확인하세요"
     Block Storage는 **인스턴스와 같은 가용성 영역(AZ)** 에 있어야 연결할 수 있습니다.
@@ -248,7 +403,7 @@ Storage > Block Storage > 블록 스토리지 생성
 
 ---
 
-## STEP 03 — Block Storage 연결 및 마운트
+## STEP 05 — Block Storage 연결 및 마운트
 
 ### 3-1. 콘솔에서 연결
 
@@ -317,16 +472,16 @@ cd C:\Users\사용자이름\Downloads
 
 > 키페어 `.pem` 파일을 다운로드한 폴더로 이동합니다. 대부분 `Downloads` 폴더에 있습니다.
 
-**③ 키페어 권한 설정 (Windows 필수)**
+??? note "③ 키페어 권한 설정 (Windows 필수) — 오류 발생 시 펼치기"
+    Windows는 `.pem` 파일을 다운로드하면 권한이 열려있어서 SSH가 거부됩니다.
+    접속 전에 반드시 아래 명령을 실행하세요.
 
-Windows는 `.pem` 파일을 다운로드하면 권한이 열려있어서 SSH가 거부됩니다.  
-접속 전에 반드시 아래 명령을 실행하세요.
+    ```powershell
+    icacls "MyKey.pem" /inheritance:r /grant:r "$($env:USERNAME):(R)"
+    ```
 
-```powershell
-icacls "MyKey.pem" /inheritance:r /grant:r "$($env:USERNAME):(R)"
-```
+    이 단계를 건너뛰면 아래 오류가 발생합니다:
 
-!!! danger "이 단계를 건너뛰면 아래 오류가 발생합니다"
     ```
     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     @         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
@@ -467,161 +622,6 @@ Filesystem       Size  Used Avail Use% Mounted on
 
 ---
 
-## STEP 04 — DB VM 사설 IP 확인
-
-App VM의 사용자 스크립트에 DB VM의 사설 IP가 필요합니다.
-
-```
-Compute > Instance > minwon-db-01 클릭
-→ 상세 정보 > IP 주소 확인
-```
-
-| 항목 | 내가 확인한 값 |
-|------|-------------|
-| DB VM 사설 IP | 192.168.1. ___ |
-
-!!! warning "이 IP는 다음 단계(App VM 생성)에서 바로 사용합니다"
-    메모해 두세요.
-
----
-
-## STEP 05 — App VM 생성 ✋ 스스로 해보기
-
-!!! tip "이번 STEP은 캡처 없이 직접 해보는 시간입니다"
-    DB VM을 만들었던 순서와 동일합니다.
-    아래 설정값 표를 보면서 **천천히, 하나씩** 진행해보세요.
-    DB VM과 다른 항목은 **굵게** 표시했습니다.
-
-### 콘솔 경로
-
-```
-Compute > Instance > 인스턴스 생성
-```
-
-### 설정값
-
-| 항목 | 값 | 주의 |
-|------|---|------|
-| 이름 | **`minwon-app-01`** | |
-| 이미지 | Ubuntu Server 22.04 LTS | OS > Ubuntu 선택 |
-| 인스턴스 타입 | `t2.c1m1` (1 vCPU, 1GB RAM) | |
-| 가용성 영역 | 임의의 가용성 영역 | |
-| 루트 디스크 | HDD 20GB | |
-| VPC | `minwon-vpc` | |
-| 서브넷 | **`minwon-subnet-app`** | ⚠️ DB와 다름 |
-| 보안 그룹 | **`minwon-sg-app`** | ⚠️ DB와 다름 |
-| 키페어 | DB VM과 동일한 키페어 사용 | 키페어 다운로드 이미 완료 |
-| 플로팅 IP | **사용** | ⚠️ DB와 다름 — App은 공인 IP 직접 연결 |
-
-!!! danger "❌ 이 3가지를 틀리면 서비스가 절대 동작하지 않습니다"
-    1. **서브넷** → 반드시 `minwon-subnet-app` (DB 서브넷 선택 금지)
-    2. **보안 그룹** → 반드시 `minwon-sg-app` (DB 보안 그룹 선택 금지)
-    3. **플로팅 IP** → 반드시 **사용** 으로 설정 (App VM은 공인 IP로 직접 접속)
-
-### 사용자 스크립트 입력
-
-**추가 설정 > 사용자 스크립트** 란에 아래 내용을 붙여넣습니다.
-
-!!! danger "스크립트에서 딱 한 줄만 수정합니다"
-    스크립트 전체 중 **수정할 곳은 단 한 줄**입니다.
-
-    **수정 전 (그대로 붙여넣으면 안 됨)**
-    ```
-    DB_HOST="192.168.1.10"
-    ```
-
-    **수정 후 (STEP 04에서 확인한 내 DB VM 사설 IP로 교체)**
-    ```
-    DB_HOST="192.168.1.XX"   ← 내 DB VM IP로 변경
-    ```
-
-    ⚠️ `DB_PORT`, `DB_USER`, `DB_PASSWORD` 등 **나머지 줄은 절대 수정하지 마세요.**
-
-    아래 캡처는 예시입니다. **반드시 본인의 DB VM IP를 직접 확인해서 입력하세요.**
-    옆 사람 IP를 그대로 따라 쓰면 내 서비스가 동작하지 않습니다.
-
-    ![DB_HOST 수정 예시](./images/3-14-userscript-db-host.png)
-> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
-
-```bash
-#!/bin/bash
-set -e
-
-# ── ① 이 줄만 수정하세요 ───────────────────────────
-DB_HOST="192.168.1.10"        # ← 내 DB VM 사설 IP로 변경 (나머지는 수정 금지)
-DB_PORT="3306"
-DB_USER="complaint_user"
-DB_PASSWORD="Minjeon2024!"
-DB_NAME="complaints_db"
-APP_PORT="8080"
-GITHUB_REPO="https://github.com/skilleat-labs/cloud-native-minwon-lab.git"
-APP_DIR="/opt/complaint-app"
-# ──────────────────────────────────────────────────
-
-echo "===== [1/6] 패키지 설치 ====="
-apt-get update -y
-apt-get install -y python3 python3-pip git bash-completion
-
-echo "===== [2/6] 소스 clone ====="
-git clone "$GITHUB_REPO" /tmp/minwon-repo
-mkdir -p "$APP_DIR"
-cp -r /tmp/minwon-repo/app/. "$APP_DIR/"
-
-echo "===== [3/6] 의존성 설치 ====="
-pip3 install -r "$APP_DIR/requirements.txt" --break-system-packages 2>/dev/null || \
-  pip3 install -r "$APP_DIR/requirements.txt"
-
-echo "===== [4/6] 환경변수 파일 생성 ====="
-cat > "$APP_DIR/.env" <<EOF
-DB_HOST=${DB_HOST}
-DB_PORT=${DB_PORT}
-DB_USER=${DB_USER}
-DB_PASSWORD=${DB_PASSWORD}
-DB_NAME=${DB_NAME}
-PORT=${APP_PORT}
-EOF
-
-echo "===== [5/6] systemd 서비스 등록 ====="
-cat > /etc/systemd/system/complaint-app.service <<EOF
-[Unit]
-Description=온라인 민원 서비스
-After=network.target
-
-[Service]
-WorkingDirectory=${APP_DIR}
-EnvironmentFile=${APP_DIR}/.env
-ExecStart=/usr/bin/python3 ${APP_DIR}/app.py
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl enable complaint-app
-
-# hostname이 127.0.1.1로 매핑되는 Ubuntu 기본값을 실제 사설 IP로 교체
-PRIVATE_IP=$(hostname -I | awk '{print $1}')
-sed -i "s/127.0.1.1/$PRIVATE_IP/" /etc/hosts
-
-systemctl start complaint-app
-
-echo "===== [6/6] kubectl 설치 및 bash completion 설정 ====="
-KUBECTL_VER=$(curl -L -s https://dl.k8s.io/release/stable.txt)
-curl -LO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
-chmod +x kubectl
-mv kubectl /usr/local/bin/
-kubectl completion bash > /etc/bash_completion.d/kubectl
-# ubuntu 유저 로그인 시 자동 로드
-echo 'source /usr/share/bash-completion/bash_completion' >> /home/ubuntu/.bashrc
-echo 'source /etc/bash_completion.d/kubectl' >> /home/ubuntu/.bashrc
-
-echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT}"
-```
-
----
-
 ## STEP 06 — App 보안 그룹 수정 (8080 포트 오픈)
 
 브라우저에서 `공인IP:8080` 으로 직접 접속하려면 보안 그룹에서 8080 포트를 인터넷에 열어야 합니다.
@@ -640,14 +640,17 @@ Network > Security Group > minwon-sg-app 클릭
 | 방향 | 수신 | 수신 |
 | 프로토콜 | TCP | TCP |
 | 포트 | 8080 | 8080 |
-| 원격 | `192.168.0.0/24` (App 서브넷) | `0.0.0.0/0` (인터넷 전체) |
+| 원격 | `192.168.0.0/24` (App 서브넷) | `내 PC의 공인 IP/32` |
 
-![보안 그룹 8080 포트 0.0.0.0/0 으로 변경](./images/3-16-sg-app-8080-open.png)
+![보안 그룹 8080 포트 내 IP로 변경](./images/3-16-sg-app-8080-open.png)
 > 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
-!!! warning "실습 전용 설정입니다"
-    `0.0.0.0/0` 은 전 세계 누구나 8080 포트로 접근 가능합니다.
-    실습이 끝나면 다시 제한하거나 인스턴스를 삭제하세요.
+!!! tip "내 공인 IP 확인 방법"
+    브라우저에서 [https://ifconfig.me](https://ifconfig.me) 또는 [https://whatismyip.com](https://whatismyip.com) 접속 후 표시되는 IP를 `xxx.xxx.xxx.xxx/32` 형식으로 입력하세요.
+
+!!! warning "IP가 바뀌면 다시 설정해야 합니다"
+    카페, 회사 등 네트워크가 바뀌면 공인 IP가 달라집니다.
+    접속이 안 될 경우 IP를 다시 확인하고 보안 그룹을 업데이트하세요.
 
 ---
 
