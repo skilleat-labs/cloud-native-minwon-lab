@@ -162,7 +162,7 @@ Storage > Object Storage > API 엔드포인트 설정 버튼 클릭
 |------|---|---------|
 | Object Storage URL | `https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_{TenantID}` | API 엔드포인트 설정 |
 | Tenant ID | `AUTH_` 뒤의 문자열 | API 엔드포인트 설정 |
-| username | **IAM 계정 ID** (예: `gov1.edu1`) | 강사에게 받은 계정 |
+| username | **IAM 계정 ID** (예: `gov2.edu1`) | 강사에게 받은 계정 |
 | API 비밀번호 | Object Storage 전용 비밀번호 | API 엔드포인트 설정에서 직접 설정 |
 
 !!! warning "API 비밀번호 ≠ IAM 로그인 비밀번호"
@@ -207,7 +207,7 @@ EOF
 | 자리표시자 | 바꿀 값 |
 |-----------|--------|
 | `여기에TenantID입력` | API 엔드포인트 설정에서 복사한 Tenant ID |
-| `여기에IAM계정ID입력` | IAM 계정 ID (예: `gov1.edu1`) |
+| `여기에IAM계정ID입력` | IAM 계정 ID (예: `gov2.edu1`) |
 | `여기에API비밀번호입력` | API 엔드포인트 설정에서 설정한 API 전용 비밀번호 |
 
 입력이 완료되면 아래처럼 추가된 내용이 그대로 출력됩니다.
@@ -215,7 +215,7 @@ EOF
 ```
 OBJECT_STORAGE_URL=https://kr1-api-object-storage.nhncloudservice.com/v1/AUTH_abc123...
 OBJECT_STORAGE_CONTAINER=minwon-attachments
-OS_USERNAME=gov1.edu1
+OS_USERNAME=gov2.edu1
 OS_PASSWORD=mypassword
 ```
 
