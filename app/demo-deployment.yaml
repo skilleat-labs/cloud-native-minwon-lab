@@ -1,0 +1,78 @@
+# ============================================================
+# demo-deployment.yaml  —  2일차 개념 설명용 Deployment 실습
+# ============================================================
+#
+# 사용 목적:
+#   - Deployment의 롤링 업데이트 시연
+#   - 색상을 변경해 재배포하면 Pod가 순차적으로 교체됨을 확인
+#
+# 실행:
+#   kubectl apply -f app/demo-deployment.yaml
+#
+# 확인:
+#   kubectl get pods -l app=color-dep
+#   kubectl get deployment color-deployment
+#   kubectl rollout status deployment/color-deployment
+#
+# 접속:
+#   kubectl get services color-dep-service  →  EXTERNAL-IP 확인
+#   브라우저에서 http://<EXTERNAL-IP> 접속
+#
+# 색상 변경 후 롤링 업데이트 체험:
+#   1) APP_COLOR 값을 green → pink 등으로 수정
+#   2) kubectl apply -f app/demo-deployment.yaml
+#   3) kubectl rollout status deployment/color-deployment 로 교체 과정 확인
+#
+# 이전 버전으로 롤백:
+#   kubectl rollout undo deployment/color-deployment
+#
+# 삭제:
+#   kubectl delete -f app/demo-deployment.yaml
+# ============================================================
+
+# ── Deployment ────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: color-deployment
+  labels:
+    app: color-dep
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: color-dep
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1               # 업데이트 중 추가로 생성할 수 있는 Pod 수
+      maxUnavailable: 0         # 업데이트 중 중단을 허용할 Pod 수 (0 = 무중단)
+  template:
+    metadata:
+      labels:
+        app: color-dep
+    spec:
+      containers:
+        - name: webapp-color
+          image: kodekloud/webapp-color
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_COLOR
+              value: "green"    # 색상 변경: blue / green / red / pink / darkblue
+                                # 값을 바꾼 뒤 kubectl apply 하면 롤링 업데이트 시작
+
+---
+# ── Service (LoadBalancer) ────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: color-dep-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: color-dep
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

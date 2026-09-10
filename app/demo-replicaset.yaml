@@ -1,0 +1,63 @@
+# ============================================================
+# demo-replicaset.yaml  —  2일차 개념 설명용 ReplicaSet 실습
+# ============================================================
+#
+# 사용 목적:
+#   - ReplicaSet이 Pod를 일정 개수 유지하는 원리 시연
+#   - Pod를 삭제해도 자동으로 다시 생성됨을 확인
+#
+# 실행:
+#   kubectl apply -f app/demo-replicaset.yaml
+#
+# 확인:
+#   kubectl get pods -l app=color-app
+#   kubectl get replicaset
+#
+# 접속:
+#   kubectl get services color-rs-service  →  EXTERNAL-IP 확인
+#   브라우저에서 http://<EXTERNAL-IP> 접속 → 파란색 화면
+#
+# 삭제:
+#   kubectl delete -f app/demo-replicaset.yaml
+# ============================================================
+
+# ── ReplicaSet ────────────────────────────────────────────
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: color-replicaset
+  labels:
+    app: color-app
+spec:
+  replicas: 3                   # Pod를 항상 3개 유지
+  selector:
+    matchLabels:
+      app: color-app
+  template:
+    metadata:
+      labels:
+        app: color-app
+    spec:
+      containers:
+        - name: webapp-color
+          image: kodekloud/webapp-color
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_COLOR
+              value: "blue"     # 색상 변경: blue / green / red / pink / darkblue
+
+---
+# ── Service (LoadBalancer) ────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: color-rs-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: color-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
