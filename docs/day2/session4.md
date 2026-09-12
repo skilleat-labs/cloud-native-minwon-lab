@@ -62,10 +62,20 @@ Kubernetes 노드가 NCR에서 이미지를 받아오려면 **로그인 정보**
 이 정보를 Secret으로 저장해 둡니다.
 
 App VM 터미널에서 아래 명령을 실행합니다.
+`(강사 제공)` 부분을 강사에게 받은 아이디/비밀번호로 교체하세요.
 
 ```bash
-kubectl create secret docker-registry ncr-secret --docker-server=43c329ba-kr1-registry.container.nhncloud.com --docker-username=IYCPXnTgoKcm9mKlqmRD --docker-password=hagfeho4i2NHOgfw
+kubectl create secret docker-registry ncr-secret \
+  --docker-server=43c329ba-kr1-registry.container.nhncloud.com \
+  --docker-username=(강사 제공 아이디) \
+  --docker-password=(강사 제공 비밀번호)
 ```
+
+!!! tip "한 줄로 입력해도 됩니다"
+    줄바꿈(\)이 불편하다면 아래처럼 한 줄로 입력하세요.
+    ```bash
+    kubectl create secret docker-registry ncr-secret --docker-server=43c329ba-kr1-registry.container.nhncloud.com --docker-username=(강사 제공 아이디) --docker-password=(강사 제공 비밀번호)
+    ```
 
 생성 확인:
 
