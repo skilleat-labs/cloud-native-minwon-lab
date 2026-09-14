@@ -119,6 +119,11 @@ NHN Cloud는 서비스를 **프로젝트 단위로 켜야** 사용할 수 있습
 | Storage > Block Storage | Storage | DB 데이터 디스크 |
 | Storage > Object Storage | Storage | 첨부파일 저장 |
 
+!!! warning "개별 활성화 불필요 — 한 번에 켜집니다"
+    위 서비스를 **하나씩 체크할 필요 없습니다.**
+    **Compute > Instance** 하나를 활성화하면 Network·Compute·Storage 관련 서비스가 **한 번에 함께 활성화**됩니다.
+    단, **Storage > Object Storage**만 별도로 따로 켜야 합니다.
+
 ### 활성화 방법
 
 1. 상단 **서비스 선택** 클릭
