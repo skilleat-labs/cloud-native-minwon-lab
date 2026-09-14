@@ -358,6 +358,38 @@ echo "✅ 앱 배포 완료: http://$(hostname -I | awk '{print $1}'):${APP_PORT
 
 ## STEP 04 — Block Storage 생성
 
+### 왜 DB VM에 별도 Block Storage를 붙이나요?
+
+VM을 만들면 OS가 설치된 **기본 디스크(루트 볼륨)** 가 함께 생성됩니다.
+그런데 DB 데이터를 루트 볼륨에 저장하면 아래 문제가 생깁니다.
+
+```
+루트 볼륨에 DB 데이터를 저장할 때의 문제
+┌─────────────────────────────┐
+│         minwon-db-01        │
+│  ┌────────────────────────┐ │
+│  │  루트 볼륨 (OS + DB)   │ │  ← VM 삭제 시 데이터도 함께 삭제
+│  │  /dev/vda              │ │  ← OS 장애 → 데이터 복구 불가
+│  └────────────────────────┘ │  ← 용량 확장이 어렵고 위험
+└─────────────────────────────┘
+```
+
+Block Storage를 **별도로 분리**하면 이렇게 됩니다.
+
+```
+Block Storage를 분리했을 때
+┌─────────────────────────────┐        ┌──────────────────────┐
+│         minwon-db-01        │        │    Block Storage      │
+│  ┌────────────────────────┐ │  연결  │  /dev/vdb            │
+│  │  루트 볼륨 (OS만)      │ │ ─────► │  DB 데이터 전용      │
+│  │  /dev/vda              │ │        │  독립적으로 백업·확장 │
+│  └────────────────────────┘ │        │  VM과 별개로 보존     │
+└─────────────────────────────┘        └──────────────────────┘
+
+→ VM이 삭제·교체되어도 데이터 디스크는 그대로 남아있음
+→ 디스크만 백업하거나 다른 VM에 옮겨 붙이는 것도 가능
+```
+
 !!! warning "생성 전 — DB VM의 가용성 영역을 먼저 확인하세요"
     Block Storage는 **인스턴스와 같은 가용성 영역(AZ)** 에 있어야 연결할 수 있습니다.
     아래 경로에서 `minwon-db-01` 의 가용성 영역을 확인한 뒤 Block Storage를 생성하세요.
@@ -472,26 +504,7 @@ cd C:\Users\사용자이름\Downloads
 
 > 키페어 `.pem` 파일을 다운로드한 폴더로 이동합니다. 대부분 `Downloads` 폴더에 있습니다.
 
-??? note "③ 키페어 권한 설정 (Windows 필수) — 오류 발생 시 펼치기"
-    Windows는 `.pem` 파일을 다운로드하면 권한이 열려있어서 SSH가 거부됩니다.
-    접속 전에 반드시 아래 명령을 실행하세요.
-
-    ```powershell
-    icacls "MyKey.pem" /inheritance:r /grant:r "$($env:USERNAME):(R)"
-    ```
-
-    이 단계를 건너뛰면 아래 오류가 발생합니다:
-
-    ```
-    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    @         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
-    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    Permissions 0644 for 'MyKey.pem' are too open.
-    Load key "MyKey.pem": bad permissions
-    Permission denied (publickey).
-    ```
-
-**④ SSH 접속**
+**③ SSH 접속**
 
 ```powershell
 ssh -i MyKey.pem ubuntu@<DB-VM-플로팅-IP>
@@ -847,6 +860,29 @@ graph LR
 | ④ | App VM이 실행 중이고 `minwon-sg-app`이 적용되었는가 | Compute > Instance 상세 |
 | ⑤ | App VM에서 민원 서비스가 실행 중인가 | `sudo systemctl status complaint-app` |
 | ⑥ | App VM → DB VM 3306 포트 통신이 되는가 | `nc -zv <DB-IP> 3306` |
+
+---
+
+## 부록 — Windows SSH 오류 해결
+
+??? note "키페어 권한 설정 (Windows 필수) — SSH 접속 오류 발생 시 펼치기"
+    Windows는 `.pem` 파일을 다운로드하면 권한이 열려있어서 SSH가 거부됩니다.
+    아래 오류가 발생했다면 명령을 실행한 뒤 다시 접속하세요.
+
+    ```
+    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    @         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
+    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    Permissions 0644 for 'MyKey.pem' are too open.
+    Load key "MyKey.pem": bad permissions
+    Permission denied (publickey).
+    ```
+
+    **해결 방법** — PowerShell에서 실행:
+
+    ```powershell
+    icacls "MyKey.pem" /inheritance:r /grant:r "$($env:USERNAME):(R)"
+    ```
 
 ---
 
