@@ -14,7 +14,8 @@
 | 03 | App VM | 민원 서비스 실행 서버 (앱 자동 배포) |
 | 04 | Block Storage | DB 데이터 전용 디스크 |
 | 05 | Block Storage 연결 및 마운트 | 데이터 디스크 준비 |
-| 06 | 배포 확인 | 앱 정상 실행 확인 |
+| 06 | App 보안 그룹 수정 | 8080 포트 오픈 |
+| 07 | 배포 확인 | 앱 정상 실행 확인 |
 
 !!! tip "순서가 중요합니다"
     App VM의 사용자 스크립트에 **DB VM의 사설 IP**가 필요합니다.
@@ -437,7 +438,7 @@ Storage > Block Storage > 블록 스토리지 생성
 
 ## STEP 05 — Block Storage 연결 및 마운트
 
-### 3-1. 콘솔에서 연결
+### 5-1. 콘솔에서 연결
 
 1. `minwon-db-disk` 를 체크한 뒤 **연결 추가** 버튼 클릭
 2. **찾아보기** 를 눌러 `minwon-db-01` 인스턴스 선택
@@ -446,7 +447,7 @@ Storage > Block Storage > 블록 스토리지 생성
 ![블록 스토리지 연결 추가 화면](./images/3-9-block-storage-attach.png)
 > 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
-### 3-2. DB VM에 플로팅 IP 연결
+### 5-2. DB VM에 플로팅 IP 연결
 
 Block Storage 마운트를 위해 DB VM에 SSH로 접속해야 합니다.
 DB VM에는 플로팅 IP가 없으므로 <span style="color:red">**임시로 연결합니다.**</span>
@@ -459,7 +460,7 @@ DB VM에는 플로팅 IP가 없으므로 <span style="color:red">**임시로 연
 
 3. 사용 가능한 플로팅 IP를 선택해 **연결** 클릭합니다
 
-### 3-3. SSH 접속 (Windows PowerShell)
+### 5-3. SSH 접속 (Windows PowerShell)
 
 #### SSH란? — 내 컴퓨터에서 클라우드 서버를 제어하는 방법
 
@@ -542,7 +543,7 @@ sudo ls /var/lib/mysql
     `sudo su -` 로 root 전환하면 편하지만, 실수로 시스템 파일을 삭제하는 사고가 생길 수 있습니다.
     명령마다 `sudo` 를 붙이는 습관이 안전합니다.
 
-### 3-4. 디스크 인식 확인
+### 5-4. 디스크 인식 확인
 
 ```bash
 sudo lsblk
@@ -558,7 +559,7 @@ sudo lsblk
 | `vda` | 20G | 루트 디스크 (OS) |
 | `vdb` | 10G | 방금 연결한 Block Storage |
 
-### 3-5. 파티션 및 파일시스템 생성
+### 5-5. 파티션 및 파일시스템 생성
 
 **파티션**이란 디스크를 논리적으로 나누는 구역입니다. 새 디스크는 빈 공간만 있으므로 OS가 사용할 수 있도록 구역을 먼저 만들어야 합니다.
 **파일시스템**은 파티션 위에 파일을 저장하는 규칙(형식)입니다. 포맷하지 않으면 데이터를 읽고 쓸 수 없습니다.
@@ -588,7 +589,7 @@ echo -e "n\np\n1\n\n\nw" | sudo fdisk /dev/vdb
 sudo mkfs -t xfs /dev/vdb1
 ```
 
-### 3-6. 마운트 및 자동 마운트 등록
+### 5-6. 마운트 및 자동 마운트 등록
 
 **마운트**란 디스크를 특정 폴더 경로에 연결하는 작업입니다. 마운트 후에는 `/mnt/data` 경로에 파일을 저장하면 Block Storage에 저장됩니다.
 
@@ -624,7 +625,6 @@ df -h | grep mnt
 ```
 
 ![mkfs 포맷 → 마운트 → fstab 등록 → df 확인 화면](./images/3-13-mount-fstab.png)
-> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
 아래와 같이 출력되면 성공입니다.
 
@@ -632,6 +632,7 @@ df -h | grep mnt
 Filesystem       Size  Used Avail Use% Mounted on
 /dev/vdb1         10G  104M  9.9G   2% /mnt/data
 ```
+> 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
 ---
 
@@ -672,7 +673,7 @@ Network > Security Group > minwon-sg-app 클릭
 App VM의 사용자 스크립트는 부팅 후 백그라운드에서 자동 실행됩니다.
 **인스턴스 생성 후 약 2~3분 기다렸다가** SSH로 접속해 확인합니다.
 
-### 6-1. App VM 플로팅 IP 확인
+### 7-1. App VM 플로팅 IP 확인
 
 STEP 05에서 App VM 생성 시 플로팅 IP를 **사용**으로 설정했습니다.
 콘솔에서 할당된 공인 IP를 먼저 확인하세요.
@@ -702,7 +703,7 @@ http://<확인한 공인IP>:8080
 ![App VM 플로팅 IP 확인 화면](./images/6-1-app-floating-ip-check.png)
 > 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
-### 6-2. PowerShell로 App VM에 SSH 접속
+### 7-2. PowerShell로 App VM에 SSH 접속
 
 **① PowerShell 열기**
 
@@ -734,7 +735,7 @@ ssh -i MyKey.pem ubuntu@<App-VM-플로팅-IP>
 
 접속 성공 시 `ubuntu@minwon-app-01:~$` 프롬프트가 나타납니다.
 
-### 6-3. 배포 상태 확인
+### 7-3. 배포 상태 확인
 
 접속 후 아래 명령어를 순서대로 실행합니다.
 
@@ -762,7 +763,7 @@ curl http://localhost:8080
 
 HTML 코드가 출력되면 앱이 정상 동작 중입니다.
 
-### 6-4. DB VM 서비스 확인 (새 터미널에서)
+### 7-4. DB VM 서비스 확인 (새 터미널에서)
 
 !!! tip "App VM 터미널은 그대로 두고 PowerShell 창을 새로 여세요"
     App VM에 접속 중인 터미널을 닫지 말고,
@@ -786,7 +787,7 @@ sudo systemctl status mysql
 ![MySQL 서비스 정상 실행 화면](./images/3-18-mysql-status.png)
 > 📌 위 화면은 참고용입니다. 실제 화면 구성이 다를 수 있으니 **텍스트 지시를 기준으로** 진행하세요.
 
-### 6-5. App VM에서 DB VM 통신 확인
+### 7-5. App VM에서 DB VM 통신 확인
 
 App VM 터미널(기존 창)로 돌아와서 실행합니다.
 
@@ -808,7 +809,7 @@ nc -zv <DB-VM-사설-IP> 3306
 
 ---
 
-### 6-7. App VM 이미지 생성 (복제 준비)
+### 7-6. App VM 이미지 생성 (복제 준비)
 
 지금까지 모든 설정이 완료된 App VM을 **이미지로 저장**합니다.
 
