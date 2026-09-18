@@ -9,11 +9,10 @@
 
 | STEP | 내용 |
 |------|------|
-| 01 | NCR 이미지 Pull Secret 생성 |
-| 02 | deployment.yaml 값 수정 |
-| 03 | 배포 적용 (`kubectl apply`) |
-| 04 | Pod 정상 실행 확인 |
-| 05 | 브라우저에서 기존 데이터 연결 확인 |
+| 01 | deployment.yaml 값 수정 |
+| 02 | 배포 적용 (`kubectl apply`) |
+| 03 | Pod 정상 실행 확인 |
+| 04 | 브라우저에서 기존 데이터 연결 확인 |
 
 !!! info "모든 명령은 App VM 터미널에서 실행합니다"
     3차시에서 접속해 둔 App VM SSH 터미널을 그대로 사용합니다.
@@ -56,47 +55,11 @@ flowchart LR
 
 ---
 
-## STEP 01 — NCR 이미지 Pull Secret 생성
-
-Kubernetes 노드가 NCR에서 이미지를 받아오려면 **로그인 정보**가 필요합니다.
-이 정보를 Secret으로 저장해 둡니다.
-
-App VM 터미널에서 아래 명령을 실행합니다.
-`(강사 제공)` 부분을 강사에게 받은 아이디/비밀번호로 교체하세요.
-
-```bash
-kubectl create secret docker-registry ncr-secret \
-  --docker-server=43c329ba-kr1-registry.container.nhncloud.com \
-  --docker-username=IYCPXnTgoKcm9mKlqmRD \
-  --docker-password=hagfeho4i2NHOgfw
-```
-
-!!! tip "한 줄로 입력해도 됩니다"
-    줄바꿈(\)이 불편하다면 아래처럼 한 줄로 입력하세요.
-    ```bash
-    kubectl create secret docker-registry ncr-secret --docker-server=43c329ba-kr1-registry.container.nhncloud.com --docker-username=IYCPXnTgoKcm9mKlqmRD --docker-password=hagfeho4i2NHOgfw
-    ```
-
-생성 확인:
-
-```bash
-kubectl get secrets
-```
-
-```
-NAME           TYPE                             DATA   AGE
-ncr-secret     kubernetes.io/dockerconfigjson   1      10s
-```
-
-`ncr-secret` 이 보이면 성공입니다.
-
----
-
-## STEP 02 — deployment.yaml 값 수정
+## STEP 01 — deployment.yaml 값 수정
 
 레포지토리에 준비된 YAML 파일을 받아서 값을 수정합니다.
 
-### 2-1. 레포지토리 clone
+### 1-1. 레포지토리 clone
 
 ```bash
 git clone https://github.com/skilleat-labs/cloud-native-minwon-lab.git
@@ -112,7 +75,7 @@ git pull
 
 ---
 
-### 2-2. DB VM 사설 IP 확인
+### 1-2. DB VM 사설 IP 확인
 
 1일차 DB VM(`minwon-db-01`)의 **사설 IP**가 필요합니다.
 
@@ -124,7 +87,7 @@ git pull
 
 ---
 
-### 2-3. DB 보안그룹에 NKS 허용 규칙 추가
+### 1-3. DB 보안그룹에 NKS 허용 규칙 추가
 
 Kubernetes Pod에서 DB VM으로 접속하려면 DB 보안그룹에 NKS 워커 노드의 보안그룹을 허용해야 합니다.
 
@@ -148,7 +111,7 @@ Kubernetes Pod에서 DB VM으로 접속하려면 DB 보안그룹에 NKS 워커 �
 
 ---
 
-### 2-4. deployment.yaml 수정
+### 1-4. deployment.yaml 수정
 
 아래 명령에서 `여기에DB사설IP입력` 을 **본인 DB VM의 사설 IP로 바꾼 뒤** 실행합니다.
 
@@ -164,7 +127,7 @@ sed -i 's|192.168.0.20|192.168.0.15|g' app/deployment.yaml
 
 ---
 
-### 2-5. 수정 결과 확인
+### 1-5. 수정 결과 확인
 
 ```bash
 cat app/deployment.yaml
@@ -175,12 +138,11 @@ cat app/deployment.yaml
 | 확인 항목 | 올바른 값 |
 |---------|---------|
 | `DB_HOST` | 본인 DB VM 사설 IP |
-| `image:` | `43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest` |
-| `imagePullSecrets:` | `- name: ncr-secret` 포함 |
+| `image:` | `skilleat/minwon-complaint-app:latest` |
 
 ---
 
-## STEP 03 — 배포 적용
+## STEP 02 — 배포 적용
 
 ```bash
 kubectl apply -f app/deployment.yaml
@@ -210,7 +172,7 @@ flowchart LR
 
 ---
 
-## STEP 03-1 — Object Storage 연결 (선택)
+## STEP 02-1 — Object Storage 연결 (선택)
 
 1일차에서 Object Storage를 설정한 경우, 배포 직후 아래 명령으로 Secret에 추가합니다.
 
@@ -239,7 +201,7 @@ kubectl patch secret complaint-db-secret --type=merge -p "{
 
 ---
 
-## STEP 04 — Pod 정상 실행 확인
+## STEP 03 — Pod 정상 실행 확인
 
 **① Pod 상태 확인**
 
@@ -313,7 +275,7 @@ kubectl logs <Pod-이름>
 
 ---
 
-## STEP 05 — 기존 데이터 연결 확인
+## STEP 04 — 기존 데이터 연결 확인
 
 Service의 `EXTERNAL-IP`로 브라우저에서 접속합니다.
 
@@ -338,12 +300,11 @@ http://<EXTERNAL-IP>
 
 | # | 확인 항목 | 확인 방법 |
 |---|---------|---------|
-| ① | `ncr-secret` 이 생성되었다 | `kubectl get secrets` |
-| ② | `complaint-db-secret` 이 생성되었다 | `kubectl get secrets` |
-| ③ | Pod가 `Running` 상태다 | `kubectl get pods` |
-| ④ | Service의 EXTERNAL-IP가 생겼다 | `kubectl get services` |
-| ⑤ | 브라우저에서 민원 서비스가 접속된다 | 브라우저 확인 |
-| ⑥ | 1일차 민원 데이터가 보인다 | 민원 목록 확인 |
+| ① | `complaint-db-secret` 이 생성되었다 | `kubectl get secrets` |
+| ② | Pod가 `Running` 상태다 | `kubectl get pods` |
+| ③ | Service의 EXTERNAL-IP가 생겼다 | `kubectl get services` |
+| ④ | 브라우저에서 민원 서비스가 접속된다 | 브라우저 확인 |
+| ⑤ | 1일차 민원 데이터가 보인다 | 민원 목록 확인 |
 
 ---
 

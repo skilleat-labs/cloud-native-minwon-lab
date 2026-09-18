@@ -30,11 +30,9 @@ spec:
       labels:
         app: complaint-app
     spec:
-      imagePullSecrets:
-        - name: ncr-secret                              # STEP 01에서 생성한 NCR 인증 Secret
       containers:
         - name: complaint-app
-          image: 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
+          image: skilleat/minwon-complaint-app:latest
           ports:
             - containerPort: 8080
           envFrom:
