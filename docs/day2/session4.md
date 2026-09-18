@@ -1,7 +1,7 @@
 # Day 2 · 4차시 — 기존 DB를 유지한 채 서비스를 배포하라
 
 **소요 시간**: 50분 (14:00~14:50)
-**목표**: NCR 인증 Secret을 만들고, DB 연결 정보를 주입해 Pod에서 1일차 DB와 연결한다
+**목표**: DB 연결 정보를 주입해 Pod에서 1일차 DB와 연결한다
 
 ---
 
@@ -39,18 +39,18 @@ flowchart LR
     CMD["kubectl apply -f"]
     CP["🧠 컨트롤 플레인"]
     NODE["🖥️ 노드"]
-    NCR["🏭 NCR\n이미지 창고"]
+    HUB["🐳 Docker Hub\n이미지 창고"]
     POD["📦 Pod\n실행 중"]
 
     YAML --> CMD --> CP
     CP -->|"이미지 Pull 지시"| NODE
-    NODE -->|"docker pull"| NCR
-    NCR -->|"이미지 전달"| NODE
+    NODE -->|"docker pull"| HUB
+    HUB -->|"이미지 전달"| NODE
     NODE --> POD
 
     style YAML fill:#fff3cd,stroke:#f0ad4e
     style POD fill:#e8f4fd,stroke:#2196F3
-    style NCR fill:#e8f5e9,stroke:#4caf50
+    style HUB fill:#e8f5e9,stroke:#4caf50
 ```
 
 ---
@@ -162,7 +162,7 @@ service/complaint-service created
 flowchart LR
     A["kubectl apply"] --> B["컨트롤 플레인\n원하는 상태 기록"]
     B --> C["스케줄러\n배치할 노드 결정"]
-    C --> D["노드에서\nNCR 이미지 Pull"]
+    C --> D["노드에서\nDocker Hub 이미지 Pull"]
     D --> E["컨테이너 실행\nPod 준비"]
     E --> F["Service가\nPod를 대상에 포함"]
 
@@ -269,7 +269,7 @@ kubectl logs <Pod-이름>
 
 | 증상 | 원인 | 해결 |
 |------|------|------|
-| `ImagePullBackOff` | NCR 인증 실패 또는 이미지 주소 오류 | STEP 01 Secret 재확인, 이미지 주소 재확인 |
+| `ImagePullBackOff` | 이미지 주소 오류 또는 Docker Hub 접근 불가 | 이미지 주소 재확인 (`skilleat/minwon-complaint-app:latest`) |
 | `CrashLoopBackOff` | 앱 실행 오류 | `kubectl logs <Pod명>`으로 원인 확인 |
 | `Pending` | 노드에 자원 여유 없음 | 노드 상태 확인 |
 

@@ -10,11 +10,10 @@
 | STEP | 내용 |
 |------|------|
 | 01 | 환경변수로 달라지는 컨테이너 실습 |
-| 02 | NCR 로그인 |
-| 03 | 이미지 Pull & 컨테이너 실행 |
-| 04 | 보안 그룹 8081 포트 오픈 |
-| 05 | 동작 확인 |
-| 06 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
+| 02 | 이미지 Pull & 컨테이너 실행 |
+| 03 | 보안 그룹 8081 포트 오픈 |
+| 04 | 동작 확인 |
+| 05 | 컨테이너 삭제 후 재실행 — 상태 관찰 |
 
 ---
 
@@ -137,29 +136,12 @@ flowchart LR
 
 ---
 
-## STEP 02 — NCR 로그인
-
-강사에게 받은 아이디와 비밀번호로 로그인합니다.
-
-```bash
-docker login 43c329ba-kr1-registry.container.nhncloud.com
-```
-
-```
-Username: (강사 제공)
-Password: (강사 제공)
-```
-
-`Login Succeeded` 가 나오면 성공입니다.
-
----
-
-## STEP 03 — 이미지 Pull & 컨테이너 실행
+## STEP 02 — 이미지 Pull & 컨테이너 실행
 
 ### 5-1. 이미지 받기
 
 ```bash
-docker pull 43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
+docker pull skilleat/minwon-complaint-app:latest
 ```
 
 레이어를 다운로드하는 메시지가 나오고 `Pull complete` 가 보이면 완료입니다.
@@ -171,8 +153,8 @@ docker images
 ```
 
 ```
-REPOSITORY                                                               TAG      IMAGE ID       SIZE
-43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app   latest   abc123...   150MB
+REPOSITORY                          TAG      IMAGE ID       SIZE
+skilleat/minwon-complaint-app       latest   abc123...      150MB
 ```
 
 목록에 이미지가 보이면 정상입니다.
@@ -210,7 +192,7 @@ docker run -d \
   --name complaint-app \
   -p 8081:8080 \
   --env-file /opt/complaint-app/.env \
-  43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
+  skilleat/minwon-complaint-app:latest
 ```
 
 `--env-file` 은 `.env` 파일 안의 모든 설정값을 컨테이너에 한 번에 주입합니다.
@@ -225,7 +207,7 @@ DB 주소, Object Storage 정보 등을 따로 입력할 필요가 없어요.
 
 ---
 
-## STEP 04 — 보안 그룹 8081 포트 오픈
+## STEP 03 — 보안 그룹 8081 포트 오픈
 
 컨테이너는 실행됐지만 외부에서 접속하려면 **보안 그룹(방화벽)이 8081 포트를 허용**해야 합니다.
 
@@ -280,7 +262,7 @@ Network > Security Groups > minwon-sg-app
 
 ---
 
-## STEP 05 — 동작 확인
+## STEP 04 — 동작 확인
 
 **① 컨테이너 실행 상태 확인**
 
@@ -333,7 +315,7 @@ http://<App-VM-플로팅-IP>:8081
 
 ---
 
-## STEP 06 — 컨테이너 삭제 후 재실행 관찰
+## STEP 05 — 컨테이너 삭제 후 재실행 관찰
 
 컨테이너를 지우면 **컨테이너 안의 데이터는 사라지지만, DB와 Object Storage는 그대로**임을 확인합니다.
 
@@ -358,7 +340,7 @@ docker run -d \
   --name complaint-app \
   -p 8081:8080 \
   --env-file /opt/complaint-app/.env \
-  43c329ba-kr1-registry.container.nhncloud.com/minwon-registry/complaint-app:latest
+  skilleat/minwon-complaint-app:latest
 ```
 
 ### 8-4. 결과 확인
