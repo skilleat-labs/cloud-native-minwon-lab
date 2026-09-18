@@ -67,14 +67,14 @@ App VM 터미널에서 아래 명령을 실행합니다.
 ```bash
 kubectl create secret docker-registry ncr-secret \
   --docker-server=43c329ba-kr1-registry.container.nhncloud.com \
-  --docker-username=(강사 제공 아이디) \
-  --docker-password=(강사 제공 비밀번호)
+  --docker-username=IYCPXnTgoKcm9mKlqmRD \
+  --docker-password=hagfeho4i2NHOgfw
 ```
 
 !!! tip "한 줄로 입력해도 됩니다"
     줄바꿈(\)이 불편하다면 아래처럼 한 줄로 입력하세요.
     ```bash
-    kubectl create secret docker-registry ncr-secret --docker-server=43c329ba-kr1-registry.container.nhncloud.com --docker-username=(강사 제공 아이디) --docker-password=(강사 제공 비밀번호)
+    kubectl create secret docker-registry ncr-secret --docker-server=43c329ba-kr1-registry.container.nhncloud.com --docker-username=IYCPXnTgoKcm9mKlqmRD --docker-password=hagfeho4i2NHOgfw
     ```
 
 생성 확인:
@@ -164,19 +164,7 @@ sed -i 's|192.168.0.20|192.168.0.15|g' app/deployment.yaml
 
 ---
 
-### 2-5. imagePullSecrets 추가
-
-Kubernetes가 NCR에서 이미지를 받을 때 아까 만든 Secret을 사용하도록 설정합니다.
-
-아래 명령을 **그대로** 실행합니다.
-
-```bash
-sed -i '/      containers:/i\      imagePullSecrets:\n      - name: ncr-secret' app/deployment.yaml
-```
-
----
-
-### 2-6. 수정 결과 확인
+### 2-5. 수정 결과 확인
 
 ```bash
 cat app/deployment.yaml
